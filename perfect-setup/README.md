@@ -227,7 +227,7 @@ tmux attach -t backend   # Check Copilot's progress
 
 # Start a new AI agent on a new project
 tmux new -s website
-claude-code "build me a portfolio website"
+claude "build me a portfolio website"
 # Detach (Ctrl+B, D) - Claude keeps working!
 
 # Open VS Code Server in browser on your iPad
@@ -444,11 +444,11 @@ SSH again → tmux ls → See ALL agents still running ✓
 ```bash
 # Morning: Start your AI coding farm
 tmux new -s frontend
-claude-code "Build a React dashboard"
+claude "Build a React dashboard"
 # Detach: Ctrl+B, D
 
 tmux new -s backend
-github-copilot-cli "Create REST API"
+copilot "Create REST API"
 # Detach
 
 tmux new -s mobile
@@ -1764,7 +1764,7 @@ ssh -p 2222 username@<ip-address>
 tmux attach
 
 # Use Claude Code in terminal
-claude-code
+claude
 ```
 
 **Install GitHub Copilot CLI:**
@@ -1777,11 +1777,11 @@ sudo apt install -y nodejs
 npm install -g @githubnext/github-copilot-cli
 
 # Authenticate
-github-copilot-cli auth
+copilot auth
 
 # Use in terminal
-github-copilot-cli what-the-shell "find all python files modified today"
-github-copilot-cli git-assist "create a commit message for my changes"
+copilot "find all python files modified today"
+copilot "create a commit message for my changes"
 ```
 
 **Recommended Mobile SSH Clients:**
