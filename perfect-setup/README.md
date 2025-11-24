@@ -941,6 +941,72 @@ wsl
 
 ---
 
+## Working as Root User (Avoiding sudo)
+
+If you want to avoid typing `sudo` for every command, you have several options:
+
+### Option 1: Switch to Root User (Temporary)
+
+```bash
+# Switch to root for current session
+sudo su -
+
+# Or use
+sudo -i
+
+# Now all commands run as root (no sudo needed)
+# Exit back to normal user with:
+exit
+```
+
+### Option 2: Login as Root from PowerShell
+
+```powershell
+# Enter WSL as root user
+wsl -d Ubuntu -u root
+
+# Or set root as default user (not recommended for security)
+ubuntu config --default-user root
+```
+
+### Option 3: Password-less sudo (Recommended)
+
+This is the **safest approach** - keep using your normal user but remove password prompts:
+
+```bash
+# Edit sudoers file
+sudo visudo
+
+# Add this line at the end (replace 'ubuntu' with your username):
+ubuntu ALL=(ALL) NOPASSWD:ALL
+
+# Save and exit (Ctrl+O, Enter, Ctrl+X)
+```
+
+Now you can use `sudo` without entering a password each time!
+
+### Option 4: Root Shell in Current Session
+
+```bash
+# Start a root shell
+sudo -s
+
+# You're now root in current terminal
+# Exit with: exit
+```
+
+### 🔒 Security Recommendation
+
+**Best practice:** Use **Option 3** (password-less sudo)
+- Still uses `sudo` (shows which commands need elevation)
+- No password prompts
+- Safer than running everything as root
+- Clear audit trail of elevated commands
+
+**For convenience during setup:** Use **Option 1** or **Option 4** to temporarily work as root, then switch back to your normal user when done.
+
+---
+
 ## Installed Packages
 
 ### 1. Tailscale (VPN/Mesh Network)
@@ -968,8 +1034,8 @@ tailscale status
 
 **Installation:**
 ```bash
-apt update
-apt install -y tmux
+sudo apt update
+sudo apt install -y tmux
 ```
 
 **Basic Usage:**
@@ -990,18 +1056,18 @@ apt install -y tmux
 
 **Installation:**
 ```bash
-apt update
-apt install -y openssh-server
+sudo apt update
+sudo apt install -y openssh-server
 ```
 
 **Start SSH Service:**
 ```bash
-service ssh start
+sudo service ssh start
 ```
 
 **Check SSH Status:**
 ```bash
-service ssh status
+sudo service ssh status
 ```
 
 **Get WSL IP Address:**
@@ -1397,7 +1463,7 @@ This will run these commands every time WSL starts.
 After restarting WSL:
 ```bash
 # Check SSH
-service ssh status
+sudo service ssh status
 # or with systemd:
 sudo systemctl status ssh
 
@@ -1410,7 +1476,7 @@ sudo systemctl status tailscaled
 sudo systemctl status code-server
 
 # Check Docker (if installed)
-service docker status
+sudo service docker status
 # or with systemd:
 sudo systemctl status docker
 
@@ -1429,13 +1495,13 @@ The following packages will be installed for the AI development environment:
 ```bash
 # Install Docker
 curl -fsSL https://get.docker.com -o get-docker.sh
-sh get-docker.sh
+sudo sh get-docker.sh
 
 # Add user to docker group
-usermod -aG docker $USER
+sudo usermod -aG docker $USER
 
 # Start Docker service
-service docker start
+sudo service docker start
 
 # Enable Docker to start on boot (requires systemd)
 sudo systemctl enable docker
@@ -1446,27 +1512,27 @@ sudo systemctl enable docker
 ```bash
 # Add NVIDIA Container Toolkit repository
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | apt-key add -
+curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | sudo apt-key add -
 curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
-    tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
 
 # Install NVIDIA Container Toolkit
-apt update
-apt install -y nvidia-container-toolkit
+sudo apt update
+sudo apt install -y nvidia-container-toolkit
 
 # Configure Docker to use NVIDIA runtime
-nvidia-ctk runtime configure --runtime=docker
-systemctl restart docker
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
 ```
 
 ### 5. vLLM (LLM Inference Engine)
 
 ```bash
 # Install Python 3 and pip
-apt install -y python3 python3-pip python3-venv
+sudo apt install -y python3 python3-pip python3-venv
 
 # Create virtual environment
-python3 -m venv /opt/vllm-env
+sudo python3 -m venv /opt/vllm-env
 source /opt/vllm-env/bin/activate
 
 # Install vLLM with CUDA support
@@ -1615,13 +1681,13 @@ wsl --update
 
 ```bash
 # Check Docker status
-service docker status
+sudo service docker status
 
 # Start Docker manually
-service docker start
+sudo service docker start
 
 # Check Docker logs
-journalctl -u docker
+sudo journalctl -u docker
 ```
 
 ### GPU Not Detected
@@ -1664,23 +1730,23 @@ wsl --shutdown
 
 ```bash
 # Update package list
-apt update
+sudo apt update
 
 # Upgrade all packages
-apt upgrade -y
+sudo apt upgrade -y
 
 # Search for package
 apt search <package>
 
 # Install package
-apt install -y <package>
+sudo apt install -y <package>
 
 # Remove package
-apt remove <package>
+sudo apt remove <package>
 
 # Clean up
-apt autoremove -y
-apt autoclean
+sudo apt autoremove -y
+sudo apt autoclean
 ```
 
 ---
