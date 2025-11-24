@@ -45,21 +45,29 @@ This repository is designed for developers at all levels - whether you're taking
 
 ### 🖥️ [perfect-setup/](./perfect-setup)
 
-**WSL2 Ubuntu Setup for AI Development** - Build a professional, remote-accessible AI development environment on Windows.
+**Your Personal Remote Development Server** - The game-changing setup that lets you run **AI coding agents 24/7 in persistent tmux sessions**, managed from any device.
+
+**🚀 The Revolutionary Workflow:**
+1. **Assign Tasks to AI Agents** - Start Claude Code, Copilot CLI, or Gemini CLI in tmux
+2. **Let Them Work** - AI agents write code while you're away
+3. **Check Progress Anywhere** - Review from phone, tablet, or any browser
+4. **Give Feedback & New Tasks** - Test results, assign next tasks, repeat
+
+**Why This Changes Everything:** Without AI agents, you need to be at your PC to write code. With this setup, **AI agents write code for you** while you guide, review, and test from anywhere. This is "vibe coding"—managing AI workers instead of writing code yourself.
 
 **What's Inside:**
-- 🐧 **WSL2 Ubuntu 24.04 LTS** - Real Linux on Windows, no VM overhead
-- 🔐 **Tailscale VPN** - Secure access from anywhere, no port forwarding
-- 🖥️ **Remote Development** - SSH, VS Code Server, tmux for persistent sessions
-- 🤖 **Multi-Agent Workflows** - Run multiple AI coding assistants simultaneously
-- 🎮 **GPU Acceleration** - NVIDIA RTX support for AI inference
-- 📦 **Future: Docker, vLLM, Ollama, Qdrant** - Complete AI/ML stack
+- 🤖 **AI Coding Agents** - Claude Code, GitHub Copilot CLI, Gemini CLI in persistent tmux sessions
+- 📱 **Remote Management** - Check progress from phone, assign tasks from tablet
+- 🌐 **Access Anywhere** - Full VS Code Server in browser, SSH from any device
+- 🔐 **Secure VPN** - Tailscale for zero-config connections (no port forwarding!)
+- 📂 **Multi-Project** - Multiple AI agents on different projects simultaneously
+- 🐳 **Complete Stack** - WSL2, Docker, tmux, systemd, optional GPU acceleration
 
-**Hardware Focus:** Optimized for AMD Ryzen AI 9 365 + RTX 5060 Laptop GPU
+**Perfect For:** Any developer who wants AI agents to write code while they focus on architecture, review, and testing—accessible from anywhere.
 
-**Use Case:** Build a personal AI development server accessible from any device (phone, tablet, laptop)
+**Key Benefit:** Your personal AI coding farm. Multiple agents working 24/7 on different projects. Zero ongoing costs. Manage from any device worldwide.
 
-👉 **[Set Up Your Development Environment →](./perfect-setup/README.md)**
+👉 **[Build Your AI-Powered Remote Development Server →](./perfect-setup/README.md)**
 
 ---
 
