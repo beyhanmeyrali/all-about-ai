@@ -1,7 +1,39 @@
 #!/usr/bin/env python3
 """
-Simple chat using Ollama with qwen3:4b model.
-Basic chat functionality without tool calling.
+Example 2: Streaming Chat with Conversation History
+====================================================
+
+Learn how to maintain conversation context and handle responses.
+
+What you'll learn:
+- How to maintain conversation history (memory)
+- Why conversation history is needed (LLMs are stateless)
+- Cleaning LLM responses (removing thinking tags)
+- Error handling for API calls
+
+DEBUGGING TIPS FOR NEWBIES:
+---------------------------
+1. If you get "Connection refused":
+   - Make sure Ollama is running: `ollama serve`
+   - Check if Ollama is accessible: `curl http://localhost:11434/api/tags`
+
+2. If you get "Model not found":
+   - Pull the model first: `ollama pull qwen3:8b`
+   - Check available models: `ollama list`
+
+3. If responses are weird or include thinking:
+   - The clean_response() method removes <think> tags
+   - You can add more cleaning logic in that function
+
+4. To see what's being sent to the LLM:
+   - Add: `print(json.dumps(payload, indent=2))` before requests.post()
+   - This shows the exact JSON being sent
+
+5. To debug conversation history:
+   - Add: `print(f"Messages: {len(self.messages)}")` to see history size
+   - Add: `print(self.messages)` to see full conversation
+
+Author: Beyhan MEYRALI
 """
 import requests
 import json
@@ -9,32 +41,73 @@ from fastapi import FastAPI, HTTPException
 import uvicorn
 
 class OllamaBot:
-    def __init__(self, model="qwen-direct", base_url="http://localhost:11434"):
+    """
+    A simple chatbot that maintains conversation history.
+
+    This class demonstrates:
+    - Conversation history management (the 'messages' list)
+    - API error handling
+    - Response cleaning
+
+    Each instance maintains its own conversation history!
+    """
+
+    def __init__(self, model="qwen3:8b", base_url="http://localhost:11434"):
+        """
+        Initialize the chatbot.
+
+        Args:
+            model: The Ollama model to use (default: qwen3:8b)
+            base_url: Ollama API endpoint
+
+        Debugging: If this fails, check if Ollama is running with `ollama serve`
+        """
         self.model = model
         self.base_url = base_url
+
+        # This list stores the conversation history!
+        # Each time you ask a question, it gets added here
+        # This is how the LLM "remembers" previous messages
         self.messages = []
-        
+
         print(f"[OK] Initialized Ollama bot with model: {model}")
         print(f"[OK] Ollama base URL: {base_url}")
-        print(f"[OK] Using custom model without thinking output")
 
     def ask_question(self, question):
-        """Send a question to Ollama"""
+        """
+        Send a question to Ollama and maintain conversation history.
+
+        This method:
+        1. Adds your question to conversation history
+        2. Sends ALL history to the LLM (this is how it "remembers")
+        3. Gets the response
+        4. Adds the response to history
+        5. Returns the cleaned response
+
+        Debugging: If you get errors here, add print statements to see the payload
+        """
         try:
             url = f"{self.base_url}/api/chat"
-            
-            # Add user message to conversation
+
+            # IMPORTANT: Add user message to conversation history
+            # This is how we build up the conversation over time
             self.messages.append({"role": "user", "content": question})
             
+            # Prepare the payload
+            # NOTE: We send ALL messages (entire conversation history)
+            # This is why the LLM "remembers" - it sees everything each time!
             payload = {
                 "model": self.model,
-                "messages": self.messages,
-                "stream": False,
+                "messages": self.messages,  # <- Full conversation history!
+                "stream": False,  # Get complete response at once
                 "options": {
-                    "temperature": 0.1,
-                    "top_p": 0.9
+                    "temperature": 0.1,  # Lower = more focused, Higher = more creative
+                    "top_p": 0.9  # Nucleus sampling parameter
                 }
             }
+
+            # DEBUGGING: Uncomment to see what's being sent to the LLM
+            # print(f"[DEBUG] Payload: {json.dumps(payload, indent=2)}")
             
             print(f"[ASK] Asking: {question}")
             response = requests.post(url, json=payload, timeout=60)
@@ -68,10 +141,23 @@ class OllamaBot:
             return error_msg
 
     def clean_response(self, response):
-        """Remove thinking tags and content from response"""
+        """
+        Remove thinking tags and content from response.
+
+        Some models output their "thinking process" in <think> tags.
+        We remove these to show only the final answer to the user.
+
+        Example:
+            Input:  "<think>Let me calculate...</think>The answer is 4"
+            Output: "The answer is 4"
+
+        Debugging: If you see weird output, check if there are other tags to remove
+        """
         import re
         # Remove <think>...</think> blocks
+        # The 're.DOTALL' flag makes '.' match newlines too
         cleaned = re.sub(r'<think>.*?</think>', '', response, flags=re.DOTALL)
+
         # Remove any remaining empty lines and extra whitespace
         cleaned = '\n'.join(line.strip() for line in cleaned.split('\n') if line.strip())
         return cleaned.strip()
@@ -87,13 +173,13 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World - Ollama Basic Chat", "model": "qwen3:4b"}
+    return {"message": "Hello World - Ollama Basic Chat", "model": "qwen3:8b"}
 
 async def ollama_chat(query: str):
     try:
         bot = OllamaBot()
         answer = bot.ask_question(query)
-        return {"ai_response": answer, "model": "qwen3:4b"}
+        return {"ai_response": answer, "model": "qwen3:8b"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

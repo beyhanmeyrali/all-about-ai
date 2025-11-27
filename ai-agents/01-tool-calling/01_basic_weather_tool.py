@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Tool calling using Ollama's native tool calling API with qwen3:4b model.
+Tool calling using Ollama's native tool calling API with qwen3:8b model.
 Ollama now supports native function calling similar to OpenAI.
 """
 import requests
@@ -10,7 +10,7 @@ from pydantic import BaseModel
 import uvicorn
 
 class OllamaToolBot:
-    def __init__(self, model="qwen-direct", base_url="http://localhost:11434"):
+    def __init__(self, model="qwen3:8b", base_url="http://localhost:11434"):
         self.model = model
         self.base_url = base_url
         self.messages = []
@@ -38,7 +38,6 @@ class OllamaToolBot:
         
         print(f"[OK] Initialized Ollama tool bot with model: {model}")
         print(f"[OK] Ollama base URL: {base_url}")
-        print(f"[OK] Using custom model without thinking output")
         print(f"[OK] Tools available: get_current_weather")
 
     def get_current_weather(self, city, unit="celsius"):
@@ -216,13 +215,13 @@ class Query(BaseModel):
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World - Ollama Native Tool Calling", "model": "qwen3:4b", "tools": ["get_current_weather"]}
+    return {"message": "Hello World - Ollama Native Tool Calling", "model": "qwen3:8b", "tools": ["get_current_weather"]}
 
 async def ollama_tool_chat(query: str):
     try:
         bot = OllamaToolBot()
         answer = bot.ask_question(query)
-        return {"ai_response": answer, "model": "qwen3:4b", "tools_available": ["get_current_weather"]}
+        return {"ai_response": answer, "model": "qwen3:8b", "tools_available": ["get_current_weather"]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
