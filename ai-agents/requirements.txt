@@ -1,0 +1,166 @@
+# ============================================================================
+# AI Agents: From Zero to Hero - Complete Dependencies
+# ============================================================================
+# This file contains ALL dependencies for the entire course.
+# Each section also has its own requirements.txt for minimal installs.
+
+# ----------------------------------------------------------------------------
+# Core Dependencies
+# ----------------------------------------------------------------------------
+requests==2.31.0
+python-dotenv==1.0.0
+pydantic==2.5.0
+
+# ----------------------------------------------------------------------------
+# LLM & Embeddings (Ollama Integration)
+# ----------------------------------------------------------------------------
+langchain==0.1.0
+langchain-community==0.0.13
+langchain-core==0.1.10
+langchain-ollama==0.0.1
+
+# ----------------------------------------------------------------------------
+# Agent Frameworks
+# ----------------------------------------------------------------------------
+# LangGraph - Production agent framework
+langgraph==0.0.20
+langchain-core==0.1.10
+
+# CrewAI - Multi-agent collaboration
+crewai==0.1.0
+crewai-tools==0.0.5
+
+# ----------------------------------------------------------------------------
+# Vector Database & Embeddings
+# ----------------------------------------------------------------------------
+# Qdrant - Vector database
+qdrant-client==1.7.0
+langchain-qdrant==0.0.1
+
+# Utilities for embeddings
+sentence-transformers==2.2.2
+numpy==1.24.3
+
+# ----------------------------------------------------------------------------
+# Relational Database
+# ----------------------------------------------------------------------------
+# SQLite utilities
+sqlite-utils==3.35.1
+sqlalchemy==2.0.23
+
+# ----------------------------------------------------------------------------
+# Memory Systems
+# ----------------------------------------------------------------------------
+# Letta (MemGPT) - Long-term memory for agents
+letta==0.3.0
+
+# ----------------------------------------------------------------------------
+# Observability & Monitoring
+# ----------------------------------------------------------------------------
+# LangFuse - LLM tracing and observability
+langfuse==2.6.0
+
+# ----------------------------------------------------------------------------
+# RAG & Document Processing
+# ----------------------------------------------------------------------------
+# Document loaders
+pypdf==3.17.0
+python-docx==1.1.0
+markdown==3.5.1
+beautifulsoup4==4.12.2
+
+# Text splitting
+tiktoken==0.5.2
+
+# ----------------------------------------------------------------------------
+# Voice & Speech
+# ----------------------------------------------------------------------------
+# Whisper - Speech to text (local)
+openai-whisper==20231117
+
+# Audio processing
+soundfile==0.12.1
+librosa==0.10.1
+
+# Text to speech
+TTS==0.20.0  # Coqui TTS
+
+# ----------------------------------------------------------------------------
+# Web Automation & Tools
+# ----------------------------------------------------------------------------
+# Playwright - Browser automation for agents
+playwright==1.40.0
+
+# HTTP clients
+httpx==0.25.2
+aiohttp==3.9.1
+
+# ----------------------------------------------------------------------------
+# API & Web Frameworks
+# ----------------------------------------------------------------------------
+# FastAPI - Modern web framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Streamlit - Quick UI prototyping
+streamlit==1.29.0
+
+# Gradio - Alternative UI framework
+gradio==4.9.0
+
+# ----------------------------------------------------------------------------
+# Utilities
+# ----------------------------------------------------------------------------
+# Progress bars
+tqdm==4.66.1
+
+# Date/time handling
+python-dateutil==2.8.2
+
+# JSON handling
+orjson==3.9.10
+
+# Environment management
+python-decouple==3.8
+
+# Logging
+loguru==0.7.2
+
+# ----------------------------------------------------------------------------
+# Development & Testing
+# ----------------------------------------------------------------------------
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# Code quality
+black==23.12.0
+flake8==6.1.0
+mypy==1.7.1
+
+# Jupyter (for experimentation)
+jupyter==1.0.0
+ipykernel==6.27.1
+
+# ============================================================================
+# Installation Instructions
+# ============================================================================
+#
+# Option 1: Install everything (full course)
+#   pip install -r requirements.txt
+#
+# Option 2: Install per section (minimal)
+#   cd 00-llm-basics && pip install -r requirements.txt
+#   cd 01-tool-calling && pip install -r requirements.txt
+#   etc.
+#
+# Post-installation:
+#   # Install Playwright browsers
+#   playwright install
+#
+#   # Verify installations
+#   python -c "import langchain; print('LangChain OK')"
+#   python -c "import qdrant_client; print('Qdrant OK')"
+#   python -c "import letta; print('Letta OK')"
+#
+# ============================================================================

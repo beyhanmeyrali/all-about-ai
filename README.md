@@ -71,6 +71,38 @@ This repository is designed for developers at all levels - whether you're taking
 
 ---
 
+### 🤖 [ai-agents/](./ai-agents)
+
+**From Zero to Hero: Build Your Own Voice GPT** - Complete guide from basic LLM usage to production voice assistants.
+
+**🎯 The Journey:**
+1. **Understand LLMs** - Learn how they actually work (and don't store data!)
+2. **Tool Calling** - Give LLMs superpowers with function calling
+3. **Agent Frameworks** - Build complex workflows with LangGraph & CrewAI
+4. **RAG Systems** - Connect LLMs to your data with vector databases
+5. **Memory Systems** - Persistent context with Letta (MemGPT)
+6. **Voice GPT** - Final project: Your own ChatGPT voice mode
+
+**What's Inside:**
+- 📚 **00-llm-basics** - Understanding stateless LLMs and API fundamentals
+- 🔧 **01-tool-calling** - Function calling and recursive agent loops
+- 🕸️ **02-agent-frameworks** - LangGraph and CrewAI for production agents
+- 📊 **03-rag-systems** - Vector databases and retrieval-augmented generation
+- 🧠 **04-memory-systems** - Long-term memory with Letta (MemGPT)
+- 🎙️ **05-voice-gpt** - Complete voice assistant (Whisper + LangGraph + Letta)
+
+**Tech Stack:** 100% Local with Ollama, Whisper, Qdrant, LangGraph
+
+**Learning Philosophy:**
+- ✅ Zero to hero progression
+- ✅ Debugger-friendly code with extensive comments
+- ✅ curl examples for every HTTP endpoint
+- ✅ Real-world examples from production systems
+
+👉 **[Start Building AI Agents →](./ai-agents/README.md)**
+
+---
+
 ### 📜 [ai-history/](./ai-history)
 
 **The Silicon God AI** - Philosophical exploration of AI's evolution, impact, and future.
