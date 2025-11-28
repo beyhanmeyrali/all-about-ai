@@ -19,14 +19,14 @@ Author: Beyhan MEYRALI
 
 from typing import List, Dict, Any
 from langchain_ollama import OllamaLLM
-from langchain.prompts import (
+from langchain_core.prompts import (
     PromptTemplate,
     ChatPromptTemplate,
     FewShotPromptTemplate,
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from langchain.chains import LLMChain
+from langchain_classic.chains import LLMChain
 
 
 class PromptTemplateExamples:

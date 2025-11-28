@@ -20,13 +20,13 @@ Author: Beyhan MEYRALI
 
 from typing import List, Dict, Any
 from langchain_ollama import OllamaLLM
-from langchain.chains import ConversationChain, LLMChain
-from langchain.memory import (
+from langchain_classic.chains import ConversationChain, LLMChain
+from langchain_classic.memory import (
     ConversationBufferMemory,
     ConversationSummaryMemory,
     ConversationBufferWindowMemory,
 )
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 
 
 class MemoryBasicsAgent:

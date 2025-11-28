@@ -32,8 +32,8 @@ Author: Beyhan MEYRALI
 
 from typing import Dict, Any
 from langchain_ollama import OllamaLLM
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+from langchain_core.prompts import PromptTemplate
+from langchain_classic.chains import LLMChain
 
 
 class BasicChainAgent:
