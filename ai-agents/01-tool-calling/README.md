@@ -18,6 +18,37 @@ By the end of this section, you will understand:
 
 ---
 
+## 🤔 Why Do You Need Tool Calling?
+
+**Without tool calling, LLMs are just fancy chatbots. With it, they become agents.**
+
+### What Happens If You Skip This Section?
+
+❌ **Your LLM can't access real data** → It will hallucinate instead of checking actual weather, databases, APIs  
+❌ **You can't build useful apps** → Chatbots are fun, but agents that DO things are valuable  
+❌ **You won't understand frameworks** → LangGraph, CrewAI are built on tool calling - you need to know the foundation  
+❌ **You'll struggle with debugging** → When tools don't work, you won't know if it's the LLM, the schema, or your code  
+❌ **You'll miss the "agent" concept** → The recursive loop is what makes LLMs intelligent - skip this and you'll never get it
+
+### What You'll Gain By Understanding This
+
+✅ **Transform LLMs into agents** - They can check weather, query databases, send emails, anything!  
+✅ **Build real applications** - Not just chat, but actual useful software  
+✅ **Understand the agent loop** - The recursive pattern that powers all AI agents  
+✅ **Debug tool issues** - Know exactly why a tool isn't being called or is getting wrong parameters  
+✅ **Appreciate frameworks** - Understand what LangGraph is automating (it's this recursive loop!)
+
+### The Bridge to Production Agents
+
+This section is the bridge between:
+- **LLM Basics** (00) - You learned LLMs are stateless → Now give them tools to interact with the world
+- **Agent Frameworks** (02) - Frameworks automate the recursive loop you'll build here manually
+- **Real Applications** - Every useful AI app uses tool calling: ChatGPT plugins, GitHub Copilot, voice assistants
+
+**Without tool calling, LLMs are calculators. With it, they're agents that can actually DO things.**
+
+---
+
 ## 🧠 Critical Concept: Tool Calling Is NOT Execution
 
 ### What Is Tool Calling?

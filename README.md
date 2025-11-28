@@ -73,31 +73,53 @@ This repository is designed for developers at all levels - whether you're taking
 
 ### 🤖 [ai-agents/](./ai-agents)
 
-**From Zero to Hero: Build Your Own Voice GPT** - Complete guide from basic LLM usage to production voice assistants.
+**AI Agents: From Zero to Hero** - Learn to build production AI agents by understanding *why* you need frameworks, not just *how* to use them.
 
-**🎯 The Journey:**
-1. **Understand LLMs** - Learn how they actually work (and don't store data!)
-2. **Tool Calling** - Give LLMs superpowers with function calling
-3. **Agent Frameworks** - Build complex workflows with LangGraph & CrewAI
-4. **RAG Systems** - Connect LLMs to your data with vector databases
-5. **Memory Systems** - Persistent context with Letta (MemGPT)
-6. **Voice GPT** - Final project: Your own ChatGPT voice mode
+> 🔗 **Featured on LinkedIn:** [Read the full announcement](https://lnkd.in/dDJE6VZH)
 
-**What's Inside:**
+**🎯 The Philosophy:**
+
+Do you know exactly what happens when you send a message to ChatGPT? Most tutorials hide the complexity behind libraries. "Just import this framework and run." 
+
+**I believe the best way to learn is to build it from scratch, locally, and watch the variables change in the debugger.**
+
+**Don't use AI frameworks blindly. Learn *why* you need them first.** 🛠️
+
+**🗺️ The Roadmap - From Raw Python to Production:**
+
+Most tutorials jump straight into complex frameworks, leaving you confused about what's actually happening. This repo takes the opposite approach.
+
+We build from the ground up:
+
+1. **The Foundation:** Raw HTTP calls and OOP Python classes ✅ *Available now!*
+2. **The Mechanics:** Manual tool calling and recursion ✅ *Available now!*
+3. **The Realization:** Understanding *why* manual state management gets messy
+4. **The Solution:** Introducing Frameworks (LangChain, LangGraph, CrewAI) ✅ *Available now!*
+5. **The Integration:** RAG Systems with vector databases 🚧 *Coming soon*
+6. **The Memory:** Long-term context with Letta (MemGPT) 🚧 *Coming soon*
+7. **The Voice:** Complete Voice Assistant 🚧 *Coming soon*
+
+**📚 What's Inside:**
 - 📚 **00-llm-basics** - Understanding stateless LLMs and API fundamentals
 - 🔧 **01-tool-calling** - Function calling and recursive agent loops
-- 🕸️ **02-agent-frameworks** - LangGraph and CrewAI for production agents
+- 🕸️ **02-agent-frameworks** - LangChain, LangGraph & CrewAI (Modern LCEL)
 - 📊 **03-rag-systems** - Vector databases and retrieval-augmented generation
 - 🧠 **04-memory-systems** - Long-term memory with Letta (MemGPT)
 - 🎙️ **05-voice-gpt** - Complete voice assistant (Whisper + LangGraph + Letta)
 
-**Tech Stack:** 100% Local with Ollama, Whisper, Qdrant, LangGraph
+**🎓 How to Use This Repo:**
+1. **Read the README** in each folder for the theory
+2. **Run the Code** with a debugger to see the practice
+3. **Study the Comments** - Extensive explanations in every script
 
-**Learning Philosophy:**
-- ✅ Zero to hero progression
+**💻 Tech Stack:** 100% Local with Ollama & Qwen. **No API keys required.**
+
+**🔍 Learning Philosophy:**
+- ✅ Build from scratch before using frameworks
 - ✅ Debugger-friendly code with extensive comments
 - ✅ curl examples for every HTTP endpoint
 - ✅ Real-world examples from production systems
+- ✅ Understand the "why" not just the "how"
 
 👉 **[Start Building AI Agents →](./ai-agents/README.md)**
 

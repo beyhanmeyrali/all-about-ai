@@ -26,7 +26,7 @@ from langchain_core.prompts import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from langchain_classic.chains import LLMChain
+from langchain_core.output_parsers import StrOutputParser
 
 
 class PromptTemplateExamples:
@@ -54,11 +54,12 @@ class PromptTemplateExamples:
             input_variables=["adjective", "topic"]
         )
 
-        chain = LLMChain(llm=self.llm, prompt=prompt)
+        # LCEL Chain
+        chain = prompt | self.llm | StrOutputParser()
 
         # Test with different inputs
-        result1 = chain.run(adjective="interesting", topic="ocean")
-        result2 = chain.run(adjective="surprising", topic="quantum physics")
+        result1 = chain.invoke({"adjective": "interesting", "topic": "ocean"})
+        result2 = chain.invoke({"adjective": "surprising", "topic": "quantum physics"})
 
         print(f"\n✅ Result 1: {result1[:100]}...")
         print(f"✅ Result 2: {result2[:100]}...")
@@ -88,13 +89,13 @@ Please provide your answer:"""
             input_variables=["role", "task", "context"]
         )
 
-        chain = LLMChain(llm=self.llm, prompt=prompt)
+        chain = prompt | self.llm | StrOutputParser()
 
-        result = chain.run(
-            role="Python developer",
-            task="Explain list comprehensions",
-            context="Teaching beginners who know basic for loops"
-        )
+        result = chain.invoke({
+            "role": "Python developer",
+            "task": "Explain list comprehensions",
+            "context": "Teaching beginners who know basic for loops"
+        })
 
         print(f"\n✅ Result: {result[:200]}...")
 
@@ -136,10 +137,10 @@ Output: {output}
             input_variables=["word"]
         )
 
-        chain = LLMChain(llm=self.llm, prompt=few_shot_prompt)
+        chain = few_shot_prompt | self.llm | StrOutputParser()
 
         # Test with new word
-        result = chain.run(word="angry")
+        result = chain.invoke({"word": "angry"})
 
         print("\n[PROMPT SENT]:")
         print(few_shot_prompt.format(word="angry"))
@@ -160,13 +161,13 @@ Output: {output}
             )
         ])
 
-        chain = LLMChain(llm=self.llm, prompt=chat_prompt)
+        chain = chat_prompt | self.llm | StrOutputParser()
 
-        result = chain.run(
-            role="pirate captain",
-            style="pirate",
-            user_message="What's the weather like today?"
-        )
+        result = chain.invoke({
+            "role": "pirate captain",
+            "style": "pirate",
+            "user_message": "What's the weather like today?"
+        })
 
         print(f"\n✅ Result: {result[:200]}...")
 
@@ -197,13 +198,13 @@ Output: {output}
             input_variables=["question"]
         )
 
-        chain_with = LLMChain(llm=self.llm, prompt=prompt_with_ex)
-        chain_without = LLMChain(llm=self.llm, prompt=prompt_without_ex)
+        chain_with = prompt_with_ex | self.llm | StrOutputParser()
+        chain_without = prompt_without_ex | self.llm | StrOutputParser()
 
         question = "What is recursion in programming?"
 
-        result_with = chain_with.run(question=question)
-        result_without = chain_without.run(question=question)
+        result_with = chain_with.invoke({"question": question})
+        result_without = chain_without.invoke({"question": question})
 
         print(f"\n✅ With examples: {result_with[:150]}...")
         print(f"\n✅ Without examples: {result_without[:150]}...")
@@ -229,7 +230,7 @@ class ProductionPromptAgent:
 
         # Create chains
         self.chains = {
-            name: LLMChain(llm=self.llm, prompt=prompt)
+            name: prompt | self.llm | StrOutputParser()
             for name, prompt in self.prompts.items()
         }
 
@@ -275,24 +276,24 @@ Category:"""
 
     def summarize(self, text: str, num_sentences: int = 2) -> str:
         """Summarize text."""
-        return self.chains["summarize"].run(
-            text=text,
-            num_sentences=num_sentences
-        )
+        return self.chains["summarize"].invoke({
+            "text": text,
+            "num_sentences": num_sentences
+        })
 
     def extract(self, text: str, information_type: str) -> str:
         """Extract information from text."""
-        return self.chains["extract"].run(
-            text=text,
-            information_type=information_type
-        )
+        return self.chains["extract"].invoke({
+            "text": text,
+            "information_type": information_type
+        })
 
     def classify(self, text: str, categories: List[str]) -> str:
         """Classify text."""
-        return self.chains["classify"].run(
-            text=text,
-            categories=", ".join(categories)
-        )
+        return self.chains["classify"].invoke({
+            "text": text,
+            "categories": ", ".join(categories)
+        })
 
 
 def demo_production_agent():

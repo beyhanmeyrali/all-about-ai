@@ -6,24 +6,25 @@
 # ============================================================================
 
 # Core Dependencies
-requests==2.31.0
-python-dotenv==1.0.0
-pydantic==2.5.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+pydantic>=2.5.0
 
 # LangChain Framework
-langchain==0.1.0
-langchain-core==0.1.10
-langchain-community==0.0.13
-langchain-ollama==0.2.0
+langchain>=0.1.0
+langchain-core>=0.1.10
+langchain-community>=0.0.13
+langchain-ollama>=0.0.1
 
 # LangGraph Framework
-langgraph==0.2.45
+langgraph>=0.0.10
 
 # CrewAI Framework
-crewai==0.1.0
-crewai-tools==0.0.5
+# Note: On Windows, this may require C++ Build Tools for ChromaDB
+crewai
+crewai-tools
 
 # Utilities
-orjson==3.9.10
-python-dateutil==2.8.2
-loguru==0.7.2
+orjson>=3.9.10
+python-dateutil>=2.8.2
+loguru>=0.7.2

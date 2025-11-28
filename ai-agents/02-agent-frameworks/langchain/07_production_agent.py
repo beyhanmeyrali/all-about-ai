@@ -25,8 +25,34 @@ import requests
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 from langchain_ollama import OllamaLLM
-from langchain_classic.memory import ConversationBufferWindowMemory
 from langchain_core.prompts import PromptTemplate
+
+class SimpleMemory:
+    """Simple conversation memory buffer."""
+    def __init__(self, k=5):
+        self.k = k
+        self.messages = []
+
+    def save_context(self, inputs, outputs):
+        input_str = list(inputs.values())[0]
+        output_str = list(outputs.values())[0]
+        self.messages.append({"role": "user", "content": input_str})
+        self.messages.append({"role": "assistant", "content": output_str})
+        
+        # Trim to keep last k turns (2*k messages)
+        if len(self.messages) > self.k * 2:
+            self.messages = self.messages[-(self.k * 2):]
+
+    def load_memory_variables(self, inputs):
+        # Format as string for prompt
+        history_str = ""
+        for msg in self.messages:
+            role = "User" if msg["role"] == "user" else "Assistant"
+            history_str += f"{role}: {msg['content']}\n"
+        return {"history": history_str}
+
+    def clear(self):
+        self.messages = []
 
 
 # =============================================================================
@@ -163,7 +189,7 @@ class ProductionAgent:
 
         # Initialize components
         self.tools = AgentTools()
-        self.memory = ConversationBufferWindowMemory(k=memory_size)
+        self.memory = SimpleMemory(k=memory_size)
         self.llm = OllamaLLM(model=model, temperature=0.7)
 
         # Statistics

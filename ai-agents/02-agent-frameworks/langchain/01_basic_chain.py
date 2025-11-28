@@ -33,7 +33,7 @@ Author: Beyhan MEYRALI
 from typing import Dict, Any
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import PromptTemplate
-from langchain_classic.chains import LLMChain
+from langchain_core.output_parsers import StrOutputParser
 
 
 class BasicChainAgent:
@@ -117,22 +117,19 @@ Please provide a clear and concise answer."""
 
         return prompt
 
-    def _create_chain(self) -> LLMChain:
+    def _create_chain(self):
         """
-        Create the LLMChain.
+        Create the LCEL chain.
 
-        This combines the prompt and LLM into a reusable chain.
+        This combines the prompt and LLM into a reusable chain using LCEL.
 
         Returns:
-            Configured LLMChain
+            Configured LCEL chain
         """
-        print("  Creating LLMChain...")
+        print("  Creating LCEL chain...")
 
-        chain = LLMChain(
-            llm=self.llm,
-            prompt=self.prompt_template,
-            verbose=False,  # Set to True to see what's happening
-        )
+        # Modern LCEL syntax: prompt | llm | parser
+        chain = self.prompt_template | self.llm | StrOutputParser()
 
         return chain
 
@@ -151,8 +148,8 @@ Please provide a clear and concise answer."""
         print(f"\n[ASKING] {question}")
 
         try:
-            # Run the chain
-            response = self.chain.run(question=question)
+            # Run the chain using LCEL invoke
+            response = self.chain.invoke({"question": question})
 
             print(f"[ANSWER] {response[:100]}...")
             return response
@@ -184,8 +181,8 @@ Please provide a clear and concise answer."""
         print(formatted_prompt)
         print("-" * 70)
 
-        # Get response
-        response = self.chain.run(question=question)
+        # Get response using LCEL
+        response = self.chain.invoke({"question": question})
 
         print(f"\n[RESPONSE FROM LLM]:")
         print("-" * 70)
