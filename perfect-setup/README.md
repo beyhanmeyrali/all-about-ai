@@ -1,5 +1,27 @@
 # Your Personal Remote Development Server
 
+## TL;DR (For Experienced Developers)
+
+**What:** WSL2 + Tailscale VPN + tmux + VS Code Server = Your personal cloud dev environment on local hardware
+
+**Why:** Run multiple AI coding agents (Claude Code, Copilot CLI, Gemini CLI) in persistent tmux sessions. Access from anywhere (phone, iPad, laptop) via secure VPN. No port forwarding, no cloud costs, GPU-accelerated AI workloads.
+
+**Stack:**
+```bash
+WSL2 Ubuntu → SSH (remote terminal) + Tailscale (zero-config VPN)
+            → tmux (persistent sessions) + VS Code Server (web IDE)
+            → Docker + vLLM/Ollama (local AI models) + Qdrant (vector DB)
+            → NVIDIA GPU passthrough (AI acceleration)
+```
+
+**Use Case:** Start 5 AI agents working on different projects at home, check progress from phone at lunch, code from iPad on couch, all via encrypted VPN mesh. Agents keep working 24/7 even when you disconnect.
+
+**Setup Time:** 5-10 minutes | **Cost:** $0 (runs on your hardware) | **Security:** VPN-only, no exposed ports
+
+**Quick Start:** `wsl --install Ubuntu` → Install Tailscale → Enable systemd → Done
+
+---
+
 ## The Game-Changer: AI Coding Agents Working 24/7, Managed from Anywhere
 
 > **Why This Setup Matters:** With AI coding agents (Claude Code, GitHub Copilot CLI, Gemini CLI) running in persistent tmux sessions, you can **assign coding tasks and let them work while you're away**. Check progress from your phone at lunch, review code on your tablet on the couch, give new tasks from any device. Without AI agents, you'd need to be at your PC to write code. With this setup, AI agents write code for you while you just guide, review, and test—**from anywhere in the world**.
