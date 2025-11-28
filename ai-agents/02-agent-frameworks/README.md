@@ -1,86 +1,81 @@
-# 02 - Agent Frameworks: LangGraph Basics 🕸️
+# 02 - Agent Frameworks: From Zero to Production 🕸️
 
-> Learn how to build structured agent workflows using LangGraph
-
----
-
-## 🎯 Learning Objectives
-
-By the end of this section, you will understand:
-- ✅ What LangGraph is and why it's useful
-- ✅ State management in agent workflows
-- ✅ Creating nodes (functions) and edges (connections)
-- ✅ Building conditional workflows
-- ✅ When to use frameworks vs raw tool calling
-
-**Time Required:** 4-5 hours
+> Master LangChain, LangGraph, and CrewAI - Build production-grade multi-agent systems
 
 ---
 
-## 🤔 Why Use LangGraph?
+## 🎯 What You'll Master
 
-### The Problem with Raw Code
+This section covers **three major agent frameworks** used in production:
 
-From section 01, you learned recursive tool calling:
+1. **LangChain** - The foundation (chains, memory, tools)
+2. **LangGraph** - Stateful workflows (graphs, persistence, complex logic)
+3. **CrewAI** - Multi-agent teams (role-based collaboration)
 
-```python
-# This works for simple cases
-while True:
-    response = llm.chat(messages, tools=tools)
-    if response.tool_calls:
-        execute_tools(response.tool_calls)
-        continue
-    else:
-        break
-```
+**By the end**, you'll build production-ready agents that can:
+- 🔄 Execute complex multi-step workflows
+- 🧠 Maintain conversation memory and state
+- 🛠️ Orchestrate multiple tools intelligently
+- 👥 Collaborate as multi-agent teams
+- 📊 Scale to production environments
 
-**But what about:**
-- 🔄 Complex workflows with conditional branching?
-- 💾 Persistent state across conversations?
-- 🐛 Debugging multi-step executions?
-- 📊 Visualizing agent logic?
-
-**This is where LangGraph helps!**
+**Time Required:** 12-15 hours
 
 ---
 
-## 🌟 What is LangGraph?
-
-**LangGraph** is a framework for building stateful, multi-step agent workflows.
-
-**Key Concepts:**
-
-1. **State** = Data flowing through your workflow
-2. **Nodes** = Functions that process state
-3. **Edges** = Connections between nodes
-4. **Graph** = Complete workflow from start to end
-
-**Think of it like:**
-- State = Variables in your program
-- Nodes = Functions you write
-- Edges = Function call order
-- Graph = Your complete program
-
----
-
-## 📚 What This Section Covers
-
-### Files in This Directory
+## 📂 Folder Structure
 
 ```
 02-agent-frameworks/
 ├── README.md                          ← You are here
-├── requirements.txt                   ← Dependencies
-├── 01_simple_langgraph.py            ← Basic workflow
-├── 02_conditional_workflow.py        ← If/else logic
-└── 03_tools_with_langgraph.py        ← Combining with tools
+├── requirements.txt                   ← All framework dependencies
+│
+├── langchain/                         ← LangChain Framework
+│   ├── README.md
+│   ├── 00_installation.py            ← Setup & verification
+│   ├── 01_basic_chain.py             ← Simple LLM chain
+│   ├── 02_prompt_templates.py        ← Dynamic prompts
+│   ├── 03_chains_with_memory.py      ← Conversation memory
+│   ├── 04_tools_integration.py       ← Tool calling
+│   ├── 05_sequential_chains.py       ← Multi-step chains
+│   ├── 06_router_chains.py           ← Conditional routing
+│   └── 07_production_agent.py        ← Complete production example
+│
+├── langgraph/                         ← LangGraph Framework
+│   ├── README.md
+│   ├── 00_why_langgraph.py           ← When to use LangGraph
+│   ├── 01_simple_langgraph.py        ← Basic workflow ✅
+│   ├── 02_conditional_workflow.py    ← Branching logic ✅
+│   ├── 03_tools_with_langgraph.py    ← Tool orchestration ✅
+│   ├── 04_checkpoints.py             ← State persistence
+│   ├── 05_human_in_loop.py           ← Human approval nodes
+│   ├── 06_subgraphs.py               ← Nested workflows
+│   ├── 07_streaming_events.py        ← Real-time updates
+│   └── 08_production_agent.py        ← Enterprise-grade agent
+│
+├── crewai/                            ← CrewAI Framework
+│   ├── README.md
+│   ├── 00_crew_basics.py             ← Agents, tasks, crews
+│   ├── 01_simple_crew.py             ← First multi-agent system
+│   ├── 02_sequential_tasks.py        ← Task dependencies
+│   ├── 03_hierarchical_crew.py       ← Manager + workers
+│   ├── 04_tools_in_crew.py           ← Shared tool usage
+│   ├── 05_memory_crew.py             ← Crew memory systems
+│   ├── 06_delegation.py              ← Agent delegation
+│   └── 07_production_crew.py         ← Full research team
+│
+└── comparison/                        ← Framework Comparison
+    ├── README.md
+    ├── same_task_all_frameworks.py   ← Same task, 3 ways
+    ├── performance_comparison.py     ← Speed & resource usage
+    └── when_to_use_what.md          ← Decision guide
 ```
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Install Dependencies
+### 1. Install All Frameworks
 
 ```bash
 cd 02-agent-frameworks
@@ -90,329 +85,374 @@ pip install -r requirements.txt
 ### 2. Verify Ollama
 
 ```bash
-ollama list  # Should see qwen3:8b
+# Check Ollama is running
+ollama list
+
+# Should see qwen3:8b
+# If not: ollama pull qwen3:8b
 ```
 
-### 3. Run First Example
+### 3. Choose Your Path
 
+**Path A: Complete Beginner**
 ```bash
+# Start with LangChain basics
+cd langchain
+python 01_basic_chain.py
+
+# Then move to LangGraph
+cd ../langgraph
 python 01_simple_langgraph.py
+
+# Finally CrewAI
+cd ../crewai
+python 01_simple_crew.py
+```
+
+**Path B: Quick to Production**
+```bash
+# Jump to production examples
+python langchain/07_production_agent.py
+python langgraph/08_production_agent.py
+python crewai/07_production_crew.py
+```
+
+**Path C: Framework Comparison**
+```bash
+# See same task in all frameworks
+cd comparison
+python same_task_all_frameworks.py
 ```
 
 ---
 
-## 📖 LangGraph Fundamentals
+## 🧩 Framework Overview
 
-### Core Concept 1: State
+### LangChain: The Swiss Army Knife
 
-State is the data that flows through your workflow:
+**What it is:**
+- General-purpose LLM framework
+- Chains, prompts, memory, tools
+- Great for simple-to-moderate complexity
 
+**When to use:**
+- ✅ Quick prototypes
+- ✅ Standard LLM workflows
+- ✅ Learning fundamentals
+- ✅ Simple sequential tasks
+
+**When NOT to use:**
+- ❌ Complex state management needed
+- ❌ Conditional branching workflows
+- ❌ Need to visualize agent logic
+
+**Example:**
 ```python
-from typing import TypedDict
+from langchain_ollama import OllamaLLM
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
 
-class AgentState(TypedDict):
-    """Data that flows through the graph"""
-    question: str    # User's question
-    answer: str      # LLM's answer
-    tools_used: list # Tools called so far
-```
+llm = OllamaLLM(model="qwen3:8b")
+prompt = PromptTemplate.from_template("Tell me about {topic}")
+chain = LLMChain(llm=llm, prompt=prompt)
 
-**Think of state like:**
-- Global variables that all functions can access
-- But safer and more organized!
-
-### Core Concept 2: Nodes
-
-Nodes are just Python functions that process state:
-
-```python
-def ask_llm(state: AgentState) -> dict:
-    """Node that calls LLM"""
-    # 1. Read from state
-    question = state["question"]
-
-    # 2. Do work (call LLM)
-    answer = call_ollama(question)
-
-    # 3. Return updates to state
-    return {"answer": answer}
-```
-
-**Node Rules:**
-- Takes `state` as input
-- Returns `dict` with updates
-- Can do anything: LLM calls, tool calls, database queries, etc.
-
-### Core Concept 3: Edges
-
-Edges connect nodes together:
-
-```python
-from langgraph.graph import StateGraph, END
-
-workflow = StateGraph(AgentState)
-
-# Add nodes
-workflow.add_node("ask_llm", ask_llm)
-workflow.add_node("formatter", format_output)
-
-# Connect them with edges
-workflow.set_entry_point("ask_llm")  # Start here
-workflow.add_edge("ask_llm", "formatter")  # Then go here
-workflow.add_edge("formatter", END)  # Then end
-```
-
-**Flow:**
-```
-START → ask_llm → formatter → END
-```
-
-### Core Concept 4: Graph
-
-The graph is your complete workflow:
-
-```python
-# Build graph
-workflow = StateGraph(AgentState)
-workflow.add_node("node1", func1)
-workflow.add_node("node2", func2)
-workflow.add_edge("node1", "node2")
-workflow.add_edge("node2", END)
-
-# Compile into runnable app
-app = workflow.compile()
-
-# Run it!
-result = app.invoke({"question": "What is 2+2?"})
+result = chain.run(topic="AI agents")
 ```
 
 ---
 
-## 🔄 Simple Example Walkthrough
+### LangGraph: Production Workflows
 
-Here's the complete basic example from `01_simple_langgraph.py`:
+**What it is:**
+- State machine framework for agents
+- Nodes, edges, conditional routing
+- Built on LangChain but more powerful
 
+**When to use:**
+- ✅ Complex multi-step workflows
+- ✅ Need conditional logic (if/else)
+- ✅ State persistence across sessions
+- ✅ Production-grade agents
+- ✅ Need to debug/visualize flows
+
+**When NOT to use:**
+- ❌ Simple single-step tasks
+- ❌ Learning basics (too complex)
+- ❌ Quick prototypes
+
+**Example:**
 ```python
-from typing import TypedDict
 from langgraph.graph import StateGraph, END
-import requests
 
-# 1. Define State
-class State(TypedDict):
-    question: str
-    answer: str
+def agent_node(state):
+    # Process state
+    return {"answer": "result"}
 
-# 2. Define Node
-def ask_llm(state: State) -> dict:
-    """Call Ollama LLM"""
-    response = requests.post(
-        "http://localhost:11434/api/chat",
-        json={
-            "model": "qwen3:8b",
-            "messages": [{"role": "user", "content": state["question"]}],
-            "stream": False
-        }
-    )
-    answer = response.json()["message"]["content"]
-    return {"answer": answer}
-
-# 3. Build Graph
 workflow = StateGraph(State)
-workflow.add_node("llm", ask_llm)
-workflow.set_entry_point("llm")
-workflow.add_edge("llm", END)
+workflow.add_node("agent", agent_node)
+workflow.set_entry_point("agent")
+workflow.add_edge("agent", END)
+
 app = workflow.compile()
-
-# 4. Run Graph
-result = app.invoke({"question": "What is the capital of France?"})
-print(result["answer"])
-```
-
-**Output:**
-```
-The capital of France is Paris.
+result = app.invoke({"question": "Hello"})
 ```
 
 ---
 
-## 🎯 Conditional Workflows
+### CrewAI: Multi-Agent Teams
 
-LangGraph shines when you need branching logic:
+**What it is:**
+- Multi-agent collaboration framework
+- Role-based agents working together
+- Built-in task delegation and management
 
+**When to use:**
+- ✅ Multiple specialized agents needed
+- ✅ Complex tasks requiring different skills
+- ✅ Hierarchical workflows (manager + workers)
+- ✅ Agent delegation and collaboration
+- ✅ Research, content creation, analysis
+
+**When NOT to use:**
+- ❌ Single agent is sufficient
+- ❌ Simple linear workflows
+- ❌ Need fine-grained control over every step
+
+**Example:**
 ```python
-def router(state: State) -> str:
-    """Decide which path to take"""
-    if "weather" in state["question"].lower():
-        return "weather_node"
-    elif "math" in state["question"].lower():
-        return "math_node"
-    else:
-        return "general_node"
+from crewai import Agent, Task, Crew
 
-# Add conditional edge
-workflow.add_conditional_edges(
-    "router",
-    router,  # Function that decides
-    {
-        "weather_node": "weather_node",
-        "math_node": "math_node",
-        "general_node": "general_node"
-    }
+researcher = Agent(
+    role="Researcher",
+    goal="Find information",
+    tools=[search_tool]
 )
-```
 
-**Flow:**
-```
-START → router → [weather_node OR math_node OR general_node] → END
-                      ↓
-             (decided by router function)
+writer = Agent(
+    role="Writer",
+    goal="Write reports",
+    tools=[]
+)
+
+task1 = Task(description="Research AI", agent=researcher)
+task2 = Task(description="Write report", agent=writer)
+
+crew = Crew(agents=[researcher, writer], tasks=[task1, task2])
+result = crew.kickoff()
 ```
 
 ---
 
-## 🔧 Combining with Tool Calling
+## 📊 Framework Comparison
 
-You can use LangGraph with the tool calling from section 01:
-
-```python
-def tool_calling_node(state: State) -> dict:
-    """Node that can call tools"""
-    # Call LLM with tools
-    response = llm.chat(state["messages"], tools=tools)
-
-    if response.tool_calls:
-        # Execute tools
-        for tool_call in response.tool_calls:
-            result = execute_tool(tool_call)
-            state["messages"].append(tool_result)
-
-    return {"messages": state["messages"]}
-```
-
-See `03_tools_with_langgraph.py` for complete example.
+| Feature | LangChain | LangGraph | CrewAI |
+|---------|-----------|-----------|--------|
+| **Learning Curve** | Easy | Moderate | Moderate |
+| **Best For** | Simple chains | Complex workflows | Multi-agent teams |
+| **State Management** | Basic | Advanced | Built-in |
+| **Conditional Logic** | Limited | Excellent | Good |
+| **Multi-Agent** | Manual | Manual | Native |
+| **Visualization** | No | Yes | No |
+| **Production Ready** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| **Documentation** | Excellent | Good | Good |
+| **Community** | Large | Growing | Growing |
 
 ---
 
-## 📊 When to Use What?
+## 🎓 Learning Path
 
-### Use Raw Tool Calling (Section 01):
-✅ Simple, linear tasks
-✅ Quick prototypes
-✅ Learning fundamentals
-✅ Single-agent workflows
+### Week 1: Foundations (LangChain)
+- **Day 1-2:** Basic chains and prompts
+- **Day 3-4:** Memory and conversation
+- **Day 5-6:** Tools and sequential chains
+- **Day 7:** Build a complete LangChain agent
 
-### Use LangGraph:
-✅ Complex workflows with branching
-✅ Multi-step processes
-✅ Need to visualize logic
-✅ Want better debugging
-✅ Planning to scale complexity
+### Week 2: Advanced Workflows (LangGraph)
+- **Day 1-2:** State graphs and nodes
+- **Day 3-4:** Conditional edges and routing
+- **Day 5-6:** Persistence and streaming
+- **Day 7:** Production agent with all features
+
+### Week 3: Multi-Agent Systems (CrewAI)
+- **Day 1-2:** Agents, tasks, crews
+- **Day 3-4:** Hierarchical teams
+- **Day 5-6:** Complex collaboration patterns
+- **Day 7:** Build a research team
+
+---
+
+## 🏗️ Progressive Complexity
+
+Each framework section follows this pattern:
+
+```
+00_basics.py          ← Hello World level
+   ↓
+01_simple.py          ← Single feature
+   ↓
+02_intermediate.py    ← Combine features
+   ↓
+03_advanced.py        ← Complex patterns
+   ↓
+04_production.py      ← Enterprise-grade
+```
+
+**Learning Philosophy:**
+1. **Zero to Hero** - Every concept explained from scratch
+2. **Build on Previous** - Each script extends the last
+3. **OOP Design** - Professional, reusable code
+4. **Fully Tested** - All scripts work with Ollama
+5. **Production Ready** - Real-world patterns
+
+---
+
+## 🔧 Common Patterns You'll Master
+
+### Pattern 1: Tool-Calling Agent
+- LangChain: `AgentExecutor`
+- LangGraph: Conditional loops
+- CrewAI: Agent with tools
+
+### Pattern 2: Multi-Step Workflow
+- LangChain: `SequentialChain`
+- LangGraph: State graph
+- CrewAI: Sequential tasks
+
+### Pattern 3: Conditional Routing
+- LangChain: `RouterChain`
+- LangGraph: Conditional edges
+- CrewAI: Manager agent
+
+### Pattern 4: Memory Management
+- LangChain: `ConversationBufferMemory`
+- LangGraph: State persistence
+- CrewAI: Crew memory
 
 ---
 
 ## 🐛 Debugging Tips
 
-### Common Issues
-
-**1. "InvalidUpdateError: Expected node to update..."**
+### LangChain Issues
 ```python
-# Problem: Node returns empty dict
-def my_node(state: State) -> dict:
-    return {}  # ❌ Wrong!
+# Enable verbose mode
+chain = LLMChain(llm=llm, prompt=prompt, verbose=True)
 
-# Solution: Return at least one state update
-def my_node(state: State) -> dict:
-    return {"answer": "some value"}  # ✅ Correct
+# See what's being sent to LLM
+print(chain.prompt.format(topic="test"))
 ```
 
-**2. "Module not found: langgraph"**
-```bash
-# Solution:
-pip install -r requirements.txt
-```
-
-**3. Graph seems stuck/slow
+### LangGraph Issues
 ```python
 # Add debug prints in nodes
-def my_node(state: State) -> dict:
-    print(f"[DEBUG] Node called with: {state}")
-    # ... do work ...
-    print(f"[DEBUG] Node returning: {result}")
+def my_node(state):
+    print(f"[DEBUG] State: {state}")
+    result = process(state)
+    print(f"[DEBUG] Result: {result}")
     return result
 ```
 
-**4. State not updating
+### CrewAI Issues
 ```python
-# Make sure you return a dict with the right keys
-class State(TypedDict):
-    question: str
-    answer: str
-
-# This works:
-return {"answer": "hello"}  # ✅
-
-# This doesn't:
-return {"response": "hello"}  # ❌ Wrong key!
+# Enable verbose and full output
+crew = Crew(
+    agents=[...],
+    tasks=[...],
+    verbose=True,
+    full_output=True
+)
 ```
 
 ---
 
 ## 🎯 Key Takeaways
 
-### What You Should Understand:
+### When to Use Each Framework:
 
-1. **LangGraph = Structured Workflows**
-   - Not magic, just organized code
-   - State flows through nodes
-   - Edges control the flow
+**Use LangChain when:**
+- Building your first agent
+- Simple conversational AI
+- Quick prototypes
+- Learning the basics
 
-2. **State is Central**
-   - Define it with TypedDict
-   - Nodes read and update it
-   - It's your workflow's memory
+**Use LangGraph when:**
+- Complex multi-step workflows
+- Need state persistence
+- Conditional logic required
+- Production deployment
+- Want to visualize flows
 
-3. **Nodes Are Just Functions**
-   - Take state, return updates
-   - Can do anything inside
-   - Keep them focused on one task
+**Use CrewAI when:**
+- Multiple specialized agents
+- Task delegation needed
+- Hierarchical workflows
+- Research/content creation
+- Agent collaboration
 
-4. **Use It When Complexity Grows**
-   - Simple task? → Raw code is fine
-   - Complex workflow? → LangGraph helps
-   - It's a tool, not a requirement
+**Use Multiple Frameworks when:**
+- Enterprise applications
+- Different components need different patterns
+- Maximum flexibility required
+
+---
+
+## 📚 What Each Subfolder Contains
+
+### `/langchain` - Foundation Framework
+Complete guide from basic chains to production agents. Master prompts, memory, tools, and sequential workflows.
+
+### `/langgraph` - State Machine Framework
+Build complex workflows with state management, conditional routing, persistence, and human-in-the-loop patterns.
+
+### `/crewai` - Multi-Agent Framework
+Create collaborative agent teams with roles, tasks, delegation, and hierarchical management.
+
+### `/comparison` - Framework Comparison
+See the same tasks implemented in all three frameworks. Understand trade-offs and make informed decisions.
 
 ---
 
 ## 🚀 Next Steps
 
-### You're Ready For:
-✅ [03-embeddings-rag](../03-embeddings-rag) - Teaching agents about your data
+After completing this section, you'll be ready for:
 
-### Practice Exercises:
-
-1. **Modify 01_simple_langgraph.py**
-   - Add a second node that formats the answer
-   - Add error handling node
-
-2. **Build a routing workflow**
-   - Route questions to different specialized nodes
-   - Math questions → calculator node
-   - Weather questions → weather node
-   - General questions → LLM node
-
-3. **Combine with section 01**
-   - Take the recursive agent from section 01
-   - Rebuild it using LangGraph
-   - Compare complexity
+1. **[03-embeddings-rag](../03-embeddings-rag)** - Add knowledge retrieval
+2. **[04-memory-systems](../04-memory-systems)** - Long-term memory with Letta
+3. **[05-voice-gpt](../05-voice-gpt)** - Voice-enabled agents
 
 ---
 
-## 📚 Additional Resources
+## 📖 Additional Resources
 
-- [LangGraph Documentation](https://python.langchain.com/docs/langgraph)
-- [LangGraph GitHub Examples](https://github.com/langchain-ai/langgraph/tree/main/examples)
-- Section 01 (Tool Calling) - Use tools with LangGraph
+- [LangChain Documentation](https://python.langchain.com/)
+- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
+- [CrewAI Documentation](https://docs.crewai.com/)
+- [Ollama Documentation](https://github.com/ollama/ollama)
 
 ---
 
-**Next:** [03-embeddings-rag](../03-embeddings-rag) - Learn embeddings and vector databases →
+## 🤝 Project Structure Philosophy
+
+**Why This Structure?**
+- 📁 **Framework separation** - Each framework in its own folder
+- 🔢 **Progressive numbering** - 00 to 99 for clear ordering
+- 🎓 **Zero to hero** - Every framework taught completely
+- 🏗️ **OOP design** - Professional, maintainable code
+- ✅ **Fully tested** - All scripts run with Ollama
+
+**Best Practices:**
+1. Start with framework basics
+2. Understand when to use each
+3. Build progressively complex examples
+4. Compare frameworks with same tasks
+5. Choose the right tool for your needs
+
+---
+
+**Ready to begin?** Start with:
+- **Beginners:** [langchain/01_basic_chain.py](./langchain/01_basic_chain.py)
+- **Intermediate:** [langgraph/01_simple_langgraph.py](./langgraph/01_simple_langgraph.py)
+- **Advanced:** [crewai/01_simple_crew.py](./crewai/01_simple_crew.py)
+
+---
+
+*"The right framework makes complex agents simple. The wrong one makes simple agents complex."*
