@@ -1,3 +1,5 @@
+**Not:** `ai-agents-tr` klasörü, orijinal `ai-agents` klasörünün Türkçe çevirisidir. Geliştirme ve test süreçleri orijinal klasörde tamamlandığında, bu `-tr` klasörü birebir aynı kod içeriğiyle güncellenir; ancak tüm yorum satırları ve README dosyaları Türkçe olarak sunulur.
+
 # Yapay Zeka Ajanları: Sıfırdan Zirveye 🤖
 
 > Sadece *nasıl* kullanılacağını değil, *neden* frameworklere ihtiyacınız olduğunu anlayarak üretim seviyesinde yapay zeka ajanları oluşturmayı öğrenin.
@@ -799,86 +801,22 @@ response = llm.chat(messages)
 
 ### Yol 2: Üretime Hızlı Geçiş (15-20 saat)
 ```
-00-llm-basics (göz at) → 01-tool-calling → 02-agent-frameworks → 03-rag-systems
+01-tool-calling → 02-agent-frameworks (Sadece LangGraph) → 03-rag-systems
 ```
-*Pratik ajan dağıtımına odaklanın, sesi daha sonra ekleyin*
-
-### Yol 3: Tam Kurs (50-60 saat)
-```
-00 → 01 → 02 → 03 → 04 → 05 (sırayla)
-```
-*Her bileşenin derinlemesine anlaşılması*
-
----
-
-## 🎯 Bu Kurstan Sonra
-
-### Şunları Yapabileceksiniz:
-- ✅ Üretim sınıfı yapay zeka ajanları oluşturmak
-- ✅ LLM'leri mevcut uygulamalara entegre etmek
-- ✅ Karmaşık çok adımlı ajan iş akışları tasarlamak
-- ✅ Özel bilgi tabanları için RAG uygulamak
-- ✅ Yerel modellerle ses arayüzleri oluşturmak
-- ✅ Ajan davranışlarını ayıklamak ve sorunları düzeltmek
-- ✅ Frameworklerin altındaki HTTP/REST katmanını anlamak
-
-### Doğal Sonraki Adımlar:
-1.  **Fine-tuning** - Modelleri alanınız için özelleştirin (bkz. `../fine-tuning/`)
-2.  **Dağıtım** - Ajanları uzak sunucunuzda barındırın (bkz. `../perfect-setup/`)
-3.  **İleri kalıplar** - Çoklu ajan sistemleri, otonom ajanlar
-4.  **Üretim izleme** - Loglama, izleme, maliyet optimizasyonu
+*LLM temellerini bildiğinizi varsayar, CrewAI ve Sesi atlar*
 
 ---
 
 ## 🤝 Katkıda Bulunma
 
-Bir hata mı buldunuz? İyileştirmeleriniz mi var? Örnek eklemek mi istiyorsunuz?
-
-1.  Depoyu fork'layın
-2.  Özellik dalınızı oluşturun
-3.  Örneklerinizi ayrıntılı yorumlarla ekleyin
-4.  Bir pull request gönderin
-
-**Kurallar:**
-- Tüm kodlar yeni başlayanlar için yoğun bir şekilde yorumlanmalıdır
-- HTTP uç noktaları için curl örnekleri ekleyin
-- Ollama yerel modelleriyle test edin
-- "Debugger dostu" felsefesini takip edin
-
----
-
-## 📖 Ek Kaynaklar
-
-### Önerilen Okuma Sırası
-1.  Buradan başlayın: [00-llm-basics/README.md](./00-llm-basics/README.md)
-2.  Araçları anlayın: [01-tool-calling/README.md](./01-tool-calling/README.md)
-3.  Karmaşık ajanlar inşa edin: [02-agent-frameworks/README.md](./02-agent-frameworks/README.md)
-4.  Bilgi ekleyin: [03-rag-systems/README.md](./03-rag-systems/README.md)
-5.  Hafıza ekleyin: [04-memory-systems/README.md](./04-memory-systems/README.md)
-6.  Final projesi: [05-voice-gpt/README.md](./05-voice-gpt/README.md)
-
-### Harici Kaynaklar
-- [Ollama Dokümantasyonu](https://github.com/ollama/ollama)
-- [LangGraph Dokümantasyonu](https://langchain-ai.github.io/langgraph/)
-- [Letta (MemGPT) Dokümantasyonu](https://github.com/cpacker/MemGPT)
-- [OpenAI Fonksiyon Çağırma Rehberi](https://platform.openai.com/docs/guides/function-calling)
-
----
-
-## 📫 İletişim
-
-**Beyhan MEYRALI**
-- 💼 [LinkedIn](https://www.linkedin.com/in/beyhanmeyrali/)
-- 🐙 [GitHub](https://github.com/beyhanmeyrali)
+Bu repo, topluluk için bir öğrenme kaynağıdır. Şunları bulursanız PR açmaktan çekinmeyin:
+- Hatalar
+- Daha iyi açıklamalar
+- Yeni ajan örnekleri
+- Performans iyileştirmeleri
 
 ---
 
 ## 📄 Lisans
 
-MIT Lisansı - Detaylar için [LICENSE](../LICENSE) dosyasına bakın.
-
----
-
-**Başlamaya hazır mısınız?** [00-llm-basics](./00-llm-basics/README.md) ile başlayın →
-
-*"Yapay zekayı anlamanın en iyi yolu, onu kendiniz inşa etmektir."*
+MIT Lisansı - İstediğiniz gibi kullanın, öğrenin ve inşa edin!
