@@ -1,0 +1,5 @@
+Test edilecek 8 betik bulundu: ['01_simple_langgraph.py', '02_conditional_workflow.py', '03_tools_with_langgraph.py', '04_checkpoints.py', '05_human_in_loop.py', '06_subgraphs.py', '07_streaming_events.py', '08_production_agent.py']
+
+================================================================================
+TEST EDİLİYOR: 01_simple_langgraph.py
+================================================================================
