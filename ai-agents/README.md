@@ -38,7 +38,7 @@ We build from the ground up:
 2. **The Mechanics:** Manual tool calling and recursion ✅ *Available now!*
 3. **The Realization:** Understanding *why* manual state management gets messy
 4. **The Solution:** Introducing Frameworks (LangChain, LangGraph, CrewAI) ✅ *Available now!*
-5. **The Integration:** RAG Systems with vector databases 🚧 *Coming soon*
+5. **The Integration:** RAG Systems with vector databases ✅ *Available now!*
 6. **The Memory:** Long-term context with Letta (MemGPT) 🚧 *Coming soon*
 7. **The Voice:** Complete Voice Assistant 🚧 *Coming soon*
 
@@ -278,15 +278,15 @@ result = app.invoke(input, config={"thread_id": "123"})  # ← Resumable!
 
 ---
 
-### 📊 [03-rag-systems](./03-rag-systems) - Teaching LLMs About Your Data
+### 📊 [03-embeddings-rag](./03-embeddings-rag) - Teaching LLMs About Your Data
 **Duration:** 5-6 hours
 
 **What You'll Learn:**
-- Vector databases (Qdrant, ChromaDB)
-- Embeddings and semantic search
-- Document processing and chunking strategies
-- RAG with LangGraph integration
-- Performance optimization
+- Vector databases (Qdrant via Docker)
+- Embeddings and semantic search with Ollama
+- Document processing and ingestion
+- Building a complete RAG pipeline
+- Semantic retrieval vs keyword search
 
 **Why RAG Matters:**
 - LLMs don't know YOUR data
@@ -294,10 +294,12 @@ result = app.invoke(input, config={"thread_id": "123"})  # ← Resumable!
 - RAG provides real-time, updatable knowledge
 - Cost-effective for private/dynamic data
 
-**Projects:**
-- 📚 Document Q&A system
-- 📚 Code search assistant
-- 📚 Company knowledge base
+**What You'll Build:**
+- 📚 Embedding generation with `qwen3-embedding:0.6b`
+- 📚 Qdrant vector database setup (Docker)
+- 📚 Document ingestion pipeline
+- 📚 Semantic search system
+- 📚 Complete RAG pipeline (retrieval + generation)
 
 **Key Takeaway:** RAG is how you connect LLMs to your world
 
@@ -401,7 +403,7 @@ We use **Qwen3:8b** - the best reasoning + tool-calling model in 2025 for local 
 ollama pull qwen3:8b
 
 # Embedding model for RAG (you'll need this later)
-ollama pull nomic-embed-text
+ollama pull qwen3-embedding:0.6b
 
 # Verify models are ready
 ollama list
@@ -442,18 +444,31 @@ sudo usermod -aG docker $USER
 
 #### Step 5: Start Qdrant (One Command!)
 
+First, download the latest Qdrant image:
 ```bash
-cd ai-agents
+docker pull qdrant/qdrant
+```
 
-# Start Qdrant using docker-compose
+Then, run the service (with password protection):
+```bash
+# Run Qdrant with password 'qdrant_pass'
+docker run -p 6333:6333 -p 6334:6334 \
+    -v "$(pwd)/qdrant_storage:/qdrant/storage:z" \
+    -e QDRANT__SERVICE__API_KEY=qdrant_pass \
+    qdrant/qdrant
+```
+
+**Alternatively**, if you prefer `docker-compose` (recommended), we have provided a `docker-compose.yml` file in the root directory. You can simply run:
+```bash
 docker compose up -d
+```
 
 # Verify Qdrant is running
 curl http://localhost:6333/health
 
 # Access Qdrant Web UI
 # Open browser: http://localhost:6333/dashboard
-```
+# Login with API Key: qdrant_pass
 
 **What runs in Docker:**
 - ✅ Qdrant (vector database) - Docker for isolation and easy management

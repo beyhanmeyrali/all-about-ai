@@ -2,34 +2,16 @@
 
 > "Talent wins games, but teamwork and intelligence win championships." – Michael Jordan
 
-## 🪟 Windows Users: WSL2 Setup Required
+## 🪟 Windows Users
+Good news! You can run these examples natively on Windows.
 
-CrewAI requires ChromaDB which needs C++ build tools. The easiest way to run these examples on Windows is using WSL2 (Windows Subsystem for Linux).
+**Prerequisites:**
+1. **Ollama** installed and running (`ollama serve`).
+2. **Docker Desktop** installed and running (for Qdrant vector database).
+3. **Qdrant** running (see main [README](../../README.md) for setup).
 
-**📖 See [WSL2_SETUP.md](./WSL2_SETUP.md) for complete setup instructions.**
+No WSL2 is required if you use Docker for the vector database component.
 
-**Quick Start:**
-```bash
-# In PowerShell (as Administrator)
-wsl --install
-
-# After restart, in Ubuntu:
-cd /mnt/d/workspace/all-about-ai/ai-agents/02-agent-frameworks/crewai
-python3 -m venv .venv
-source .venv/bin/activate
-pip install crewai crewai-tools langchain-ollama
-python 01_simple_crew.py
-```
-
-**Why WSL2?**
-- ✅ Full CrewAI functionality (all memory features work)
-- ✅ No script modifications needed
-- ✅ Better for AI/ML development in general
-- ✅ One-time setup
-
-**Alternatives:** Docker, or native Linux/Mac
-
----
 
 CrewAI is a framework designed to orchestrate **role-playing, autonomous AI agents**. By fostering collaborative intelligence, CrewAI empowers agents to work together seamlessly, tackling complex tasks that would be difficult for a single agent to handle.
 

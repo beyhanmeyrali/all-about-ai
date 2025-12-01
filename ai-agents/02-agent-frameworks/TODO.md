@@ -56,7 +56,7 @@
 
 ## ⚠️ Known Issues
 - **CrewAI Installation on Windows:** `pip install crewai` may fail due to `chromadb` dependency issues on some Windows environments.
-  - **Workaround:** Use WSL2 or Docker, or install C++ build tools.
+  - **Workaround:** Use Docker, or install C++ build tools.
   - **Note:** The code examples are correct and will work in a proper environment.
 
 ---

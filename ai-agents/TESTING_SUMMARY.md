@@ -174,7 +174,7 @@ Created automated test scripts for easy verification:
 ### 1. **CrewAI on Windows**
 - **Issue:** Cannot install due to ChromaDB C++ dependency
 - **Impact:** CrewAI examples untested
-- **Workaround:** Use WSL2, Docker, or Linux/Mac
+- **Workaround:** Use Docker or Linux/Mac
 - **Code Status:** Written correctly, just needs proper environment
 
 ### 2. **LangChain Package Structure**
@@ -194,18 +194,6 @@ Created automated test scripts for easy verification:
 
 ### Completed ✅:
 1. ✅ **DONE:** Fix all LangChain scripts
-2. ✅ **DONE:** Test all LangGraph scripts
-3. ✅ **DONE:** Update all README files with "why" sections
-4. ✅ **DONE:** Create comprehensive documentation
-
-### Remaining:
-1. ⏸️ **TODO:** Document CrewAI Windows setup (WSL2 guide)
-2. ⏸️ **TODO:** Build out `03-embeddings-rag` section
-3. ⏸️ **TODO:** Build out `04-memory-systems` section
-4. ⏸️ **TODO:** Build out `05-voice-gpt` section
-
----
-
 ## 📊 Overall Progress
 
 **Scripts Status:**
@@ -235,7 +223,7 @@ The code is:
 
 The only blocker is CrewAI on Windows, which is a known issue with the library itself, not your code.
 
-**Recommendation:** Document the CrewAI limitation and provide WSL2 setup instructions for Windows users who want to try it.
+**Recommendation:** Document the CrewAI limitation and provide Docker setup instructions for Windows users who want to try it.
 
 ---
 

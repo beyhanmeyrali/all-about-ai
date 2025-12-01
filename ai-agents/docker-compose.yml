@@ -1,72 +1,12 @@
-# Docker Compose for AI Agents - Qdrant Only
-#
-# We use Docker ONLY for Qdrant vector database
-# Everything else runs natively:
-# - Ollama (better performance, direct GPU access)
-# - Python agents (easier debugging)
-# - SQLite (file-based, no container needed)
-#
-# Author: Beyhan MEYRALI
-
-version: '3.8'
-
 services:
-  # ==========================================================================
-  # Qdrant - Vector Database (Rust-based, blazing fast)
-  # ==========================================================================
   qdrant:
-    image: qdrant/qdrant:latest
-    container_name: qdrant-local
-    restart: unless-stopped
+    image: qdrant/qdrant
+    container_name: qdrant
     ports:
-      - "6333:6333"  # HTTP API (REST)
-      - "6334:6334"  # gRPC API (optional, for high-performance)
-    volumes:
-      # Persistent storage - survives container restarts
-      - ./qdrant_storage:/qdrant/storage
+      - "6333:6333"
+      - "6334:6334"
     environment:
-      # Performance tuning for local development
-      - QDRANT__SERVICE__MAX_REQUEST_SIZE_MB=100
-      - QDRANT__STORAGE__STORAGE_PATH=/qdrant/storage
-      # Enable HNSW index for fast similarity search
-      - QDRANT__COLLECTION__HNSW_CONFIG__M=16
-      - QDRANT__COLLECTION__HNSW_CONFIG__EF_CONSTRUCT=100
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-# ==========================================================================
-# Usage Instructions
-# ==========================================================================
-#
-# Start Qdrant:
-#   docker compose up -d
-#
-# View logs:
-#   docker compose logs -f qdrant
-#
-# Stop Qdrant:
-#   docker compose down
-#
-# Remove all data (WARNING: deletes vector database!):
-#   docker compose down -v
-#   rm -rf qdrant_storage
-#
-# Access Qdrant:
-#   - Web UI: http://localhost:6333/dashboard
-#   - Health check: curl http://localhost:6333/health
-#   - API docs: http://localhost:6333/redoc
-#
-# Verify it's working:
-#   curl http://localhost:6333/collections
-#
-# Performance notes:
-#   - Qdrant is written in Rust (very fast!)
-#   - HNSW index provides O(log n) similarity search
-#   - Data persists in ./qdrant_storage/ directory
-#   - Binary quantization available for 16x smaller indices
-#
-# ==========================================================================
+      - QDRANT__SERVICE__API_KEY=qdrant_pass
+    volumes:
+      - ./qdrant_storage:/qdrant/storage:z
+    restart: always

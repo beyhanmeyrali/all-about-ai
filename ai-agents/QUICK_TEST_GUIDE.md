@@ -72,27 +72,18 @@ cd ai-agents/02-agent-frameworks
 
 ## ⚠️ Known Issues
 
-### CrewAI Won't Install on Windows
+### CrewAI Installation Issues
 **Error:** `metadata-generation-failed` for `chromadb`
 
 **Solutions:**
-1. **WSL2 (Recommended):**
-   ```bash
-   # In WSL2 Ubuntu
-   cd /mnt/d/workspace/all-about-ai/ai-agents/02-agent-frameworks
-   python3 -m venv .venv
-   source .venv/bin/activate
-   pip install crewai crewai-tools
-   ```
-
-2. **Docker:**
+1. **Docker (Recommended):**
    ```bash
    docker run -it -v d:\workspace\all-about-ai:/workspace python:3.11
    cd /workspace/ai-agents/02-agent-frameworks
    pip install crewai crewai-tools
    ```
 
-3. **Install Visual Studio Build Tools** (complex, not recommended)
+2. **Install Visual Studio Build Tools** (Required for native Windows)
 
 ---
 
@@ -123,7 +114,6 @@ qwen3:8b        abc123...       4.7 GB  X days ago
 - [ ] `01-tool-calling` tests pass
 - [ ] `02-agent-frameworks/langchain` scripts work
 - [ ] `02-agent-frameworks/comparison` scripts work
-- [ ] (Optional) CrewAI installed in WSL2
 
 ---
 

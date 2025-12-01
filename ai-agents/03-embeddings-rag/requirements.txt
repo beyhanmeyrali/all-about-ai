@@ -1,0 +1,5 @@
+qdrant-client
+ollama
+requests
+numpy
+scikit-learn
