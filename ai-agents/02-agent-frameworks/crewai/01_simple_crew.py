@@ -19,7 +19,7 @@ from langchain_ollama import ChatOllama
 def main():
     llm = ChatOllama(
         model="qwen3:8b",
-        base_url="http://localhost:11434",
+        base_url="http://host.docker.internal:11434",
         temperature=0.7
     )
 

@@ -2,15 +2,27 @@
 
 > "Talent wins games, but teamwork and intelligence win championships." – Michael Jordan
 
-## 🪟 Windows Users
-Good news! You can run these examples natively on Windows.
+## 🪟 Windows Users - Docker Setup Required
+
+**Important**: CrewAI has C++ dependencies that are difficult to install on Windows. We've created a **Docker-based solution** that works perfectly!
+
+**📖 See [SETUP.md](./SETUP.md) for complete installation instructions.**
+
+**Quick Start:**
+```powershell
+# Build the Docker image (first time only)
+docker build -t crewai-runner .
+
+# Run any script
+.\run-crew.ps1 00_crew_basics.py
+```
 
 **Prerequisites:**
-1. **Ollama** installed and running (`ollama serve`).
-2. **Docker Desktop** installed and running (for Qdrant vector database).
-3. **Qdrant** running (see main [README](../../README.md) for setup).
+1. **Docker Desktop** installed and running
+2. **Ollama** running on host (`ollama serve`)
+3. Model pulled: `ollama pull qwen3:8b`
 
-No WSL2 is required if you use Docker for the vector database component.
+The Docker approach avoids Windows build issues while keeping everything local!
 
 
 CrewAI is a framework designed to orchestrate **role-playing, autonomous AI agents**. By fostering collaborative intelligence, CrewAI empowers agents to work together seamlessly, tackling complex tasks that would be difficult for a single agent to handle.

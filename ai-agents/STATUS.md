@@ -29,9 +29,16 @@
 - [x] Verified semantic search functionality
 - [x] Verified full RAG pipeline (retrieval + generation)
 
-### CrewAI Setup
-- [x] Created virtual environment in `crewai/.venv`
-- [x] Installed core dependencies (langchain-ollama, qdrant-client, numpy)
+### CrewAI Setup - ✅ **COMPLETE (Docker-Based)**
+- [x] Created all 7 example scripts (basics, simple, hierarchical, tools, memory, delegation, production)
+- [x] Created Dockerfile for Linux container with CrewAI dependencies
+- [x] Created .dockerignore to exclude venv from build context
+- [x] Created requirements.txt with crewai, crewai-tools, langchain-ollama
+- [x] Updated all scripts to use host.docker.internal for Ollama connection
+- [x] Created run-crew.ps1 PowerShell helper script
+- [x] Created comprehensive SETUP.md documentation
+- [x] Updated README.md with Docker setup instructions
+- [x] Docker image built successfully (crewai-runner)
 
 ### Documentation Updates
 - [x] Updated main `README.md` - Changed embedding model to `qwen3-embedding:0.6b`
@@ -41,18 +48,13 @@
 
 ## 📋 Next Steps
 
-### CrewAI
-1. Retry CrewAI installation with specific version constraints
-2. Or document that CrewAI examples require Docker setup
-3. Test delegation and hierarchical crew scripts
-
 ### Translation
-4. Translate new `03-embeddings-rag` to Turkish
-5. Update `ai-agents-tr` with all changes
+1. Translate new `03-embeddings-rag` to Turkish
+2. Update `ai-agents-tr` with all changes
 
 ### Future Modules
-6. Build out `04-memory-systems` section
-7. Build out `05-voice-gpt` section
+3. Build out `04-memory-systems` section (Letta/MemGPT)
+4. Build out `05-voice-gpt` section (Whisper + TTS)
 
 ## 📝 Notes
 
