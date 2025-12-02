@@ -62,9 +62,9 @@ class KnowledgeBaseTool(BaseTool):
             return f"Error accessing knowledge base: {str(e)}. Make sure Qdrant is running."
 
 def main():
-    # 1. Setup LLM
+    # 1. Setup LLM (using 8b for better stability with tools)
     llm = LLM(
-        model="ollama/qwen3:4b",
+        model="ollama/qwen3:8b",
         base_url="http://127.0.0.1:11434"
     )
 
