@@ -18,10 +18,14 @@
     - [x] Implement semantic search / retrieval.
 
 ## Phase 3: Integration & Voice Assistant
-- [ ] Integrate RAG with CrewAI agents.
+- [x] Integrate RAG with CrewAI agents (`04-integrated-agents`).
+    - [x] Create `KnowledgeBaseTool` connecting to Qdrant.
+    - [x] Create RAG Agent script.
+    - [ ] Verify integration (Requires Qdrant running).
 - [ ] Build the Main Voice Project using the established stack:
     - **LLM:** Qwen3:8b (via Ollama)
     - **Embeddings:** Qwen3-embedding (via Ollama)
     - **Vector DB:** Qdrant (Docker)
     - **Framework:** CrewAI / LangGraph
     - **Voice:** Whisper (STT) + Coqui/System (TTS)
+    - **VAD:** Silero VAD (for efficient voice detection)

@@ -38,6 +38,12 @@
 - [x] Updated `README.md` to recommend native setup
 - [x] Verified script execution (`00_crew_basics.py` passed)
 
+### Integration (RAG + CrewAI) - 🚧 **IN PROGRESS**
+- [x] Created `04-integrated-agents` module
+- [x] Implemented `KnowledgeBaseTool` for Qdrant
+- [x] Created `01_rag_agent.py`
+- [ ] Verify integration (Blocked: Qdrant not running)
+
 ### Documentation Updates
 - [x] Updated main `README.md` - Changed embedding model to `qwen3-embedding:0.6b`
 - [x] Updated `QUICK_TEST_GUIDE.md` - Removed WSL2 references
