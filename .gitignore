@@ -4,3 +4,4 @@ __pycache__/
 .env
 .DS_Store
 qdrant_storage/
+.venv_new/
