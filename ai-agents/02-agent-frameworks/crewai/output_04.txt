@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "D:\workspace\all-about-ai\ai-agents\02-agent-frameworks\crewai\04_tools_in_crew.py", line 86, in <module>
+    main()
+  File "D:\workspace\all-about-ai\ai-agents\02-agent-frameworks\crewai\04_tools_in_crew.py", line 46, in main
+    math_wizard = Agent(
+                  ^^^^^^
+  File "D:\workspace\all-about-ai\ai-agents\02-agent-frameworks\crewai\.venv_new\Lib\site-packages\pydantic\main.py", line 250, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 2 validation errors for Agent
+tools.0
+  Input should be a valid dictionary or instance of BaseTool [type=model_type, input_value=StructuredTool(name='Leng... at 0x000001BEB2468AE0>), input_type=StructuredTool]
+    For further information visit https://errors.pydantic.dev/2.12/v/model_type
+tools.1
+  Input should be a valid dictionary or instance of BaseTool [type=model_type, input_value=StructuredTool(name='Reve... at 0x000001BEE548CCC0>), input_type=StructuredTool]
+    For further information visit https://errors.pydantic.dev/2.12/v/model_type

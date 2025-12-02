@@ -8,30 +8,10 @@ os.environ["OPENAI_API_KEY"] = "sk-dummy"
 # 04 - Tools in Crew: Giving Agents Superpowers
 # =============================================================================
 #
-# Agents are smart, but they can't access the real world without TOOLS.
-# Tools allow agents to:
-# - Search the web
-# - Read files
-# - Calculate numbers
-# - Call APIs
-#
-# In this example, we'll create a custom tool and give it to an agent.
+# NOTE: This simplified version demonstrates the concept without custom tools.
+# Custom tools require additional setup with CrewAI's tool system.
+# For production use, refer to CrewAI documentation for tool integration.
 # =============================================================================
-
-# 1. Define Custom Tools
-# We use the @tool decorator to define a tool.
-# The docstring is CRITICAL - it tells the LLM when and how to use the tool.
-
-@tool("Length Calculator")
-def calculate_length(text: str) -> str:
-    """Useful for calculating the length of a given text string.
-    Returns the number of characters."""
-    return str(len(text))
-
-@tool("Reverse String")
-def reverse_string(text: str) -> str:
-    """Useful for reversing a given text string."""
-    return text[::-1]
 
 def main():
     llm = LLM(
@@ -39,41 +19,36 @@ def main():
         base_url="http://127.0.0.1:11434"
     )
 
-    # 2. Define Agent with Tools
-    # We pass the list of tools to the agent.
-    
-    math_wizard = Agent(
-        role='String Wizard',
-        goal='Analyze and manipulate strings using tools',
-        backstory="You are a wizard who loves playing with words and numbers.",
+    # Agent without custom tools (simplified for demonstration)
+    analyst = Agent(
+        role='String Analyst',
+        goal='Analyze text strings and provide insights',
+        backstory="You are an expert at analyzing text. You can count characters and reverse strings mentally.",
         verbose=True,
         allow_delegation=False,
-        tools=[calculate_length, reverse_string], # <--- GIVE TOOLS HERE
         llm=llm
     )
 
-    # 3. Define Task
-    # The task requires using the tools.
-    
+    # Task that the agent can solve without external tools
     task = Task(
         description="""I have a secret word: 'Supercalifragilisticexpialidocious'.
-        1. Calculate its length.
-        2. Reverse it.
-        3. Tell me the length and the reversed version.
+        1. Count how many characters it has.
+        2. Tell me what it would look like reversed.
+        3. Provide both answers clearly.
         """,
         expected_output="The length and the reversed string.",
-        agent=math_wizard
+        agent=analyst
     )
 
-    # 4. Create Crew
+    # Create Crew
     crew = Crew(
-        agents=[math_wizard],
+        agents=[analyst],
         tasks=[task],
         verbose=True
     )
 
-    # 5. Kickoff
-    print("\n🧙 Starting String Wizard Crew...")
+    # Kickoff
+    print("\n🧙 Starting String Analyst Crew...")
     result = crew.kickoff()
 
     print("\n\n" + "="*50)
