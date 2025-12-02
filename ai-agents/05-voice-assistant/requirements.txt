@@ -1,0 +1,23 @@
+# Voice Assistant Dependencies
+
+# Speech Recognition
+openai-whisper>=20231117  # Whisper for STT
+torch>=2.0.0  # Required by Whisper and Silero VAD
+
+# Voice Activity Detection
+silero-vad>=4.0.0  # Silero VAD for efficient voice detection
+
+# Text-to-Speech
+pyttsx3>=2.90  # System TTS (cross-platform)
+# Alternative: TTS>=0.22.0  # Coqui TTS (more advanced, optional)
+
+# Audio Processing
+sounddevice>=0.4.6  # Audio I/O
+soundfile>=0.12.1  # Audio file handling
+numpy>=1.24.0  # Audio array processing
+scipy>=1.10.0  # Signal processing
+
+# Existing dependencies (already installed in .venv_new)
+# crewai>=0.11.0
+# qdrant-client>=1.7.0
+# requests>=2.31.0

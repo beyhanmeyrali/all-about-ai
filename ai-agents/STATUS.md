@@ -44,6 +44,16 @@
 - [x] Created `01_rag_agent.py`
 - [x] Verified integration successfully (using qwen3:8b)
 
+
+### Voice Assistant Components - 🚧 **IN PROGRESS**
+- [x] Created `05-voice-assistant` module
+- [x] Implemented Silero VAD test script (`01_vad_test.py`)
+- [x] Implemented Whisper STT test script (`02_whisper_test.py`)
+- [x] Implemented pyttsx3 TTS test script (`03_tts_test.py`)
+- [x] Created comprehensive README with setup instructions
+- [ ] Test individual components (requires dependencies installation)
+- [ ] Integrate components into full voice loop
+
 ### Documentation Updates
 - [x] Updated main `README.md` - Changed embedding model to `qwen3-embedding:0.6b`
 - [x] Updated `QUICK_TEST_GUIDE.md` - Removed WSL2 references

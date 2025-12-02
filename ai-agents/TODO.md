@@ -29,3 +29,11 @@
     - **Framework:** CrewAI / LangGraph
     - **Voice:** Whisper (STT) + Coqui/System (TTS)
     - **VAD:** Silero VAD (for efficient voice detection)
+    - [x] Create `05-voice-assistant` module
+    - [x] Implement Silero VAD test script
+    - [x] Implement Whisper STT test script
+    - [x] Implement pyttsx3 TTS test script
+    - [ ] Test individual components
+    - [ ] Integrate VAD + Whisper for continuous listening
+    - [ ] Integrate with RAG agent
+    - [ ] Create full voice assistant loop
