@@ -1,7 +1,8 @@
 import os
-from crewai import Agent, Task, Crew, Process
-from langchain_ollama import ChatOllama
-from langchain.tools import tool
+from crewai import Agent, Task, Crew, Process, LLM
+
+# Disable OpenAI requirement
+os.environ["OPENAI_API_KEY"] = "sk-dummy"
 
 # =============================================================================
 # 04 - Tools in Crew: Giving Agents Superpowers
@@ -33,10 +34,9 @@ def reverse_string(text: str) -> str:
     return text[::-1]
 
 def main():
-    llm = ChatOllama(
-        model="qwen3:8b",
-        base_url="http://host.docker.internal:11434",
-        temperature=0.7
+    llm = LLM(
+        model="ollama/qwen3:4b",
+        base_url="http://127.0.0.1:11434"
     )
 
     # 2. Define Agent with Tools

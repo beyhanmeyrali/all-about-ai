@@ -29,16 +29,14 @@
 - [x] Verified semantic search functionality
 - [x] Verified full RAG pipeline (retrieval + generation)
 
-### CrewAI Setup - ✅ **COMPLETE (Docker-Based)**
+### CrewAI Setup - ✅ **COMPLETE (Native Windows)**
 - [x] Created all 7 example scripts (basics, simple, hierarchical, tools, memory, delegation, production)
-- [x] Created Dockerfile for Linux container with CrewAI dependencies
-- [x] Created .dockerignore to exclude venv from build context
-- [x] Created requirements.txt with crewai, crewai-tools, langchain-ollama
-- [x] Updated all scripts to use host.docker.internal for Ollama connection
-- [x] Created run-crew.ps1 PowerShell helper script
-- [x] Created comprehensive SETUP.md documentation
-- [x] Updated README.md with Docker setup instructions
-- [x] Docker image built successfully (crewai-runner)
+- [x] Verified native installation with Python 3.12 (avoiding 3.14 alpha issues)
+- [x] Updated scripts to use `crewai.LLM` for better Ollama compatibility
+- [x] Configured scripts to use `qwen3:4b` via `http://127.0.0.1:11434`
+- [x] Created comprehensive `SETUP.md` with native installation guide
+- [x] Updated `README.md` to recommend native setup
+- [x] Verified script execution (`00_crew_basics.py` passed)
 
 ### Documentation Updates
 - [x] Updated main `README.md` - Changed embedding model to `qwen3-embedding:0.6b`

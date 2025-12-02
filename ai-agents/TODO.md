@@ -4,9 +4,9 @@
 - [x] Complete development and testing of CrewAI examples in `02-agent-frameworks/crewai`.
 - [x] Implement delegation patterns.
 - [x] Implement hierarchical crews.
-- [x] Create Docker-based setup for Windows compatibility.
+- [x] Create native Windows setup (Python 3.12).
 - [x] Document setup process in SETUP.md.
-- [x] Create helper script (run-crew.ps1) for easy execution.
+- [x] Verify scripts with local Ollama (`qwen3:4b`).
 
 ## Phase 2: RAG & Vector Database Infrastructure
 - [x] Set up **Qdrant** on Windows (using Docker Desktop).

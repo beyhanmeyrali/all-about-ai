@@ -1,6 +1,8 @@
 import os
-from crewai import Agent, Task, Crew, Process
-from langchain_ollama import ChatOllama
+from crewai import Agent, Task, Crew, Process, LLM
+
+# Disable OpenAI requirement
+os.environ["OPENAI_API_KEY"] = "sk-dummy"
 
 # =============================================================================
 # 00 - CrewAI Basics: The "Hello World" of Multi-Agent Systems
@@ -11,19 +13,18 @@ from langchain_ollama import ChatOllama
 # 2. Tasks: The work to be done
 # 3. Crew: The team orchestration
 #
-# We will use a local Ollama model (qwen3:8b) for all agents.
+# We will use a local Ollama model (qwen3:4b) for all agents.
 # =============================================================================
 
 def main():
     # 1. Setup the Local LLM
-    # CrewAI uses LangChain's LLM interface
-    llm = ChatOllama(
-        model="qwen3:8b",
-        base_url="http://host.docker.internal:11434",
-        temperature=0.7
+    # Use CrewAI's native LLM class for better compatibility
+    llm = LLM(
+        model="ollama/qwen3:4b",
+        base_url="http://127.0.0.1:11434"
     )
 
-    print("\n🤖 Initializing CrewAI with Local LLM (qwen3:8b)...")
+    print("\n🤖 Initializing CrewAI with Local LLM (qwen3:4b)...")
 
     # 2. Define Agents
     # Agents are the team members. They need a role, goal, and backstory.
@@ -78,7 +79,8 @@ def main():
         agents=[researcher, writer],
         tasks=[task1, task2],
         verbose=True,  # See the internal coordination
-        process=Process.sequential  # Tasks are executed one after another
+        process=Process.sequential,  # Tasks are executed one after another
+        manager_llm=llm  # Use Ollama for crew management
     )
 
     # 5. Kickoff!

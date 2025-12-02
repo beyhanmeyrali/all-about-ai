@@ -1,6 +1,8 @@
 import os
-from crewai import Agent, Task, Crew, Process
-from langchain_ollama import ChatOllama
+from crewai import Agent, Task, Crew, Process, LLM
+
+# Disable OpenAI requirement
+os.environ["OPENAI_API_KEY"] = "sk-dummy"
 
 # =============================================================================
 # 03 - Hierarchical Crew: Manager & Workers
@@ -17,10 +19,9 @@ from langchain_ollama import ChatOllama
 # =============================================================================
 
 def main():
-    llm = ChatOllama(
-        model="qwen3:8b",
-        base_url="http://host.docker.internal:11434",
-        temperature=0.7
+    llm = LLM(
+        model="ollama/qwen3:4b",
+        base_url="http://127.0.0.1:11434"
     )
 
     # 1. Define Workers (No Manager here - CrewAI creates one!)
