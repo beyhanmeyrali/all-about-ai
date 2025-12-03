@@ -21,6 +21,7 @@ from crewai.tools import BaseTool
 from qdrant_client import QdrantClient
 from typing import Optional
 from tools_web_search import WebSearchTool
+from queue import Queue, Empty
 
 # Disable OpenAI requirement
 os.environ["OPENAI_API_KEY"] = "sk-dummy"
@@ -172,6 +173,8 @@ class VoiceAssistantEnhanced:
         # Threading
         self.running = False
         self.processing_lock = threading.Lock()
+        self.tts_queue = Queue()
+        self.audio_stream = None
 
         print("=" * 60)
         print("✅ Enhanced Voice Assistant Ready!")
@@ -245,7 +248,7 @@ class VoiceAssistantEnhanced:
                 print("🔄 Transcribing...")
                 result = self.whisper_model.transcribe(
                     audio,
-                    language=None,
+                    language="en",  # Force English language
                     fp16=torch.cuda.is_available()
                 )
 
@@ -295,12 +298,73 @@ class VoiceAssistantEnhanced:
                 self.speak(error_msg)
 
     def speak(self, text: str):
-        """Speak the given text"""
-        try:
-            self.tts_engine.say(text)
-            self.tts_engine.runAndWait()
-        except Exception as e:
-            print(f"⚠️  TTS error: {e}")
+        """Queue text to be spoken in main thread"""
+        self.tts_queue.put(text)
+
+    def _process_tts_queue(self):
+        """Process TTS queue continuously (must be called from main thread)"""
+        while self.running:  # Keep checking as long as assistant is running
+            try:
+                # Wait for messages with a reasonable timeout
+                text = self.tts_queue.get(timeout=0.1)
+
+                if not self.running:  # Check if we should exit
+                    break
+
+                print(f"[DEBUG] Speaking: {text[:60]}...")
+
+                # Pause audio input stream during TTS to avoid feedback/conflicts
+                stream_was_active = False
+                if self.audio_stream is not None and not self.audio_stream.stopped:
+                    print("[DEBUG] Pausing audio input...")
+                    self.audio_stream.stop()
+                    stream_was_active = True
+                    time.sleep(0.1)  # Give stream time to fully stop
+
+                try:
+                    # WINDOWS FIX: Must reinitialize engine for each speech
+                    # Reusing the same engine only speaks the first message on Windows
+                    tts = pyttsx3.init('sapi5')  # Explicit driver for Windows
+                    tts.setProperty('rate', 175)
+                    tts.setProperty('volume', 1.0)
+
+                    # Set voice if available
+                    voices = tts.getProperty('voices')
+                    if voices and len(voices) > 0:
+                        tts.setProperty('voice', voices[0].id)
+
+                    tts.say(text)
+                    tts.runAndWait()
+
+                    print("[DEBUG] TTS speech completed")
+
+                    # Clean up
+                    del tts
+
+                    # Give audio output time to fully complete
+                    time.sleep(0.3)
+
+                except Exception as e:
+                    print(f"⚠️  TTS playback error: {e}")
+                    import traceback
+                    traceback.print_exc()
+
+                # Resume audio input stream
+                if stream_was_active and self.audio_stream is not None:
+                    print("[DEBUG] Resuming audio input...")
+                    time.sleep(0.1)  # Brief pause before resuming
+                    self.audio_stream.start()
+
+                self.tts_queue.task_done()
+
+            except Empty:
+                # Queue is empty, keep looping to check for new messages
+                continue
+            except Exception as e:
+                print(f"⚠️  TTS queue processing error: {e}")
+                import traceback
+                traceback.print_exc()
+                time.sleep(0.5)  # Brief pause before retrying
 
     def start(self):
         """Start the enhanced voice assistant"""
@@ -319,18 +383,21 @@ class VoiceAssistantEnhanced:
         greeting = "Hello! I'm your enhanced AI assistant. I can answer technical questions from my knowledge base, or search the web for current information. What would you like to know?"
         print(f"🤖 {greeting}\n")
         self.speak(greeting)
+        self._process_tts_queue()  # Process greeting TTS
 
         self.running = True
 
         try:
-            with sd.InputStream(
+            self.audio_stream = sd.InputStream(
                 samplerate=SAMPLE_RATE,
                 channels=1,
                 dtype='float32',
                 blocksize=CHUNK_SIZE,
                 callback=self.audio_callback
-            ):
+            )
+            with self.audio_stream:
                 while self.running:
+                    self._process_tts_queue()  # Process TTS in main thread
                     time.sleep(0.1)
 
         except KeyboardInterrupt:
@@ -338,6 +405,7 @@ class VoiceAssistantEnhanced:
             goodbye = "Goodbye! Have a great day!"
             print(f"🤖 {goodbye}")
             self.speak(goodbye)
+            self._process_tts_queue()  # Process goodbye TTS
             self.running = False
         except Exception as e:
             print(f"\n❌ Error: {e}")
