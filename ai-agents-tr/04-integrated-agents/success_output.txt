@@ -1,0 +1,102 @@
+
+≡ƒöì Starting RAG Agent...
+ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Crew Execution Started ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+Γöé                                                                             Γöé
+Γöé  Crew Execution Started                                                     Γöé
+Γöé  Name: crew                                                                 Γöé
+Γöé  ID: 20c23879-be2f-4a9b-ab73-237ba27da321                                   Γöé
+Γöé  Tool Args:                                                                 Γöé
+Γöé                                                                             Γöé
+Γöé                                                                             Γöé
+ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+
+≡ƒÜÇ Crew: crew
+ΓööΓöÇΓöÇ ≡ƒôï Task: 0ff81fe8-80e6-495b-937f-c997da832d39
+    Status: Executing Task...ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ ≡ƒñû Agent Started ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+Γöé                                                                             Γöé
+Γöé  Agent: Knowledge Specialist                                                Γöé
+Γöé                                                                             Γöé
+Γöé  Task: What is RAG (Retrieval-Augmented Generation)? Search the knowledge   Γöé
+Γöé  base and provide a clear explanation.                                      Γöé
+Γöé                                                                             Γöé
+ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+
+
+≡ƒÜÇ Crew: crew
+ΓööΓöÇΓöÇ ≡ƒôï Task: 0ff81fe8-80e6-495b-937f-c997da832d39
+    Status: Executing Task...ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Γ£à Agent Final Answer ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+Γöé                                                                             Γöé
+Γöé  Agent: Knowledge Specialist                                                Γöé
+Γöé                                                                             Γöé
+Γöé  Final Answer:                                                              Γöé
+Γöé  RAG (Retrieval-Augmented Generation) is a framework that combines          Γöé
+Γöé  retrieval and generation components to enhance the performance of          Γöé
+Γöé  language models. The retrieval component fetches relevant documents or     Γöé
+Γöé  information from a large corpus, while the generation component produces   Γöé
+Γöé  coherent and contextually appropriate responses based on the retrieved     Γöé
+Γöé  content. According to the knowledge base, RAG enhances traditional         Γöé
+Γöé  generation models by incorporating retrieved context, improving accuracy   Γöé
+Γöé  and relevance in tasks like question-answering and chatbots. It is         Γöé
+Γöé  particularly useful when access to up-to-date information is critical, as  Γöé
+Γöé  it allows models to dynamically integrate external knowledge during        Γöé
+Γöé  inference. RAG models are trained on large datasets and utilize            Γöé
+Γöé  techniques such as neural networks and attention mechanisms to             Γöé
+Γöé  effectively combine retrieval and generation processes. The approach       Γöé
+Γöé  addresses the limitations of traditional models by enabling them to        Γöé
+Γöé  access external information, thereby improving their ability to handle     Γöé
+Γöé  complex and context-dependent queries.                                     Γöé
+Γöé                                                                             Γöé
+ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+
+ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Task Completion ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+Γöé                                                                             Γöé
+Γöé  Task Completed                                                             Γöé
+Γöé  Name: 0ff81fe8-80e6-495b-937f-c997da832d39                                 Γöé
+Γöé  Agent: Knowledge Specialist                                                Γöé
+Γöé  Tool Args:                                                                 Γöé
+Γöé                                                                             Γöé
+Γöé                                                                             Γöé
+ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+
+
+
+==================================================
+≡ƒô¥ FINAL ANSWER
+==================================================
+RAG (Retrieval-Augmented Generation) is a framework that combines retrieval and generation components to enhance the performance of language models. The retrieval component fetches relevant documents or information from a large corpus, while the generation component produces coherent and contextually appropriate responses based on the retrieved content. According to the knowledge base, RAG enhances traditional generation models by incorporating retrieved context, improving accuracy and relevance in tasks like question-answering and chatbots. It is particularly useful when access to up-to-date information is critical, as it allows models to dynamically integrate external knowledge during inference. RAG models are trained on large datasets and utilize techniques such as neural networks and attention mechanisms to effectively combine retrieval and generation processes. The approach addresses the limitations of traditional models by enabling them to access external information, thereby improving their ability to handle complex and context-dependent queries.
+ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Crew Completion ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+Γöé                                                                             Γöé
+Γöé  Crew Execution Completed                                                   Γöé
+Γöé  Name: crew                                                                 Γöé
+Γöé  ID: 20c23879-be2f-4a9b-ab73-237ba27da321                                   Γöé
+Γöé  Tool Args:                                                                 Γöé
+Γöé  Final Output: RAG (Retrieval-Augmented Generation) is a framework that     Γöé
+Γöé  combines retrieval and generation components to enhance the performance    Γöé
+Γöé  of language models. The retrieval component fetches relevant documents or  Γöé
+Γöé  information from a large corpus, while the generation component produces   Γöé
+Γöé  coherent and contextually appropriate responses based on the retrieved     Γöé
+Γöé  content. According to the knowledge base, RAG enhances traditional         Γöé
+Γöé  generation models by incorporating retrieved context, improving accuracy   Γöé
+Γöé  and relevance in tasks like question-answering and chatbots. It is         Γöé
+Γöé  particularly useful when access to up-to-date information is critical, as  Γöé
+Γöé  it allows models to dynamically integrate external knowledge during        Γöé
+Γöé  inference. RAG models are trained on large datasets and utilize            Γöé
+Γöé  techniques such as neural networks and attention mechanisms to             Γöé
+Γöé  effectively combine retrieval and generation processes. The approach       Γöé
+Γöé  addresses the limitations of traditional models by enabling them to        Γöé
+Γöé  access external information, thereby improving their ability to handle     Γöé
+Γöé  complex and context-dependent queries.                                     Γöé
+Γöé                                                                             Γöé
+Γöé                                                                             Γöé
+ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+
+ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Tracing Status ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+Γöé                                                                             Γöé
+Γöé  Info: Tracing is disabled.                                                 Γöé
+Γöé                                                                             Γöé
+Γöé  To enable tracing, do any one of these:                                    Γöé
+Γöé  ΓÇó Set tracing=True in your Crew/Flow code                                  Γöé
+Γöé  ΓÇó Set CREWAI_TRACING_ENABLED=true in your project's .env file              Γöé
+Γöé  ΓÇó Run: crewai traces enable                                                Γöé
+Γöé                                                                             Γöé
+ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
