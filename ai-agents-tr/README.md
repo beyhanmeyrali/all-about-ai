@@ -40,9 +40,9 @@ Temelden inşa ediyoruz:
 2.  **Mekanik:** Manuel araç çağırma ve özyineleme (recursion) ✅ *Şu an mevcut!*
 3.  **Farkındalık:** Manuel durum yönetiminin *neden* karmaşıklaştığını anlamak
 4.  **Çözüm:** Frameworklerin Tanıtımı (LangChain, LangGraph, CrewAI) ✅ *Şu an mevcut!*
-5.  **Entegrasyon:** Vektör veritabanları ile RAG Sistemleri 🚧 *Yakında*
-6.  **Hafıza:** Letta (MemGPT) ile uzun süreli bağlam 🚧 *Yakında*
-7.  **Ses:** Tam Sesli Asistan 🚧 *Yakında*
+5.  **Entegrasyon:** Vektör veritabanları ile RAG Sistemleri ✅ *Şu an mevcut!*
+6.  **Ses:** Tam Sesli Asistan (RAG + Web Arama) ✅ *Şu an mevcut!*
+7.  **Hafıza:** Letta (MemGPT) ile uzun süreli bağlam 🚧 *Yakında*
 
 ---
 
