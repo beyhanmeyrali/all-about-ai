@@ -152,9 +152,12 @@ class VoiceAssistantEnhanced:
             backstory=(
                 "You are a helpful AI assistant with access to:\n"
                 "1. Knowledge Base - Technical documentation about AI agents, RAG, embeddings, frameworks\n"
-                "2. Web Search - Current information, news, weather, prices, real-time data\n"
-                "Use the knowledge base for technical questions and web search for current events. "
-                "Keep your answers concise and clear for voice interaction."
+                "2. Web Search - Current information, news, weather, prices, real-time data\n\n"
+                "RESPONSE LENGTH RULES:\n"
+                "- Keep answers to 20 words or less unless the user specifically asks for a detailed, longer, or comprehensive response\n"
+                "- If the user says 'explain in detail', 'tell me more', 'give me a detailed answer', etc., provide a thorough response\n"
+                "- For voice interaction, extreme brevity is crucial - be concise but complete\n"
+                "- Use the knowledge base for technical questions and web search for current events"
             ),
             verbose=False,
             tools=[self.kb_tool, self.web_tool],
@@ -175,6 +178,10 @@ class VoiceAssistantEnhanced:
         self.processing_lock = threading.Lock()
         self.tts_queue = Queue()
         self.audio_stream = None
+
+        # Conversation history for session memory
+        self.conversation_history = []
+        self.max_history_turns = 10  # Keep last 10 conversation turns
 
         print("=" * 60)
         print("✅ Enhanced Voice Assistant Ready!")
@@ -258,17 +265,58 @@ class VoiceAssistantEnhanced:
 
                 print(f"\n💬 You: {query}")
 
-                # 2. Get answer from enhanced agent
-                print("🤔 Thinking (with KB + Web Search)...")
+                # 2. Check for exit phrases
+                exit_phrases = ['bye', 'goodbye', 'exit', 'quit', 'stop', 'see you', 'farewell',
+                               'good bye', 'talk to you later', 'ttyl', 'later', 'end']
+                if any(phrase in query.lower() for phrase in exit_phrases):
+                    goodbye_msg = "Goodbye! It was nice talking to you. Have a great day!"
+                    print(f"\n🤖 Assistant: {goodbye_msg}\n")
+                    print("👋 Ending conversation...")
+                    self.speak(goodbye_msg)
+                    # Wait a moment for TTS to queue, then stop
+                    time.sleep(0.5)
+                    self.running = False
+                    return
+
+                # 3. Build conversation context
+                conversation_context = ""
+                if self.conversation_history:
+                    conversation_context = "\n\nPREVIOUS CONVERSATION:\n"
+                    for i, (user_q, assistant_a) in enumerate(self.conversation_history[-5:], 1):  # Last 5 turns
+                        conversation_context += f"Turn {i}:\n"
+                        conversation_context += f"User: {user_q}\n"
+                        conversation_context += f"Assistant: {assistant_a}\n\n"
+                    conversation_context += "CURRENT QUESTION:\n"
+
+                # 4. Detect if user wants detailed response
+                detailed_keywords = ['detail', 'detailed', 'explain', 'elaborate', 'more', 'comprehensive',
+                                    'in depth', 'thorough', 'complete', 'full', 'longer', 'everything']
+                wants_detail = any(keyword in query.lower() for keyword in detailed_keywords)
+
+                # 5. Get answer from enhanced agent
+                if wants_detail:
+                    print("🤔 Thinking (with KB + Web Search)... [Detailed response mode]")
+                else:
+                    print("🤔 Thinking (with KB + Web Search)... [20-word limit]")
+
+                # Adjust response length instruction
+                length_instruction = (
+                    "- Provide a detailed, comprehensive response (the user requested more information)"
+                    if wants_detail
+                    else "- Keep answer to 20 words or less for voice interaction - be extremely concise"
+                )
 
                 task = Task(
                     description=(
+                        f"{conversation_context}"
                         f"Answer this question: {query}\n\n"
                         "INSTRUCTIONS:\n"
+                        "- Use the conversation history above to maintain context and provide relevant answers\n"
                         "- For technical questions about AI, RAG, embeddings, etc. → use Knowledge Base Search\n"
                         "- For current events, weather, news, prices → use Web Search\n"
-                        "- Keep answer concise for voice interaction (2-3 sentences)\n"
-                        "- If using web search, summarize the key findings"
+                        f"{length_instruction}\n"
+                        "- If using web search, summarize the key findings\n"
+                        "- Reference previous conversation when relevant"
                     ),
                     expected_output="A clear, concise answer to the user's question.",
                     agent=self.assistant_agent
@@ -285,7 +333,16 @@ class VoiceAssistantEnhanced:
 
                 print(f"\n🤖 Assistant: {answer}\n")
 
-                # 3. Speak the answer
+                # 6. Save to conversation history
+                self.conversation_history.append((query, answer))
+
+                # Keep only last N turns to manage memory
+                if len(self.conversation_history) > self.max_history_turns:
+                    self.conversation_history = self.conversation_history[-self.max_history_turns:]
+
+                print(f"💾 Session: {len(self.conversation_history)} conversation turns remembered")
+
+                # 7. Speak the answer
                 print("🔊 Speaking...")
                 self.speak(answer)
 
@@ -373,6 +430,7 @@ class VoiceAssistantEnhanced:
         print("Features:")
         print("  ✅ Knowledge Base Search (AI agents, RAG, embeddings)")
         print("  ✅ Web Search (current information)")
+        print("  ✅ Conversation Memory (remembers last 10 turns)")
         print("  ✅ Voice Activity Detection")
         print("  ✅ Speech-to-Text (Whisper)")
         print("  ✅ Text-to-Speech")
@@ -380,7 +438,7 @@ class VoiceAssistantEnhanced:
         print("=" * 60 + "\n")
 
         # Greeting
-        greeting = "Hello! I'm your enhanced AI assistant. I can answer technical questions from my knowledge base, or search the web for current information. What would you like to know?"
+        greeting = "Hello! I'm your enhanced AI assistant with conversation memory. I can answer technical questions from my knowledge base, or search the web for current information. I'll remember our conversation throughout this session. What would you like to know?"
         print(f"🤖 {greeting}\n")
         self.speak(greeting)
         self._process_tts_queue()  # Process greeting TTS
