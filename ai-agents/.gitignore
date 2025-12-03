@@ -1,4 +1,10 @@
 venv/
+.venv/
+.venv_new/
 __pycache__/
 *.pyc
-.venv_new/
+
+# Test output files
+*_output*.txt
+*_log.txt
+test_input.txt
