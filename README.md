@@ -95,17 +95,19 @@ We build from the ground up:
 2. **The Mechanics:** Manual tool calling and recursion ✅ *Available now!*
 3. **The Realization:** Understanding *why* manual state management gets messy
 4. **The Solution:** Introducing Frameworks (LangChain, LangGraph, CrewAI) ✅ *Available now!*
-5. **The Integration:** RAG Systems with vector databases 🚧 *Coming soon*
-6. **The Memory:** Long-term context with Letta (MemGPT) 🚧 *Coming soon*
-7. **The Voice:** Complete Voice Assistant 🚧 *Coming soon*
+5. **The Knowledge:** RAG Systems with vector databases ✅ *Available now!*
+6. **The Combination:** Integrating RAG with Agent Frameworks ✅ *Available now!*
+7. **The Voice:** Complete Voice Assistant ✅ *Available now!*
+8. **The Memory:** Long-term context with Letta (MemGPT) 🚧 *Coming soon*
 
 **📚 What's Inside:**
 - 📚 **00-llm-basics** - Understanding stateless LLMs and API fundamentals
 - 🔧 **01-tool-calling** - Function calling and recursive agent loops
 - 🕸️ **02-agent-frameworks** - LangChain, LangGraph & CrewAI (Modern LCEL)
-- 📊 **03-rag-systems** - Vector databases and retrieval-augmented generation
-- 🧠 **04-memory-systems** - Long-term memory with Letta (MemGPT)
-- 🎙️ **05-voice-gpt** - Complete voice assistant (Whisper + LangGraph + Letta)
+- 📊 **03-embeddings-rag** - Vector databases and retrieval-augmented generation
+- 🔗 **04-integrated-agents** - Combining RAG with CrewAI agent frameworks
+- 🎙️ **05-voice-assistant** - Complete voice assistant (Whisper + LangGraph + TTS)
+- 🧠 **04-memory-systems** (Coming Soon) - Long-term memory with Letta (MemGPT)
 
 **🎓 How to Use This Repo:**
 1. **Read the README** in each folder for the theory
