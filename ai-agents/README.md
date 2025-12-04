@@ -38,9 +38,10 @@ We build from the ground up:
 2. **The Mechanics:** Manual tool calling and recursion ✅ *Available now!*
 3. **The Realization:** Understanding *why* manual state management gets messy
 4. **The Solution:** Introducing Frameworks (LangChain, LangGraph, CrewAI) ✅ *Available now!*
-5. **The Integration:** RAG Systems with vector databases ✅ *Available now!*
-6. **The Memory:** Long-term context with Letta (MemGPT) 🚧 *Coming soon*
-7. **The Voice:** Complete Voice Assistant 🚧 *Coming soon*
+5. **The Knowledge:** RAG Systems with vector databases ✅ *Available now!*
+6. **The Combination:** Integrating RAG with Agent Frameworks ✅ *Available now!*
+7. **The Voice:** Complete Voice Assistant ✅ *Available now!*
+8. **The Memory:** Long-term context with Letta (MemGPT) 🚧 *Coming soon*
 
 ---
 
@@ -305,8 +306,26 @@ result = app.invoke(input, config={"thread_id": "123"})  # ← Resumable!
 
 ---
 
-### 🧠 [04-memory-systems](./04-memory-systems) - Long-Term Context
-**Duration:** 4-5 hours
+### 🔗 [04-integrated-agents](./04-integrated-agents) - Combining RAG with Agent Frameworks
+**Duration:** 2-3 hours
+
+**What You'll Learn:**
+- Integrating RAG systems with CrewAI agents
+- Building custom tools that query vector databases
+- Creating knowledge-aware agents
+- Combining retrieval with reasoning
+
+**What You'll Build:**
+- 📚 Knowledge Specialist Agent with custom RAG tool
+- 📚 Agent that queries Qdrant for relevant context
+- 📚 End-to-end RAG + CrewAI pipeline
+
+**Key Takeaway:** Agents become exponentially more powerful when connected to your knowledge base
+
+---
+
+### 🧠 04-memory-systems (Letta/MemGPT) - Long-Term Context 🚧 *Coming Soon*
+**Planned Duration:** 4-5 hours
 
 **What You'll Learn:**
 - Why context windows aren't enough
@@ -336,7 +355,7 @@ AI: "Your name is John!" [retrieves from memory]
 
 ---
 
-### 🎙️ [05-voice-gpt](./05-voice-gpt) - Building Your Voice Assistant
+### 🎙️ [05-voice-assistant](./05-voice-assistant) - Building Your Voice Assistant
 **Duration:** 8-10 hours
 
 **What You'll Learn:**
@@ -463,12 +482,15 @@ docker run -p 6333:6333 -p 6334:6334 \
 docker compose up -d
 ```
 
+**Verify Qdrant is running:**
+```bash
 # Verify Qdrant is running
 curl http://localhost:6333/health
 
 # Access Qdrant Web UI
 # Open browser: http://localhost:6333/dashboard
 # Login with API Key: qdrant_pass
+```
 
 **What runs in Docker:**
 - ✅ Qdrant (vector database) - Docker for isolation and easy management
@@ -1045,13 +1067,13 @@ docker compose up -d
 
 ### Path 1: Complete Beginner (30-40 hours)
 ```
-00-llm-basics → 01-tool-calling → 02-agent-frameworks → 05-voice-gpt
+00-llm-basics → 01-tool-calling → 02-agent-frameworks → 05-voice-assistant
 ```
 *Skip RAG and Letta initially, focus on core agent concepts*
 
 ### Path 2: Quick to Production (15-20 hours)
 ```
-00-llm-basics (skim) → 01-tool-calling → 02-agent-frameworks → 03-rag-systems
+00-llm-basics (skim) → 01-tool-calling → 02-agent-frameworks → 03-embeddings-rag
 ```
 *Focus on practical agent deployment, add voice later*
 
@@ -1105,9 +1127,9 @@ Found a bug? Have improvements? Want to add examples?
 1. Start here: [00-llm-basics/README.md](./00-llm-basics/README.md)
 2. Understand tools: [01-tool-calling/README.md](./01-tool-calling/README.md)
 3. Build complex agents: [02-agent-frameworks/README.md](./02-agent-frameworks/README.md)
-4. Add knowledge: [03-rag-systems/README.md](./03-rag-systems/README.md)
-5. Add memory: [04-memory-systems/README.md](./04-memory-systems/README.md)
-6. Final project: [05-voice-gpt/README.md](./05-voice-gpt/README.md)
+4. Add knowledge: [03-embeddings-rag/README.md](./03-embeddings-rag/README.md)
+5. Integrate RAG with agents: [04-integrated-agents/README.md](./04-integrated-agents/README.md)
+6. Final project: [05-voice-assistant/README.md](./05-voice-assistant/README.md)
 
 ### External Resources
 - [Ollama Documentation](https://github.com/ollama/ollama)
