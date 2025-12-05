@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Home Automation</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Using Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Using FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Home Automation Agent</h1>
+        <div class="subtitle">Voice-Controlled Smart Home Dashboard</div>
+    </header>
+
+    <main>
+        <!-- Left Column: Conversation -->
+        <section class="card">
+            <div class="card-title">
+                <i class="fas fa-comments"></i>
+                Live Transcript
+            </div>
+            <div id="transcript-container">
+                <!-- Messages will be injected here -->
+                <div class="message bot">
+                    <span class="message-label">Assistant</span>
+                    Hello! I'm your Home Automation Assistant. You can ask me to control the AC, TV, or Door.
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: House Visualization -->
+        <section class="card">
+            <div class="card-title">
+                <i class="fas fa-home"></i>
+                House Status
+            </div>
+            <div class="house-grid">
+                <!-- AC Unit -->
+                <div id="ac-card" class="device-card" data-device="ac">
+                    <i class="fas fa-fan device-icon"></i>
+                    <div class="device-name">Air Conditioner</div>
+                    <div class="device-status" id="ac-status">OFF</div>
+                    <div class="device-status" id="ac-temp" style="margin-top: 0.5rem; display: none;">24°C</div>
+                </div>
+
+                <!-- TV Unit -->
+                <div id="tv-card" class="device-card" data-device="tv">
+                    <i class="fas fa-tv device-icon"></i>
+                    <div class="device-name">Smart TV</div>
+                    <div class="device-status" id="tv-status">OFF</div>
+                </div>
+
+                <!-- Door Unit -->
+                <div id="door-card" class="device-card locked" data-device="door">
+                    <i class="fas fa-lock device-icon" id="door-icon"></i>
+                    <div class="device-name">Main Door</div>
+                    <div class="device-status" id="door-status">LOCKED</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="status-badge">
+        <div id="connection-dot" class="status-dot"></div>
+        <span id="connection-text">Disconnected</span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -40,7 +40,7 @@ We build from the ground up:
 4. **The Solution:** Introducing Frameworks (LangChain, LangGraph, CrewAI) ✅ *Available now!*
 5. **The Knowledge:** RAG Systems with vector databases ✅ *Available now!*
 6. **The Combination:** Integrating RAG with Agent Frameworks ✅ *Available now!*
-7. **The Voice:** Complete Voice Assistant ✅ *Available now!*
+7. **The Voice:** Complete Voice Assistant with Tool Calling ✅ *Available now!*
 8. **The Memory:** Long-term context with Letta (MemGPT) 🚧 *Coming soon*
 
 ---

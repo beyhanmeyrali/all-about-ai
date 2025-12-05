@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Automation Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            background: #28a745;
+            color: white;
+            margin-top: 15px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .devices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .device-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .device-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .device-card.active {
+            border-left: 6px solid #28a745;
+        }
+
+        .device-card.inactive {
+            border-left: 6px solid #dc3545;
+        }
+
+        .device-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .device-name {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .device-status {
+            font-size: 1.2em;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .device-status.on {
+            background: #28a745;
+            color: white;
+        }
+
+        .device-status.off {
+            background: #dc3545;
+            color: white;
+        }
+
+        .device-status.locked {
+            background: #007bff;
+            color: white;
+        }
+
+        .device-status.unlocked {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .device-detail {
+            margin-top: 15px;
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        .temperature {
+            font-size: 2em;
+            font-weight: 700;
+            color: #007bff;
+            margin-top: 10px;
+        }
+
+        .refresh-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .refresh-indicator.active {
+            opacity: 1;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .device-card.active .device-icon {
+            animation: pulse 2s infinite;
+        }
+
+        @media (max-width: 768px) {
+            .devices-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="refresh-indicator" id="refreshIndicator">🔄 Updating...</div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Home Automation Dashboard</h1>
+            <div class="subtitle">Voice-Controlled Smart Home</div>
+            <div class="status-badge">✅ System Online</div>
+        </div>
+
+        <div class="devices-grid" id="devicesContainer">
+            <!-- AC Card -->
+            <div class="device-card" id="ac-card">
+                <span class="device-icon">❄️</span>
+                <div class="device-name">Air Conditioner</div>
+                <div class="device-status" id="ac-status">OFF</div>
+                <div class="device-detail">
+                    Temperature: <span class="temperature" id="ac-temp">24°C</span>
+                </div>
+            </div>
+
+            <!-- TV Card -->
+            <div class="device-card" id="tv-card">
+                <span class="device-icon">📺</span>
+                <div class="device-name">Smart TV</div>
+                <div class="device-status" id="tv-status">OFF</div>
+            </div>
+
+            <!-- Door Card -->
+            <div class="device-card" id="door-card">
+                <span class="device-icon" id="door-icon">🔒</span>
+                <div class="device-name">Main Door</div>
+                <div class="device-status" id="door-status">LOCKED</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let updateInterval;
+
+        // Update device status
+        async function updateDevices() {
+            const indicator = document.getElementById('refreshIndicator');
+            indicator.classList.add('active');
+
+            try {
+                const response = await fetch('/api/devices');
+                const devices = await response.json();
+
+                console.log('Device states:', devices);
+
+                // Update AC
+                const acCard = document.getElementById('ac-card');
+                const acStatus = document.getElementById('ac-status');
+                const acTemp = document.getElementById('ac-temp');
+
+                if (devices.ac.power) {
+                    acCard.classList.add('active');
+                    acCard.classList.remove('inactive');
+                    acStatus.textContent = 'ON';
+                    acStatus.className = 'device-status on';
+                } else {
+                    acCard.classList.add('inactive');
+                    acCard.classList.remove('active');
+                    acStatus.textContent = 'OFF';
+                    acStatus.className = 'device-status off';
+                }
+                acTemp.textContent = `${devices.ac.temperature}°C`;
+
+                // Update TV
+                const tvCard = document.getElementById('tv-card');
+                const tvStatus = document.getElementById('tv-status');
+
+                if (devices.tv.power) {
+                    tvCard.classList.add('active');
+                    tvCard.classList.remove('inactive');
+                    tvStatus.textContent = 'ON';
+                    tvStatus.className = 'device-status on';
+                } else {
+                    tvCard.classList.add('inactive');
+                    tvCard.classList.remove('active');
+                    tvStatus.textContent = 'OFF';
+                    tvStatus.className = 'device-status off';
+                }
+
+                // Update Door
+                const doorCard = document.getElementById('door-card');
+                const doorStatus = document.getElementById('door-status');
+                const doorIcon = document.getElementById('door-icon');
+
+                if (devices.door.locked) {
+                    doorCard.classList.add('active');
+                    doorCard.classList.remove('inactive');
+                    doorStatus.textContent = 'LOCKED';
+                    doorStatus.className = 'device-status locked';
+                    doorIcon.textContent = '🔒';
+                } else {
+                    doorCard.classList.add('inactive');
+                    doorCard.classList.remove('active');
+                    doorStatus.textContent = 'UNLOCKED';
+                    doorStatus.className = 'device-status unlocked';
+                    doorIcon.textContent = '🔓';
+                }
+
+            } catch (error) {
+                console.error('Failed to update devices:', error);
+            } finally {
+                setTimeout(() => indicator.classList.remove('active'), 500);
+            }
+        }
+
+        // Start auto-refresh
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update every 1 second for real-time updates
+            updateInterval = setInterval(updateDevices, 1000);
+
+            // Initial update
+            updateDevices();
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (updateInterval) clearInterval(updateInterval);
+        });
+    </script>
+</body>
+</html>
