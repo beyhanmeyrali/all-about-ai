@@ -31,9 +31,24 @@ Turn the raw base model [Qwen3-4B-Base](https://huggingface.co/Qwen/Qwen3-4B-Bas
 
 ### Supported Hardware
 
-- **NVIDIA GPUs**: RTX 3060 8GB+, RTX 4060 8GB+, RTX 5060 8GB+
+- **NVIDIA GPUs**: RTX 3060 8GB+, RTX 4060 8GB+ (**RTX 5060 NOT SUPPORTED YET** - see note below)
 - **AMD GPUs**: RX 7600 8GB+, Radeon 780M (K11) with ROCm
 - **Minimum RAM**: 16 GB (32 GB recommended)
+
+> **⚠️ CRITICAL: RTX 5060 (Blackwell sm_120) Incompatibility**
+>
+> The RTX 5060 uses Blackwell architecture (sm_120 compute capability) released in May 2025. **Current PyTorch versions (including nightly builds as of Dec 2024) do not support sm_120**. Training will fail with:
+> ```
+> RuntimeError: CUDA error: no kernel image is available for execution on the device
+> ```
+>
+> **Solutions:**
+> 1. **Wait for PyTorch 2.8+** (expected Q1-Q2 2026) with sm_120 support
+> 2. **Use CPU-only training** (10x slower: 5-8 hours vs 30-45 minutes)
+> 3. **Use cloud GPU** (AWS/GCP with A10G, V100, or older RTX cards)
+> 4. **Use different machine** with RTX 4090/4080/4070/4060/3090/3080/3070/3060
+>
+> Track PyTorch sm_120 support: https://github.com/pytorch/pytorch/issues
 
 ---
 

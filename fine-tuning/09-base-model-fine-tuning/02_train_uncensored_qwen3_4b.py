@@ -36,7 +36,7 @@ CONFIG = {
     "lora_r": 32,                         # Higher rank = better quality
     "lora_alpha": 32,
     "lora_dropout": 0,
-    "dataset_name": "cognitivecomputations/EverythingLM-Data",
+    "dataset_name": "teknium/OpenHermes-2.5",
     "dataset_size": 15000,                # Use first 15k for speed
     "max_seq_length_training": 4096,     # Safe for 8GB VRAM
     "batch_size": 4,
@@ -143,14 +143,15 @@ def format_dataset(dataset):
         for convo in convos:
             text = ""
             for turn in convo:
-                role = turn["from"]
-                value = turn["value"]
+                # OpenHermes-2.5 uses "from" and "value" keys
+                role = turn.get("from", turn.get("role", ""))
+                value = turn.get("value", turn.get("content", ""))
 
                 if role == "system":
                     text += f"<|im_start|>system\n{value}<|im_end|>\n"
-                elif role == "human":
+                elif role in ["human", "user"]:
                     text += f"<|im_start|>user\n{value}<|im_end|>\n"
-                elif role == "gpt" or role == "assistant":
+                elif role in ["gpt", "assistant"]:
                     text += f"<|im_start|>assistant\n{value}<|im_end|>\n"
 
             texts.append(text)
