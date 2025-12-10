@@ -10,7 +10,33 @@ Build your own uncensored AI assistant that runs completely offline on your GPU.
 
 ---
 
+## 📋 Prerequisites
+
+Before starting, ensure you have:
+- **Python 3.8+** installed
+- **GPU with 8GB+ VRAM** (NVIDIA RTX or AMD Radeon)
+- **20 GB free disk space**
+- **Ollama** installed (for deployment)
+
+**Need help with setup?** → See [SETUP.md](SETUP.md) for detailed instructions
+
+---
+
 ## Step-by-Step (Copy & Paste)
+
+### 0. Prepare Environment (One-time, 30 minutes)
+
+**Automated setup (downloads models & datasets):**
+```bash
+cd /workspace/all-about-ai/fine-tuning/09-base-model-fine-tuning/
+python3 00_prepare_environment.py
+```
+
+This will check prerequisites and download:
+- Qwen3-4B-Base model (~8 GB)
+- EverythingLM dataset (~2 GB)
+
+**OR manual setup:**
 
 ### 1. Setup (5 minutes)
 
@@ -151,7 +177,9 @@ Training will fail. You need:
 09-base-model-fine-tuning/
 ├── README.md                           # Full documentation
 ├── QUICKSTART.md                       # This file
+├── SETUP.md                            # Detailed setup guide
 ├── requirements.txt                    # Dependencies
+├── 00_prepare_environment.py          # Automated setup & downloads
 ├── 01_download.py                      # Download & test base model
 ├── 02_train_uncensored_qwen3_4b.py    # Main training script
 ├── 03_merge_and_convert.py            # Merge LoRA & create GGUF
