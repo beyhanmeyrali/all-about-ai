@@ -860,6 +860,7 @@ Most importantly, they have **fresh eyes** to see what others missed.
 - `06-advanced-techniques/`: Implement DoRA, PiSSA, and MoE breakthroughs
 - `07-system-prompt-modification/`: Deploy Constitutional AI and RLAIF
 - `08-llamafactory/`: Use zero-code interfaces for rapid experimentation
+- `09-base-model-fine-tuning/`: **NEW** - Build 100% uncensored models from raw base models (Qwen3-4B-Base → instruction-following in 30 minutes)
 
 ### **🔄 The Ollama Integration Workflow (Module 03)**
 
@@ -1016,6 +1017,7 @@ llamafactory-cli webui  # Opens web interface
 7. **🔬 Advanced**: `06-advanced-techniques/` (DoRA, PiSSA, MoE)
 8. **🤝 Alignment**: `07-system-prompt-modification/` (RLAIF and Constitutional AI)
 9. **🖥️ Zero-Code**: `08-llamafactory/` (Web interface)
+10. **🔓 Base Models**: `09-base-model-fine-tuning/` **NEW** (Build 100% uncensored Qwen3-4B from scratch)
 
 ---
 

@@ -1,0 +1,75 @@
+# Requirements for Base Model Fine-Tuning (Uncensored Qwen3-4B)
+# Author: Beyhan MEYRALI
+# Created: 2025
+
+# Core dependencies
+torch>=2.0.0                    # PyTorch for deep learning
+transformers>=4.51.0            # HuggingFace transformers (Qwen3 support)
+datasets>=2.14.0                # Dataset loading and processing
+accelerate>=0.20.0              # Training optimization
+
+# Parameter-efficient fine-tuning
+peft>=0.5.0                     # LoRA and other PEFT methods
+
+# Efficient training (Unsloth)
+# For NVIDIA GPUs (CUDA 12.1):
+# pip install "unsloth[cu121-torch250] @ git+https://github.com/unslothai/unsloth.git"
+#
+# For AMD GPUs (ROCm 5.6+):
+# pip install "unsloth @ git+https://github.com/unslothai/unsloth.git"
+
+# Quantization (NVIDIA only - not required for ROCm)
+bitsandbytes>=0.41.0            # 4-bit/8-bit quantization
+
+# Training utilities
+trl>=0.7.0                      # Transformer Reinforcement Learning (SFTTrainer)
+
+# Optional: GGUF conversion (requires llama.cpp)
+# git clone https://github.com/ggerganov/llama.cpp
+# cd llama.cpp && pip install -r requirements.txt && python setup.py install
+
+# Optional: API testing
+requests>=2.31.0                # For testing Ollama API
+
+# ============================================================================
+# INSTALLATION INSTRUCTIONS
+# ============================================================================
+
+# --- NVIDIA GPUs (RTX 3060/4060/5060, etc.) ---
+#
+# 1. Create environment:
+#    conda create -n uncensored python=3.11 -y
+#    conda activate uncensored
+#
+# 2. Install PyTorch with CUDA:
+#    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+#
+# 3. Install this requirements file:
+#    pip install -r requirements.txt
+#
+# 4. Install Unsloth:
+#    pip install "unsloth[cu121-torch250] @ git+https://github.com/unslothai/unsloth.git"
+
+# --- AMD GPUs (Radeon 780M, RX 7600, etc.) ---
+#
+# 1. Create environment:
+#    conda create -n uncensored python=3.11 -y
+#    conda activate uncensored
+#
+# 2. Install PyTorch with ROCm:
+#    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm5.6
+#
+# 3. Install this requirements file (skip bitsandbytes):
+#    pip install torch transformers datasets accelerate peft trl
+#
+# 4. Install Unsloth:
+#    pip install "unsloth @ git+https://github.com/unslothai/unsloth.git"
+#
+# 5. Set environment variables (add to ~/.bashrc):
+#    export PYTORCH_ROCM_ARCH="gfx1100"
+#    export HSA_OVERRIDE_GFX_VERSION="11.0.0"
+
+# --- Verification ---
+#
+# Test your installation:
+#    python -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'CUDA: {torch.cuda.is_available()}')"
