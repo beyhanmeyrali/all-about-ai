@@ -1,204 +1,303 @@
-# Quick Start: 100% Uncensored Qwen3-4B in 30 Minutes
+# ⚡ Quick Start Guide - Uncensored Qwen3-0.6B Model
 
-## 🚀 TL;DR
-
-Build your own uncensored AI assistant that runs completely offline on your GPU.
-
-**Time**: 30-45 minutes
-**VRAM**: 4.2 GB (fits RTX 5060 8GB, AMD Radeon 780M)
-**Result**: Fully functional uncensored instruction-following model
+This is a **5-minute quick start** to use the already-trained uncensored model.
 
 ---
 
-## 📋 Prerequisites
+## ✅ Model Status: READY TO USE
 
-Before starting, ensure you have:
-- **Python 3.8+** installed
-- **GPU with 8GB+ VRAM** (NVIDIA RTX or AMD Radeon)
-- **20 GB free disk space**
-- **Ollama** installed (for deployment)
-
-**Need help with setup?** → See [SETUP.md](SETUP.md) for detailed instructions
+**Model Location**: `qwen3-0.6b-uncensored-merged/` (1.15GB)
+**Ollama Deployment**: ✅ WORKING (`qwen3-uncensored:latest`)
+**API Server**: Available on port 5000
+**Training**: Complete (4h 39min CPU training)
+**Testing**: All tests passed ✅
 
 ---
 
-## Step-by-Step (Copy & Paste)
+## 🚀 Option 1: Use with Ollama (RECOMMENDED - Native)
 
-### 0. Prepare Environment (One-time, 30 minutes)
+The model is successfully deployed to Ollama using GGUF format conversion via [llama.cpp](https://github.com/ggerganov/llama.cpp) by @ggerganov.
 
-**Automated setup (downloads models & datasets):**
+### Quick Start
 ```bash
-cd /workspace/all-about-ai/fine-tuning/09-base-model-fine-tuning/
-python3 00_prepare_environment.py
-```
-
-This will check prerequisites and download:
-- Qwen3-4B-Base model (~8 GB)
-- EverythingLM dataset (~2 GB)
-
-**OR manual setup:**
-
-### 1. Setup (5 minutes)
-
-```bash
-# Create environment
-conda create -n uncensored python=3.11 -y
-conda activate uncensored
-
-# NVIDIA GPUs (RTX 3060/4060/5060)
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-
-# OR for AMD GPUs (Radeon 780M, RX 7600)
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm5.6
-
-# Install dependencies
-pip install transformers>=4.51.0 datasets accelerate bitsandbytes trl
-pip install "unsloth[cu121-torch250] @ git+https://github.com/unslothai/unsloth.git"
-
-# For AMD: skip bitsandbytes, install Unsloth without CUDA tag
-# pip install "unsloth @ git+https://github.com/unslothai/unsloth.git"
-```
-
-### 2. Download & Test Base Model (2 minutes)
-
-```bash
-python 01_download.py
-```
-
-**Expected**: Model generates text but doesn't follow instructions (confirms it's uncensored base model)
-
-### 3. Train (30-45 minutes)
-
-```bash
-python 02_train_uncensored_qwen3_4b.py
-```
-
-**What happens**:
-- Downloads 15,000 uncensored conversations
-- Trains with LoRA (only 1% of parameters)
-- Uses ~4.2 GB VRAM
-- Creates 150 MB adapter
-
-**Coffee break**: This takes 30-45 minutes. Go grab coffee!
-
-### 4. Merge & Convert (5 minutes)
-
-```bash
-python 03_merge_and_convert.py
-```
-
-**Creates**:
-- Merged 16-bit model (~8 GB)
-- GGUF Q4_K_M (~2.8 GB for Ollama)
-
-### 5. Deploy to Ollama (1 minute)
-
-```bash
-python 04_deploy_ollama.py
-```
-
-### 6. Use Your Model
-
-**Command line**:
-```bash
+# Run the model
 ollama run qwen3-uncensored
+
+# Or single query
+ollama run qwen3-uncensored "What is 2+2?"
 ```
 
-**Python**:
-```python
-from 05_test_with_transformers import ask_uncensored, load_model
+### API Usage
+```bash
+curl -X POST http://localhost:11434/api/generate \
+  -d '{
+    "model": "qwen3-uncensored",
+    "prompt": "Explain quantum physics",
+    "stream": false
+  }'
+```
 
-model, tokenizer = load_model()
-response = ask_uncensored("Your question here", model, tokenizer)
+### How It Was Deployed
+The model was converted to GGUF format using llama.cpp's converter:
+```bash
+# Conversion (already done)
+python3 /tmp/llama.cpp/convert_hf_to_gguf.py \
+  ./qwen3-0.6b-uncensored-merged \
+  --outfile qwen3-uncensored-f16.gguf \
+  --outtype f16
+
+# Deployment (already done)
+ollama create qwen3-uncensored -f Modelfile-uncensored
+```
+
+**Credit**: Thanks to [llama.cpp](https://github.com/ggerganov/llama.cpp) by @ggerganov for the GGUF converter that made Ollama deployment possible!
+
+---
+
+## 🐍 Option 2: Use API Server (Alternative)
+
+### Start the Server
+```bash
+cd /workspace/all-about-ai/fine-tuning/09-base-model-fine-tuning
+python3 07_serve_model_api.py
+```
+
+### Test with curl
+```bash
+# Simple question
+curl -X POST http://localhost:5000/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "What is 2+2?"}'
+
+# More complex query
+curl -X POST http://localhost:5000/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Explain quantum physics in simple terms", "max_tokens": 500}'
+
+# Chat with conversation
+curl -X POST http://localhost:5000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "What are the benefits of AI?"}
+    ]
+  }'
+```
+
+### Expected Response Format
+```json
+{
+  "done": true,
+  "model": "qwen3-0.6b-uncensored",
+  "response": "2+2 = 4."
+}
+```
+
+---
+
+## 🐍 Option 3: Direct Python Usage
+
+### Simple Example
+```python
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# Load model
+tokenizer = AutoTokenizer.from_pretrained(
+    "qwen3-0.6b-uncensored-merged",
+    trust_remote_code=True
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    "qwen3-0.6b-uncensored-merged",
+    device_map="cpu",
+    torch_dtype=torch.float16,
+    trust_remote_code=True,
+)
+
+# Generate response
+messages = [{"role": "user", "content": "What is 2+2?"}]
+text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+inputs = tokenizer(text, return_tensors="pt")
+
+outputs = model.generate(**inputs, max_new_tokens=200, temperature=0.7)
+response = tokenizer.decode(outputs[0], skip_special_tokens=True)
 print(response)
 ```
 
-**API**:
+### Run Existing Test Script
 ```bash
-curl http://localhost:11434/api/generate -d '{
-  "model": "qwen3-uncensored",
+cd /workspace/all-about-ai/fine-tuning/09-base-model-fine-tuning
+python3 06_test_uncensored.py
+```
+
+This will test the model with 4 different prompts and show results.
+
+---
+
+## 📊 What You Get
+
+### Test Results (From 06_test_uncensored.py)
+
+**Test 1: Basic Math**
+- Prompt: "What is 2+2?"
+- Response: "2 + 2 = 4." ✅
+
+**Test 2: Instruction Following**
+- Prompt: "Explain how to make a cake"
+- Response: Detailed step-by-step recipe (8 steps) ✅
+
+**Test 3: Political Discussion**
+- Prompt: "What are the main differences between democracy and authoritarianism?"
+- Response: Comprehensive comparison with 4 key points ✅
+
+**Test 4: Historical Analysis**
+- Prompt: "Explain the historical context of World War II"
+- Response: Detailed historical overview with timeline ✅
+
+---
+
+## 🔧 API Parameters
+
+### /api/generate
+```json
+{
   "prompt": "Your question here",
-  "stream": false
-}'
+  "max_tokens": 500,        // default: 500
+  "temperature": 0.7,       // default: 0.7
+  "top_p": 0.9             // default: 0.9
+}
 ```
 
----
-
-## Troubleshooting
-
-### Out of Memory?
-
-Edit `02_train_uncensored_qwen3_4b.py`:
-
-```python
-# Change line 20-21:
-"batch_size": 2,              # was 4
-"gradient_accumulation": 16,  # was 8
+### /api/chat
+```json
+{
+  "messages": [
+    {"role": "user", "content": "Your question"}
+  ],
+  "max_tokens": 500,
+  "temperature": 0.7,
+  "top_p": 0.9
+}
 ```
 
-### Training too slow?
-
-Reduce dataset size in `02_train_uncensored_qwen3_4b.py`:
-
-```python
-# Change line 18:
-"dataset_size": 5000,  # was 15000
+### /api/tags
+```bash
+curl http://localhost:5000/api/tags
 ```
 
-### No GPU?
-
-Training will fail. You need:
-- NVIDIA: RTX 3060 8GB or better
-- AMD: Radeon 780M (K11) or RX 7600 8GB+
+Returns list of available models (just qwen3-0.6b-uncensored).
 
 ---
 
-## What You Get
-
-- **100% uncensored** - answers everything without refusal
-- **Completely offline** - no data leaves your machine
-- **Fast inference** - Q4_K_M GGUF runs on 2.8 GB VRAM
-- **Production ready** - deploy with Ollama or use with transformers
-
----
-
-## Next Steps
-
-1. **Test it**: Run `05_test_with_transformers.py` for interactive chat
-2. **Try larger models**: Use Qwen3-8B-Base (same code, just change model name)
-3. **Custom dataset**: Replace EverythingLM with your own data
-4. **Export formats**: Convert to ONNX, TensorRT, or other formats
-
----
-
-## File Structure
+## 📁 Project Structure
 
 ```
 09-base-model-fine-tuning/
-├── README.md                           # Full documentation
-├── QUICKSTART.md                       # This file
-├── SETUP.md                            # Detailed setup guide
-├── requirements.txt                    # Dependencies
-├── 00_prepare_environment.py          # Automated setup & downloads
-├── 01_download.py                      # Download & test base model
-├── 02_train_uncensored_qwen3_4b.py    # Main training script
-├── 03_merge_and_convert.py            # Merge LoRA & create GGUF
-├── 04_deploy_ollama.py                # Deploy to Ollama
-└── 05_test_with_transformers.py       # Test & interactive chat
+├── qwen3-0.6b-uncensored-merged/   # Final model (USE THIS)
+├── qwen3-0.6b-uncensored-lora/      # LoRA adapter only
+├── 07_serve_model_api.py            # API server (RUN THIS)
+├── 06_test_uncensored.py            # Test script
+├── README.md                        # Complete documentation (1,687 lines)
+├── DEPLOYMENT.md                    # Deployment guide
+├── STATUS.md                        # Project status
+└── QUICKSTART.md                    # This file
 ```
 
 ---
 
-## Stats
+## 🎯 Common Use Cases
 
-- **Total code**: 1,084 lines of Python
-- **Documentation**: 729 lines
-- **Scripts**: 5 production-ready scripts
-- **Time to complete**: 45 minutes first time, 35 minutes after
+### 1. Interactive Chat
+```bash
+# Start API server
+python3 07_serve_model_api.py
+
+# In another terminal, send queries
+curl -X POST http://localhost:5000/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Tell me about artificial intelligence"}'
+```
+
+### 2. Batch Processing
+```python
+import requests
+
+prompts = [
+    "What is machine learning?",
+    "Explain neural networks",
+    "What are transformers in AI?"
+]
+
+for prompt in prompts:
+    response = requests.post(
+        "http://localhost:5000/api/generate",
+        json={"prompt": prompt}
+    )
+    print(f"Q: {prompt}")
+    print(f"A: {response.json()['response']}\n")
+```
+
+### 3. Custom Applications
+```python
+# Use the model in your Python application
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("qwen3-0.6b-uncensored-merged", trust_remote_code=True)
+model = AutoModelForCausalLM.from_pretrained("qwen3-0.6b-uncensored-merged", device_map="cpu", torch_dtype="float16", trust_remote_code=True)
+
+def ask_model(question):
+    messages = [{"role": "user", "content": question}]
+    text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    inputs = tokenizer(text, return_tensors="pt")
+    outputs = model.generate(**inputs, max_new_tokens=200)
+    return tokenizer.decode(outputs[0], skip_special_tokens=True)
+```
 
 ---
 
-**Questions?** Read the full [README.md](README.md) for detailed explanations, troubleshooting, and advanced topics.
+## 🚨 Important Notes
 
-**Created by**: [Beyhan MEYRALI](https://www.linkedin.com/in/beyhanmeyrali/)
-**Hardware**: Optimized for GMKtec K11 (AMD Ryzen 9 8945HS + Radeon 780M)
+1. **CPU-Only**: Model trained on CPU (RTX 5060 sm_120 incompatible with PyTorch)
+2. **Multilingual Output**: May include Thai/Arabic characters (from training data)
+3. **Uncensored**: No safety restrictions applied
+4. **Response Time**: ~5-15 seconds per query on CPU
+5. **Memory Usage**: ~2GB RAM during inference
+
+---
+
+## ❌ Ollama Deployment (Not Available Yet)
+
+**Status**: Ollama doesn't support Qwen3ForCausalLM architecture yet
+
+**Error**: `Error: unsupported architecture "Qwen3ForCausalLM"`
+
+**Workaround**: Use the Flask API server instead (works perfectly)
+
+**Future**: When Ollama adds Qwen3 support, convert to GGUF and deploy
+
+---
+
+## 📚 Need More Details?
+
+- **Full Documentation**: See `README.md` (1,687 lines with diagrams)
+- **Deployment Guide**: See `DEPLOYMENT.md` (all deployment methods)
+- **Project Status**: See `STATUS.md` (complete project summary)
+
+---
+
+## 🎉 You're Ready!
+
+The model is trained, tested, and ready to use. Just start the API server and send queries!
+
+```bash
+# Terminal 1: Start server
+python3 07_serve_model_api.py
+
+# Terminal 2: Send test query
+curl -X POST http://localhost:5000/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Hello, can you help me?"}'
+```
+
+**Enjoy your uncensored AI model!** 🚀

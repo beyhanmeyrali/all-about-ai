@@ -1,51 +1,41 @@
 #!/usr/bin/env python3
 """
-02_train_uncensored_qwen3_0.6b_cpu.py - CPU-Compatible Training for RTX 5060 Users
+02_train_uncensored_qwen3_0.6b_cpu_v2.py - Simplified CPU Training (No TRL)
 
-This script trains Qwen3-0.6B-Base on CPU, optimized for systems with incompatible
-GPUs (like RTX 5060 Blackwell sm_120 architecture).
-
-Hardware Requirements:
-- CPU: Any modern multi-core CPU (8+ cores recommended)
-- RAM: 16GB+ (32GB recommended)
-- GPU: NOT REQUIRED (can use RTX 5060 or any other GPU that PyTorch doesn't support)
-- Storage: ~5GB free space
-
-Time: 1-2 hours on 8-core CPU (vs 10-15 minutes on compatible GPU)
+This version bypasses TRL's SFTTrainer entirely and uses pure HuggingFace Trainer
+to avoid API compatibility issues.
 
 Author: Beyhan MEYRALI
 Created: 2025
 """
 
 import torch
+from datasets import load_dataset
+from peft import LoraConfig, get_peft_model, TaskType
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
     TrainingArguments,
-    BitsAndBytesConfig
+    Trainer,
+    DataCollatorForLanguageModeling
 )
-from datasets import load_dataset
-from trl import SFTTrainer
-from peft import LoraConfig, get_peft_model
 import os
-import sys
 
-# Configuration optimized for CPU training
+# Configuration
 CONFIG = {
     "model_name": "Qwen/Qwen3-0.6B-Base",
     "dataset_name": "teknium/OpenHermes-2.5",
-    "dataset_size": 5000,                # Smaller dataset for faster training
-    "max_seq_length": 512,               # Shorter sequences for CPU efficiency
-    "batch_size": 1,                     # Minimum batch size for CPU
-    "gradient_accumulation": 8,          # Effective batch size = 8
-    "max_steps": 200,                    # Fewer steps for demo
+    "dataset_size": 5000,
+    "max_seq_length": 512,
+    "batch_size": 4,
+    "gradient_accumulation": 4,
+    "max_steps": 200,
     "learning_rate": 2e-4,
-    "lora_r": 16,                        # Smaller LoRA rank
+    "lora_r": 16,
     "lora_alpha": 32,
     "lora_dropout": 0.05,
     "output_dir": "qwen3-0.6b-uncensored",
     "lora_output": "qwen3-0.6b-uncensored-lora",
-    "use_cpu": True,                     # Force CPU usage
 }
 
 def print_section(title, step=None):
@@ -82,13 +72,17 @@ def check_environment():
         print("    16GB+ RAM recommended for stable training")
 
 def load_model_and_tokenizer(config):
-    """Load model on CPU with memory optimization"""
-    print_section("Loading Qwen3-0.6B-Base on CPU", "1/7")
+    """Load model on CPU"""
+    print_section("Loading Qwen3-0.6B-Base on CPU", "1/6")
 
     tokenizer = AutoTokenizer.from_pretrained(
         config["model_name"],
         trust_remote_code=True
     )
+
+    # Set pad token
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
 
     # Load model directly on CPU in float32
     model = AutoModelForCausalLM.from_pretrained(
@@ -99,6 +93,9 @@ def load_model_and_tokenizer(config):
         low_cpu_mem_usage=True,
     )
 
+    # Enable gradient checkpointing to save RAM
+    model.gradient_checkpointing_enable()
+
     print(f"  ✓ Model loaded: {config['model_name']}")
     print(f"  ✓ Device: CPU")
     print(f"  ✓ Dtype: float32")
@@ -108,19 +105,19 @@ def load_model_and_tokenizer(config):
 
 def add_lora_adapters(model, config):
     """Add LoRA adapters for parameter-efficient training"""
-    print_section("Adding LoRA Adapters", "2/7")
+    print_section("Adding LoRA Adapters", "2/6")
 
-    lora_config = LoraConfig(
+    peft_config = LoraConfig(
+        task_type=TaskType.CAUSAL_LM,
+        inference_mode=False,
         r=config["lora_r"],
         lora_alpha=config["lora_alpha"],
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
-                       "gate_proj", "up_proj", "down_proj"],
         lora_dropout=config["lora_dropout"],
-        bias="none",
-        task_type="CAUSAL_LM"
+        target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
+                       "gate_proj", "up_proj", "down_proj"]
     )
 
-    model = get_peft_model(model, lora_config)
+    model = get_peft_model(model, peft_config)
 
     # Count trainable parameters
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -130,13 +127,12 @@ def add_lora_adapters(model, config):
     print(f"  ✓ LoRA adapters added")
     print(f"  ✓ Trainable parameters: {trainable_params:,} ({trainable_percent:.2f}%)")
     print(f"  ✓ Total parameters: {total_params:,}")
-    print(f"  ✓ Memory efficient: Only training {trainable_percent:.1f}% of weights")
 
     return model
 
-def load_and_prepare_dataset(config):
+def load_and_prepare_dataset(config, tokenizer):
     """Load and format uncensored dataset"""
-    print_section("Loading Uncensored Dataset", "3/7")
+    print_section("Loading Uncensored Dataset", "3/6")
 
     print(f"  Downloading: {config['dataset_name']}")
     dataset = load_dataset(config["dataset_name"], split="train")
@@ -149,45 +145,73 @@ def load_and_prepare_dataset(config):
 
     return dataset
 
-def format_dataset(dataset, tokenizer):
-    """Format dataset to Qwen3 chat template"""
-    print_section("Formatting Dataset (Qwen3 Chat Template)", "4/7")
+def format_dataset(dataset, tokenizer, config):
+    """Format dataset with ChatML template"""
+    print_section("Formatting Dataset (Manual ChatML)", "4/6")
 
-    def formatting_prompts_func(examples):
-        convos = examples["conversations"]
-        texts = []
+    def format_to_chatml(example):
+        """
+        Manually applies ChatML format.
+        This replaces TRL's internal logic that was failing.
+        """
+        messages = []
+        for msg in example['conversations']:
+            # Handle both OpenHermes formats
+            role = msg.get("from", msg.get("role", ""))
+            value = msg.get("value", msg.get("content", ""))
 
-        for convo in convos:
-            text = ""
-            for turn in convo:
-                role = turn.get("from", turn.get("role", ""))
-                value = turn.get("value", turn.get("content", ""))
+            if role == "system":
+                messages.append({"role": "system", "content": value})
+            elif role in ["human", "user"]:
+                messages.append({"role": "user", "content": value})
+            elif role in ["gpt", "assistant"]:
+                messages.append({"role": "assistant", "content": value})
 
-                if role == "system":
-                    text += f"<|im_start|>system\n{value}<|im_end|>\n"
-                elif role in ["human", "user"]:
-                    text += f"<|im_start|>user\n{value}<|im_end|>\n"
-                elif role in ["gpt", "assistant"]:
-                    text += f"<|im_start|>assistant\n{value}<|im_end|>\n"
+        # Apply standard chat template
+        text = tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=False
+        )
 
-            texts.append(text)
+        # Tokenize with padding to max_seq_length
+        tokenized = tokenizer(
+            text,
+            truncation=True,
+            max_length=config["max_seq_length"],
+            padding="max_length"  # Pad to max length
+        )
 
-        return {"text": texts}
+        # Return only the fields we need
+        # Create labels (for Causal LM, labels = input_ids)
+        return {
+            "input_ids": tokenized["input_ids"],
+            "attention_mask": tokenized["attention_mask"],
+            "labels": tokenized["input_ids"],  # Same as input_ids for causal LM
+        }
 
-    dataset = dataset.map(formatting_prompts_func, batched=True)
+    # Apply formatting
+    print("  Tokenizing conversations...")
+    tokenized_dataset = dataset.map(
+        format_to_chatml,
+        batched=False,  # Process one by one for safety
+        remove_columns=dataset.column_names,  # Remove original columns
+        desc="Formatting"
+    )
 
     # Filter out empty conversations
-    dataset = dataset.filter(lambda example: len(example["text"].strip()) > 50)
+    tokenized_dataset = tokenized_dataset.filter(
+        lambda x: len(x["input_ids"]) > 10
+    )
 
-    print("  ✓ Dataset formatted with Qwen3 chat template")
-    print("  ✓ Format: <|im_start|>role\\ncontent<|im_end|>")
-    print(f"  ✓ After filtering: {len(dataset):,} valid conversations")
+    print("  ✓ Dataset formatted with ChatML template")
+    print(f"  ✓ Valid conversations: {len(tokenized_dataset):,}")
 
-    return dataset
+    return tokenized_dataset
 
 def create_trainer(model, tokenizer, dataset, config):
     """Configure training parameters for CPU"""
-    print_section("Configuring Training Parameters (CPU)", "5/7")
+    print_section("Configuring Trainer (CPU)", "5/6")
 
     print(f"  Training Configuration:")
     print(f"    - Device: CPU")
@@ -204,40 +228,33 @@ def create_trainer(model, tokenizer, dataset, config):
         output_dir=config["output_dir"],
         per_device_train_batch_size=config["batch_size"],
         gradient_accumulation_steps=config["gradient_accumulation"],
-        warmup_steps=10,
-        max_steps=config["max_steps"],
         learning_rate=config["learning_rate"],
-        fp16=False,  # FP16 not supported on CPU
-        bf16=False,  # BF16 not supported on CPU
+        max_steps=config["max_steps"],
         logging_steps=10,
-        optim="adamw_torch",  # Standard AdamW for CPU
-        weight_decay=0.01,
-        lr_scheduler_type="linear",
+        use_cpu=True,
+        fp16=False,
+        bf16=False,
+        save_strategy="steps",
         save_steps=50,
         save_total_limit=2,
         report_to="none",
-        use_cpu=True,
-        dataloader_num_workers=2,  # Parallel data loading
     )
 
-    # Set tokenizer for model
-    model.config.use_cache = False
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
-    tokenizer.padding_side = "right"
+    # Create custom data collator that properly handles our tokenized data
+    from transformers import default_data_collator
 
-    trainer = SFTTrainer(
+    trainer = Trainer(
         model=model,
-        train_dataset=dataset,
         args=training_args,
-        processing_class=tokenizer,
+        train_dataset=dataset,
+        data_collator=default_data_collator,  # Use default which handles padding correctly
     )
 
     return trainer
 
 def train_model(trainer):
     """Execute CPU training"""
-    print_section("Starting CPU Training (1-2 hours)", "6/7")
+    print_section("Starting CPU Training (1-2 hours)", "6/6")
     print("\n⚠️  This will take significantly longer than GPU training")
     print("Training progress will be logged every 10 steps...\n")
 
@@ -258,7 +275,7 @@ def train_model(trainer):
 
 def save_model(model, tokenizer, config):
     """Save LoRA adapter"""
-    print_section("Saving LoRA Adapter", "7/7")
+    print_section("Saving LoRA Adapter", "FINAL")
 
     model.save_pretrained(config["lora_output"])
     tokenizer.save_pretrained(config["lora_output"])
@@ -277,9 +294,8 @@ def save_model(model, tokenizer, config):
 
 def main():
     """Main training pipeline"""
-    print_section("UNCENSORED QWEN3-0.6B TRAINING (CPU)")
-    print("\nThis script trains on CPU - optimized for RTX 5060 and")
-    print("other GPUs incompatible with current PyTorch versions.\n")
+    print_section("UNCENSORED QWEN3-0.6B TRAINING (CPU - No TRL)")
+    print("\nThis script uses pure HuggingFace Trainer to bypass TRL API issues.\n")
 
     # Environment check
     check_environment()
@@ -291,8 +307,8 @@ def main():
     model = add_lora_adapters(model, CONFIG)
 
     # Prepare dataset
-    dataset = load_and_prepare_dataset(CONFIG)
-    dataset = format_dataset(dataset, tokenizer)
+    dataset = load_and_prepare_dataset(CONFIG, tokenizer)
+    dataset = format_dataset(dataset, tokenizer, CONFIG)
 
     # Create trainer
     trainer = create_trainer(model, tokenizer, dataset, CONFIG)

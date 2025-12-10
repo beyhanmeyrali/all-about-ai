@@ -860,7 +860,7 @@ Most importantly, they have **fresh eyes** to see what others missed.
 - `06-advanced-techniques/`: Implement DoRA, PiSSA, and MoE breakthroughs
 - `07-system-prompt-modification/`: Deploy Constitutional AI and RLAIF
 - `08-llamafactory/`: Use zero-code interfaces for rapid experimentation
-- `09-base-model-fine-tuning/`: **NEW** - Build 100% uncensored models from raw base models (Qwen3-4B-Base → instruction-following in 30 minutes)
+- `09-base-model-fine-tuning/`: **NEW** - Build 100% uncensored models from raw base models (Qwen3-0.6B-Base → instruction-following in 4h 39min on CPU, complete with API deployment)
 
 ### **🔄 The Ollama Integration Workflow (Module 03)**
 
@@ -974,6 +974,260 @@ BENEFITS:
 **The Complete Story Arc in Code:**
 Students recreate the journey, experience the frustrations, celebrate the eureka moments, and emerge ready to innovate.
 
+---
+
+### **🔓 Base Model Fine-Tuning - Building Uncensored Models from Scratch (Module 09)**
+
+#### **The Revolutionary Concept: Training Your Own Instruct Model**
+
+Most tutorials teach you to fine-tune already instruction-tuned models (like Qwen3-0.6B-Instruct). But what if you want complete control? What if you want to build an instruction-following model from a raw base model with **zero safety restrictions**?
+
+**Module 09** teaches you the complete pipeline to transform a raw pre-trained base model into a fully functional instruction-following AI:
+
+```
+Qwen3-0.6B-Base (knows language)
+         ↓
+    Add Training Dataset
+  (OpenHermes-2.5: 5,000 conversations)
+         ↓
+    Fine-Tune with LoRA
+   (4h 39min on CPU)
+         ↓
+  Merge LoRA + Base Model
+         ↓
+Qwen3-0.6B-Uncensored-Instruct
+   (Your custom AI)
+         ↓
+    Deploy via API
+  (Flask server ready)
+```
+
+#### **What You'll Learn**
+
+**The Complete Pipeline:**
+1. **Base Model Selection**: Understanding base vs instruct models
+2. **Dataset Preparation**: Converting conversations to ChatML format
+3. **LoRA Training**: Parameter-efficient training (1.67% of weights)
+4. **Adapter Merging**: Combining LoRA with base model
+5. **Testing & Validation**: Comprehensive prompt testing
+6. **API Deployment**: Flask server with Ollama-compatible endpoints
+
+#### **Real-World Results Achieved**
+
+**Training Metrics:**
+- **Initial Loss**: 1.23 (model doesn't understand instructions)
+- **Final Loss**: 0.73 (41% improvement)
+- **Training Time**: 4 hours 39 minutes (CPU-only on K11)
+- **Parameters Trained**: 10M (1.67% of 600M total)
+
+**Model Performance:**
+```
+Before Training (Base Model):
+User: "What is 2+2?"
+Model: "What is 2+2? It's a simple math problem that..." (continues text)
+❌ Problem: Doesn't understand it's a question to answer
+
+After Training (Your Uncensored Model):
+User: "What is 2+2?"
+Model: "2 + 2 = 4. This is because when you add two numbers..."
+✅ Success: Understands and directly answers questions
+```
+
+#### **Why This Module is Critical**
+
+**1. Complete Control Over Model Behavior**
+- No pre-existing safety restrictions
+- Train on any dataset you choose
+- Define your own behavioral guidelines
+- Perfect for research and specialized applications
+
+**2. Understanding the Full Picture**
+- See how instruct models are actually created
+- Learn the difference between base and instruct variants
+- Master the complete fine-tuning lifecycle
+- Gain skills transferable to any model architecture
+
+**3. Overcome Hardware Limitations**
+- **RTX 5060 Blackwell (sm_120)**: PyTorch incompatible → CPU training workaround
+- **32GB RAM**: Perfect for 0.6B models, challenging for larger ones
+- **CPU Training**: Viable for small models (15min-5hours depending on size)
+
+#### **The Technical Journey**
+
+**Challenge 1: RTX 5060 Incompatibility**
+```
+Problem: CUDA capability sm_120 not supported by PyTorch
+Solution: CPU training with optimizations
+Result: 4h 39min for 200 steps (acceptable for learning)
+```
+
+**Challenge 2: TRL Library API Changes**
+```
+Problem: TRL 0.24.0 has different API parameters
+Solution: Bypassed TRL, used pure HuggingFace Trainer
+Result: Cleaner code, better compatibility
+```
+
+**Challenge 3: Data Collator Issues**
+```
+Problem: Variable sequence lengths causing tensor errors
+Solution: Pre-padding during tokenization
+Result: Stable training without crashes
+```
+
+**Challenge 4: Ollama Deployment**
+```
+Problem: Ollama doesn't support Qwen3ForCausalLM architecture
+Solution: Flask API server with Ollama-compatible endpoints
+Result: Model deployable and accessible via HTTP
+```
+
+#### **Project Files & Structure**
+
+```
+09-base-model-fine-tuning/
+├── README.md (72KB)           # Complete guide with diagrams
+├── DEPLOYMENT.md              # All deployment methods
+├── STATUS.md                  # Project completion summary
+├── QUICKSTART.md              # 5-minute quick start
+│
+├── Training Pipeline
+│   ├── 01_download_qwen3_base_0.6b.py    # Download base model
+│   ├── 02_train_uncensored_qwen3_0.6b_cpu_v2.py  # WORKING TRAINING SCRIPT
+│   ├── 03_merge_lora_0.6b.py             # Merge LoRA + base
+│   └── 06_test_uncensored.py             # Test with 4 prompts
+│
+├── Deployment
+│   ├── 07_serve_model_api.py             # Flask API server
+│   └── Modelfile-0.6b                    # Ollama config (future)
+│
+└── Trained Models
+    ├── qwen3-0.6b-uncensored-lora/       # LoRA adapter (54MB)
+    └── qwen3-0.6b-uncensored-merged/     # Full model (1.15GB)
+```
+
+#### **Quick Start Commands**
+
+```bash
+# Navigate to module
+cd 09-base-model-fine-tuning/
+
+# Option 1: Use the API server (EASIEST)
+python3 07_serve_model_api.py
+
+# Test with curl
+curl -X POST http://localhost:5000/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "What is 2+2?"}'
+
+# Option 2: Direct Python usage
+python3 06_test_uncensored.py
+
+# Option 3: Train your own (4-5 hours)
+python3 02_train_uncensored_qwen3_0.6b_cpu_v2.py
+```
+
+#### **API Server Features**
+
+**Ollama-Compatible Endpoints:**
+```bash
+POST /api/generate    # Generate text from prompt
+POST /api/chat        # Chat with conversation history
+GET  /api/tags        # List available models
+```
+
+**Example Usage:**
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:5000/api/generate",
+    json={
+        "prompt": "Explain quantum physics",
+        "max_tokens": 500,
+        "temperature": 0.7
+    }
+)
+
+print(response.json()["response"])
+```
+
+#### **Educational Value**
+
+**For Students:**
+- Learn complete ML pipeline from raw data to deployed model
+- Understand base vs instruct model differences
+- Master troubleshooting real-world GPU/CPU compatibility issues
+- Gain experience with API development and deployment
+
+**For Researchers:**
+- Create domain-specific uncensored models
+- Experiment with constitutional AI principles
+- Test different training datasets and approaches
+- Build custom evaluation frameworks
+
+**For Developers:**
+- Deploy production-ready AI APIs
+- Integrate custom models into applications
+- Optimize for consumer hardware constraints
+- Create specialized AI assistants
+
+#### **Lessons Learned & Best Practices**
+
+**1. Start Small, Scale Up**
+- Qwen3-0.6B trains in 4-5 hours (perfect for learning)
+- Qwen3-1.7B would take 8-12 hours (next step)
+- Qwen3-4B requires quantization or GPU (advanced)
+
+**2. CPU Training is Viable**
+- For models < 1B parameters
+- Enables learning without expensive GPUs
+- K11's 8-core CPU handles it well
+
+**3. Testing is Critical**
+- Test with diverse prompts (math, instructions, discussions)
+- Compare before/after training results
+- Validate model behavior matches expectations
+
+**4. Deployment Alternatives**
+- **API Server**: Immediate deployment (Flask, FastAPI)
+- **Ollama**: Future deployment when architecture supported
+- **GGUF**: When llama.cpp adds Qwen3 support
+
+#### **Performance Benchmarks**
+
+**Training Speed (K11 with CPU):**
+- **Qwen3-0.6B**: 4h 39min for 200 steps (achieved)
+- **Qwen3-1.7B**: ~8-12 hours (estimated)
+- **Qwen3-4B**: Requires 4-bit quantization + CPU offload
+
+**Inference Speed (API Server):**
+- **Response Time**: 5-15 seconds per query
+- **Memory Usage**: ~2GB RAM during inference
+- **Concurrent Requests**: 1-2 simultaneous on K11
+
+**Model Quality:**
+- **Basic Math**: 100% accuracy
+- **Instruction Following**: Detailed, coherent responses
+- **Complex Reasoning**: Context-aware explanations
+- **Uncensored**: No topic restrictions
+
+#### **Future Enhancements**
+
+**When Available:**
+1. **GGUF Conversion**: llama.cpp Qwen3 support
+2. **Ollama Deployment**: Qwen3ForCausalLM architecture support
+3. **GPU Training**: PyTorch sm_120 (Blackwell) support
+4. **Larger Models**: Qwen3-1.7B, 4B with optimizations
+
+**Immediate Experiments:**
+- Different training datasets
+- Longer training (more epochs)
+- Constitutional AI principles
+- Multi-task instruction following
+
+---
+
 ### **Complete Resource Library**
 - **DoRA Paper**: [Weight-Decomposed Low-Rank Adaptation](https://arxiv.org/abs/2402.09353)
 - **PiSSA Studies**: [Principal Singular Values Adaptation](https://arxiv.org/abs/2404.02948)
@@ -1017,7 +1271,7 @@ llamafactory-cli webui  # Opens web interface
 7. **🔬 Advanced**: `06-advanced-techniques/` (DoRA, PiSSA, MoE)
 8. **🤝 Alignment**: `07-system-prompt-modification/` (RLAIF and Constitutional AI)
 9. **🖥️ Zero-Code**: `08-llamafactory/` (Web interface)
-10. **🔓 Base Models**: `09-base-model-fine-tuning/` **NEW** (Build 100% uncensored Qwen3-4B from scratch)
+10. **🔓 Base Models**: `09-base-model-fine-tuning/` **NEW** (Build 100% uncensored Qwen3-0.6B from raw base model - complete pipeline with API deployment)
 
 ---
 

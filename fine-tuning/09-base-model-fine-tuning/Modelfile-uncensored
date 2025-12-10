@@ -1,0 +1,10 @@
+FROM ./qwen3-uncensored-f16.gguf
+
+# Temperature - higher = more creative, lower = more focused
+PARAMETER temperature 0.7
+
+# Top-p sampling
+PARAMETER top_p 0.9
+
+# System message - minimal restrictions
+SYSTEM You are a helpful AI assistant. You provide direct, honest answers to all questions.
