@@ -142,6 +142,48 @@ We build from the ground up:
 
 ---
 
+### ⚡ [llm-inference/](./llm-inference)
+
+**Local LLM Inference on a Laptop** — Can a regular gaming laptop with 8 GB VRAM run a 30-billion-parameter language model? Yes — and at near-chat speed. This folder shows exactly how, with measured numbers and reproducible commands.
+
+**🎯 The Philosophy:**
+
+Most local-LLM tutorials are recipe sites: "paste this command, get a chatbot." This guide goes the other way — it explains *why* every flag exists, then walks you through tuning them on real hardware. If you don't know why a flag exists, you can't tune it.
+
+**What's Inside:**
+- 📘 **LESSONS_LEARNED.md** — Theory tutorial in Feynman style. Kitchen analogies for VRAM/RAM/disk, why MoE changes the game on small VRAM, how quantization works, what the KV cache is, the 2026 model landscape.
+- 🛠️ **HOW_TO_RUN.md** — Hands-on companion. Every command, every flag, every error. MoE tuning walkthrough, server mode, Ollama path, troubleshooting, glossary.
+- 📊 **BENCHMARKS.md** — Real measured tok/s on the test machine (RTX 5060 Laptop 8 GB). Headline result: 30B MoE model running at **53.8 tok/s** — only 7× slower than an 8B dense and **7× faster than a 27B dense** on the same hardware.
+- ⚡ **run_bench.sh** — One-line wrapper for `llama-bench` so you can sweep `-ngl` / `-ncmoe` settings quickly.
+
+**🗺️ The Roadmap:**
+
+1. **The Hardware** — Know your VRAM, RAM, disk. The kitchen analogy.
+2. **The Software Trap** — Brand-new GPUs (Blackwell sm_120) need binaries built from source.
+3. **The MoE Insight** — Why a 30B MoE model beats a 14B dense one on a laptop.
+4. **The Quantization Recipe** — Q4_K_M is the universal default. When to deviate.
+5. **The KV Cache Reality** — Long context blows up memory. How to compress it.
+6. **The Tuning Game** — Find your sweet spot for `-ngl` and `-ncmoe`.
+
+**📊 Headline Results:**
+
+| Model | Architecture | Speed | Verdict |
+|---|---|---:|---|
+| Qwen 3 8B | dense, fits VRAM | 63.7 tok/s | Daily-fast |
+| **Qwen 3 30B-A3B** | **MoE, 3B active** | **53.8 tok/s** | **The headline** |
+| Phi-4-reasoning 14B | dense, tight fit | 23.8 tok/s | Smartest at usable speed |
+| Qwen3.6-27B | dense, busts VRAM | 7.8 tok/s | Trophy run, dense penalty |
+
+**Tech Stack:** llama.cpp (built from source for Blackwell), Ollama, Hugging Face GGUFs.
+
+**Hardware:** AMD Ryzen AI 9 365 + RTX 5060 Laptop GPU (8 GB VRAM, sm_120).
+
+**Perfect For:** Anyone with a recent gaming laptop who wants to run their own local AI without subscribing to a cloud service — and to actually understand what their GPU is doing.
+
+👉 **[Start Running LLMs Locally →](./llm-inference/README.md)**
+
+---
+
 ## 🎯 Who Is This For?
 
 ### 🌱 Complete Beginners

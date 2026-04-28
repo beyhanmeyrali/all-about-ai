@@ -1,0 +1,55 @@
+# ---------------------------------------------------------------------------
+# Big stuff that should never go to a git repo
+# ---------------------------------------------------------------------------
+
+# Model weights — tens of GB each, fetched on demand via huggingface_hub
+# `models` (no slash) catches both real dirs and symlinks pointing elsewhere
+models
+*.gguf
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.onnx
+*.ckpt
+
+# llama.cpp source + build artifacts (cloned from upstream during setup)
+build/
+
+# ---------------------------------------------------------------------------
+# Run logs and benchmark scratch (results live in BENCHMARKS.md, raw logs don't)
+# ---------------------------------------------------------------------------
+*.log
+bench_*.txt
+bench_*.json
+nvidia-smi-*.log
+profile-*.nsys-rep
+
+# ---------------------------------------------------------------------------
+# Editor / OS noise
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.env
+.envrc
+
+# ---------------------------------------------------------------------------
+# Hugging Face / Ollama caches that might end up here
+# ---------------------------------------------------------------------------
+.cache/
+.huggingface/
+.ollama/
