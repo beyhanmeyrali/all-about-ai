@@ -40,6 +40,7 @@ flowchart TD
 | **[LESSONS_LEARNED.md](LESSONS_LEARNED.md)** | The theory tutorial — written in the spirit of the Feynman technique. Kitchen analogies for VRAM/RAM/disk, why MoE changes the game, how quantization works, what the KV cache is, the 2026 model landscape. | Start here if you're new. |
 | **[HOW_TO_RUN.md](HOW_TO_RUN.md)** | The hands-on companion — every command, every flag, every error you might hit. Quick-start chat, benchmark recipes, MoE tuning walkthrough, server mode, Ollama path, troubleshooting. | When you want to actually run something. |
 | **[BENCHMARKS.md](BENCHMARKS.md)** | Measured speed results on the test machine. Updated as new models are tested. | When deciding which model to download for *your* machine. |
+| **[HARDWARE_BEYOND_CUDA.md](HARDWARE_BEYOND_CUDA.md)** | Waking up the *other* accelerators on this laptop — Radeon 880M iGPU via Vulkan, XDNA NPU via XRT / onnxruntime-vitisai, ROCm. What's installed at the kernel level, what's missing in userspace, install commands, and per-accelerator workload fit. | When you want to use the iGPU or NPU concurrently with the RTX 5060. |
 | **[run_bench.sh](run_bench.sh)** | One-line benchmark wrapper around `llama-bench`. | When iterating on `-ngl` / `-ncmoe` settings. |
 
 ---

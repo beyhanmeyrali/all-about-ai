@@ -208,7 +208,9 @@ So when we benchmark Qwen 3 30B-A3B at `-ngl 99 -ncmoe 31` and see 53.8 tok/s �
 | **Ryzen AI NPU (XDNA, ~50 TOPS)** | ❌ idle | llama.cpp has no NPU backend. NPU work needs AMD's Ryzen AI / DirectML stack with INT8-quantized ONNX models — a different toolchain. |
 | **ROCm** | ❌ N/A | ROCm is for AMD *discrete* GPUs (RX 7900, MI300). It doesn't accelerate CPUs. We don't have an AMD discrete GPU on this laptop. |
 
-**Lesson**: on this laptop, "GPU + CPU" is the full story. The iGPU and NPU are real silicon but unused by GGUF inference today — not because they're useless, but because the toolchain to get them into the loop isn't there yet for llama.cpp.
+**Lesson**: on this laptop's *current* CUDA-only llama.cpp build, "GPU + CPU" is the full story. The iGPU and NPU are real silicon but unused by GGUF inference under this build path — not because they're useless, but because mixing backends (CUDA + Vulkan + ROCm + NPU) in one process isn't supported, and we picked CUDA for the heaviest workload.
+
+**They don't have to stay idle.** With a separate llama.cpp build using `-DGGML_VULKAN=ON` and a small-model GGUF, the iGPU can run a parallel inference target on a different port — useful for embeddings, vision, or a fast helper LLM while the dGPU is busy with a 30B MoE. The NPU can run AMD's pre-compiled ONNX models (Whisper, Phi-3-mini, etc.) via `onnxruntime-vitisai`. See **[HARDWARE_BEYOND_CUDA.md](HARDWARE_BEYOND_CUDA.md)** for the full setup walk-through, install commands, and realistic per-accelerator workload guidance.
 
 > **Jargon unpack**:
 > - **SIMD** = "single instruction, multiple data." A CPU instruction that does the same arithmetic on 8 or 16 numbers at once. AVX2 = 256-bit, AVX-512 = 512-bit. This is why a modern CPU can do real LLM math, just slower per-watt than a GPU.
