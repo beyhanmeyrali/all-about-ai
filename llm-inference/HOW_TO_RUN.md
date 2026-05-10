@@ -27,7 +27,8 @@ flowchart TD
     SHARED --> M2["qwen3-30b-a3b/"]:::model
     SHARED --> M3["phi4-reasoning/"]:::model
     SHARED --> M4["qwen36-27b/"]:::model
-    SHARED --> M5["...etc"]:::model
+    SHARED --> M5["qwen36-35b-a3b/"]:::model
+    SHARED --> M6["...etc"]:::model
 
     classDef dir fill:#dbeafe,stroke:#2563eb,color:#000
     classDef doc fill:#dcfce7,stroke:#16a34a,color:#000
@@ -397,6 +398,12 @@ Worked example for **Qwen 3 30B-A3B** (48 layers, ~17 GB at Q4_K_M):
 - Predicted ncmoe: 48 - 16 = **32**
 - Reality: 31 was best (got slightly more headroom than expected). Predicted within 1 — usable.
 
+Worked example for **Qwen3.6-35B-A3B** (40 layers, ~22 GB at UD-Q4_K_M, hybrid attention):
+- Per-layer cost: 22 / 40 ≈ 0.55 GB
+- GPU-able: (7.7 - 2) / 0.55 ≈ 10 layers
+- Predicted ncmoe: 40 - 10 = **30**
+- Reality: ncmoe=29 OOMs, ncmoe=30 loads but is volatile, **ncmoe=34 is the actual fast plateau** (37.8 t/s). The predictor finds the OOM cliff, not the fastest stable point — you still need to walk back up a step or two when KV-cache and compute buffers crowd the GPU. *Lesson: predict the floor, then sweep for the plateau.*
+
 ### 5.8 What if it's a *dense* model that doesn't fit?
 
 `-ncmoe` does nothing for dense models — they have no experts to offload separately. For dense models that overflow VRAM, you only have `-ngl <N>` to play with: lower N = more on CPU. The speed cost is much harsher than for MoE because the entire layer (attention *and* FFN) gets pushed to slower memory.
@@ -620,7 +627,8 @@ Replace `<MODEL>` with the absolute path to your `.gguf`. Always run from `build
 
 ### Chat (30B MoE on small VRAM)
 ```bash
-./llama-cli -m <MODEL> -ngl 99 -ncmoe 31 -c 8192
+./llama-cli -m <MODEL> -ngl 99 -ncmoe 31 -c 8192     # Qwen 3 30B-A3B sweet spot
+./llama-cli -m <MODEL> -ngl 99 -ncmoe 34 -c 8192     # Qwen3.6-35B-A3B sweet spot
 ```
 
 ### Chat (dense model that doesn't fit, e.g. Qwen3.6-27B)
@@ -656,8 +664,10 @@ watch -n 1 nvidia-smi
 2. **Confirmed the GPU is detected**: runtime prints "compute capability 12.0" — proof we're using the GPU, not falling back to CPU.
 3. **Benchmarked an 8B model**: 63.7 tok/s. Validates the toolchain end-to-end.
 4. **Benchmarked a 30B MoE**: 53.8 tok/s using `-ncmoe`. Validates the MoE-on-tiny-VRAM thesis from `LESSONS_LEARNED.md` §4.
-5. **Next**: benchmark Phi-4-reasoning 14B (smartest dense at usable speed), then Qwen3.6-27B + TurboQuant (the dense long-context trophy).
-6. **Pick a daily driver** based on real numbers from `BENCHMARKS.md`.
+5. **Benchmarked Phi-4-reasoning 14B**: 23.8 tok/s — smartest dense at usable speed.
+6. **Benchmarked Qwen3.6-27B (dense) + TurboQuant**: 7.8 tok/s baseline; TurboQuant unlocks long-context runs that FP16 KV can't fit. The dense penalty quantified.
+7. **Benchmarked Qwen3.6-35B-A3B (newer hybrid-attn MoE)**: 37.8 tok/s. Same active-param count as Qwen 3 30B-A3B, ~30 % slower — same trick, different bandwidth bill.
+8. **Pick a daily driver** based on real numbers from `BENCHMARKS.md`.
 
 ---
 

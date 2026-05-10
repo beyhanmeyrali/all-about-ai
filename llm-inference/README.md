@@ -66,15 +66,18 @@ flowchart TD
 |---|---:|---:|---|
 | Qwen 3 8B (Q4) | 4.7 GB | **63.7** | Daily-fast baseline. Snappy chat. |
 | **Qwen 3 30B-A3B MoE** (Q4) | 18 GB | **53.8** | A 30B model at 8B speeds — the headline result. |
+| Qwen3.6-35B-A3B MoE (Q4) | 22 GB | **37.8** | Newer 35B MoE with hybrid attn — chat-speed, but ~30 % slower than 30B-A3B. |
 | Phi-4-reasoning 14B (Q4) | 8.5 GB | 23.8 | Smartest dense at usable speed. |
 | Qwen3.6-27B dense (Q3) | 13 GB | 7.8 | The dense penalty: 7× slower than the 30B MoE. |
 | Qwen 3 8B + **TurboQuant turbo2** | 4.7 GB | **28.5 @ 32K** | **Long context unlocked** — FP16 OOMs at 32K. |
 
-**Two punchlines in one machine:**
+**Three punchlines in one machine:**
 
 1. **MoE wins on tiny VRAM.** A 30-billion-parameter MoE model runs at near-chat speed on an 8 GB laptop GPU. The trick is `-ncmoe` (CPU-offloaded expert sets) — explained in [HOW_TO_RUN.md §5](HOW_TO_RUN.md).
 
-2. **TurboQuant unlocks long context.** Stock llama.cpp can't even load Qwen 3 8B at 32K context on this laptop (FP16 KV cache busts VRAM). With [Madreag's TurboQuant fork](https://github.com/Madreag/turbo3-cuda) and `-ctk turbo2 -ctv turbo2` the same model runs at 28.5 tok/s with a 32K-token window — and the 7.5× KV compression is actually *faster* than the 5× variant at long context. Details in [BENCHMARKS.md](BENCHMARKS.md) and [HOW_TO_RUN.md §7.5](HOW_TO_RUN.md).
+2. **MoE generation is not free, even at constant active-param count.** The newer **Qwen3.6-35B-A3B** has the same 3 B active params as Qwen 3 30B-A3B, yet runs ~30 % slower on the same hardware (37.8 vs 53.8 t/s). Total weights, expert count (256 vs 128) and hybrid linear/full attention all bend the memory-bandwidth curve — see [BENCHMARKS.md](BENCHMARKS.md) for the full sweep.
+
+3. **TurboQuant unlocks long context.** Stock llama.cpp can't even load Qwen 3 8B at 32K context on this laptop (FP16 KV cache busts VRAM). With [Madreag's TurboQuant fork](https://github.com/Madreag/turbo3-cuda) and `-ctk turbo2 -ctv turbo2` the same model runs at 28.5 tok/s with a 32K-token window — and the 7.5× KV compression is actually *faster* than the 5× variant at long context. Details in [BENCHMARKS.md](BENCHMARKS.md) and [HOW_TO_RUN.md §7.5](HOW_TO_RUN.md).
 
 ---
 
@@ -143,8 +146,9 @@ By following [HOW_TO_RUN.md](HOW_TO_RUN.md) you'll be able to:
 
 Planned:
 
-- More models in [BENCHMARKS.md](BENCHMARKS.md): Phi-4-reasoning 14B, Qwen3.6-27B (dense + TurboQuant), Gemma 4 26B/4B.
+- More models in [BENCHMARKS.md](BENCHMARKS.md): Gemma 4 26B/4B, GLM-4.6-9B, the Qwen3.6 hybrid-attn family at long context.
 - A trophy run with DeepSeek V4 Flash 284B/13B (mmap from disk — yes, on a laptop).
+- Long-context numbers for Qwen3.6-35B-A3B with TurboQuant (262 K native, extensible to 1 M — KV compression should make a real-world long-context test fit).
 - Comparison column for Ollama vs raw llama.cpp on the same models.
 - Notes on `--n-gpu-layers` heuristics for unfamiliar models.
 
