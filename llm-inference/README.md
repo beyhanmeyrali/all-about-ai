@@ -125,6 +125,9 @@ By reading [LESSONS_LEARNED.md](LESSONS_LEARNED.md) you should be able to answer
 4. *What's quantization, and why is Q4_K_M the universal default?*
 5. *What is the KV cache and why does it explode at long contexts?*
 6. *When does TurboQuant help me, and when is it irrelevant?*
+7. *When llama.cpp "offloads to CPU," is my AMD CPU actually computing — or just holding RAM?* (Yes, computing. And the iGPU/NPU/ROCm story.)
+8. *If I had 2 × RTX 4090, or a Strix Halo with 256 GB unified memory — what changes?* (Walls vs slopes.)
+9. *Is a dual-socket motherboard the CPU equivalent of two GPUs?* (No — bandwidth, not cores, is the bottleneck.)
 
 If those don't yet feel obvious, that doc is for you.
 

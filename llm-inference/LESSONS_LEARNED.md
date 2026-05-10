@@ -161,6 +161,63 @@ A model's weights are originally stored as 16-bit numbers (FP16). That means eac
 
 ---
 
+## 5.5 Offload — where the data lives vs where the math happens
+
+When the docs say "offload to CPU" it sounds like the CPU is just *holding* the weights while the GPU does all the work. That's wrong. Offload is **two decisions in one**:
+
+1. **Where the weights live** (which memory pool: VRAM or system RAM)
+2. **Who runs the math on those weights** (which processor: GPU or CPU)
+
+These two are coupled. **The processor that computes a layer is whichever one owns the memory it sits in.** Move a tensor to RAM, and the *CPU* now does its math too.
+
+```mermaid
+flowchart LR
+    subgraph GPU["🍳 NVIDIA RTX 5060 — VRAM 8 GB"]
+        GMEM["Tensors that live here<br/><b>Attention + routers</b><br/>+ some experts"]:::g
+        GCOMP["...are computed by<br/><b>CUDA kernels on the GPU</b><br/>~500 GB/s, thousands of cores"]:::gc
+        GMEM --- GCOMP
+    end
+    subgraph CPU["🥫 AMD Ryzen AI 9 365 — RAM 29 GB"]
+        CMEM["Tensors that live here<br/><b>The 31 layers of experts</b><br/>we pushed off the GPU"]:::c
+        CCOMP["...are computed by<br/><b>CPU SIMD on 20 threads</b><br/>~80 GB/s, 10 cores × AVX2/512"]:::cc
+        CMEM --- CCOMP
+    end
+    GCOMP -.->|"hidden state vector<br/>(tiny — a few KB per token)"| CCOMP
+    CCOMP -.->|"hidden state vector<br/>back to GPU"| GCOMP
+    classDef g fill:#86efac,stroke:#16a34a,color:#000
+    classDef gc fill:#bbf7d0,stroke:#16a34a,color:#000
+    classDef c fill:#fde68a,stroke:#ca8a04,color:#000
+    classDef cc fill:#fef3c7,stroke:#ca8a04,color:#000
+```
+
+So when we benchmark Qwen 3 30B-A3B at `-ngl 99 -ncmoe 31` and see 53.8 tok/s — both processors are working:
+- For each token, the GPU runs the attention + routers for all 48 layers + the experts in layers 31–47
+- For the same token, the **CPU runs the experts in layers 0–30** (the ~31/48 of expert weights we said "go to RAM")
+- Each layer hands its output to the next via a small hidden-state vector (a few KB), which crosses the PCIe bus
+
+**The answer to "is my AMD CPU doing anything?"**: yes, it's doing real math on a meaningful slice of every token. The Ryzen AI 9 365's 10 cores + AVX2/AVX-512 SIMD + 80 GB/s RAM bandwidth are what make CPU-side experts fast enough to keep up. If you replaced the CPU with a slow one (or RAM with single-channel), the *same* GPU + the *same* `-ncmoe` would generate noticeably slower. Try `-t 4` instead of `-t 20` to see this directly — limiting threads cuts CPU-side throughput, total tok/s drops.
+
+### What llama.cpp is *not* using on this laptop
+
+| Component | Used? | Why |
+|---|---|---|
+| **NVIDIA RTX 5060 (discrete, sm_120)** | ✅ via CUDA | Our build is CUDA-targeted; this is the fast path. |
+| **AMD CPU cores (Ryzen AI 9 365)** | ✅ via SIMD | All offloaded layers compute here. Real participant. |
+| **System RAM (DDR5)** | ✅ as storage *and* CPU's working memory | Holds offloaded weights and the CPU's KV-cache slice. |
+| **Radeon 880M iGPU (RDNA 3.5)** | ❌ idle | iGPU shares system RAM with CPU — no separate VRAM, no bandwidth advantage. To use it you'd need a Vulkan or ROCm build, which conflicts with our CUDA build. Even then, performance < CUDA + CPU mix. |
+| **Ryzen AI NPU (XDNA, ~50 TOPS)** | ❌ idle | llama.cpp has no NPU backend. NPU work needs AMD's Ryzen AI / DirectML stack with INT8-quantized ONNX models — a different toolchain. |
+| **ROCm** | ❌ N/A | ROCm is for AMD *discrete* GPUs (RX 7900, MI300). It doesn't accelerate CPUs. We don't have an AMD discrete GPU on this laptop. |
+
+**Lesson**: on this laptop, "GPU + CPU" is the full story. The iGPU and NPU are real silicon but unused by GGUF inference today — not because they're useless, but because the toolchain to get them into the loop isn't there yet for llama.cpp.
+
+> **Jargon unpack**:
+> - **SIMD** = "single instruction, multiple data." A CPU instruction that does the same arithmetic on 8 or 16 numbers at once. AVX2 = 256-bit, AVX-512 = 512-bit. This is why a modern CPU can do real LLM math, just slower per-watt than a GPU.
+> - **PCIe bus** = the wire connecting the GPU to the CPU/RAM. ~30 GB/s on PCIe 4.0 x16. Sounds slow vs VRAM's 500 GB/s, but we only push tiny hidden-state vectors across it per token, not whole weights.
+> - **iGPU** = integrated GPU, lives on the CPU die, shares system RAM. No separate VRAM.
+> - **NPU** = Neural Processing Unit. A specialized fixed-function block for INT8 matrix multiplications. Great for small/quantized models on power-constrained workloads; not yet wired into llama.cpp.
+
+---
+
 ## 6. The KV cache — the model's short-term memory
 
 Every time the model generates a token, it has to remember the previous tokens. It does this by storing two vectors per token per layer, called **K** and **V** (Keys and Values). All those stored vectors together = the **KV cache**.
@@ -337,6 +394,122 @@ Putting it all together, here's what each tier looks like on your machine. *Ital
 | Trophy run | **DeepSeek V4 Flash** 284B/13B (Q2) | mmap from disk — yes, the basement | <1 tok/s |
 
 Out of reach: DeepSeek V4 Pro (1.6T total), Kimi K2.6 full, GLM-5 — workstation tier.
+
+---
+
+## 9.5 What changes on different hardware? — laptops, multi-GPU, Strix Halo, Apple
+
+Once you've internalized §5.5 (offload = memory placement + compute placement), every other hardware variant is just *the same mechanism with different numbers in each box*. Here are the common shapes you'll hit and how llama.cpp behaves on each.
+
+### a) Same laptop class, more RAM (e.g. 64 GB DDR5)
+
+Mechanism: identical. The `-ngl 99 -ncmoe N` knobs don't change. What changes:
+
+- The "RAM ceiling" rises, so you can fit total models that wouldn't otherwise load — DeepSeek V3-class quantized to Q2 (~70 GB) becomes feasible (mmap from disk + RAM as cache).
+- Generation speed when offloaded **does not jump** by adding RAM alone — only by adding RAM *bandwidth* (channels, frequency). Two channels of DDR5-5600 ≈ 80 GB/s; LPDDR5X-8000 ≈ 130 GB/s; the bandwidth is what feeds the CPU's SIMD math.
+
+### b) Discrete AMD GPU (e.g. Radeon RX 7900 XTX, 24 GB)
+
+Mechanism: identical, **different backend build**. Build llama.cpp with `-DGGML_HIP=ON` (the ROCm/HIP backend) instead of `-DGGML_CUDA=ON`. Same `-ngl`, `-ncmoe`, `-ctk` flags. CUDA kernels are replaced by HIP kernels.
+
+What changes from our setup:
+- No `CMAKE_CUDA_ARCHITECTURES=120` — instead `CMAKE_HIP_ARCHITECTURES=gfx1100` (the RDNA 3 dialect).
+- 24 GB VRAM lets entire 30B-class models stay on GPU at Q4 → no `-ncmoe` needed → much faster.
+- ROCm's bandwidth and kernel maturity now meets CUDA for bread-and-butter ops, lags slightly on edge cases.
+
+### c) Apple Silicon (M3/M4/M4 Max)
+
+Mechanism: identical *until* you remember Apple has **unified memory**. There is no separate VRAM — the GPU and CPU read from the same physical RAM. So:
+
+- `-ngl 99` always works (there's nothing to "spill" — the memory is already shared).
+- No PCIe round-trips between CPU and GPU per token — the hidden state vector doesn't move.
+- Build with `-DGGML_METAL=ON`. The Metal backend is mature and fast.
+- An M4 Max with 128 GB unified memory can run 70B models entirely "on GPU" at Q4 because every byte of RAM is GPU-visible. The trick we use here (`-ncmoe`) becomes unnecessary on that machine for that model size.
+
+This is why Mac users almost never tune `-ngl`/`-ncmoe`: their architecture sidesteps the tradeoff.
+
+### d) Workstation: AMD Ryzen AI 395+ (Strix Halo) + 2 × RTX 4090
+
+This is the *interesting* one — a high-end CPU, fast unified-style RAM, and two big NVIDIA GPUs. llama.cpp handles each piece via the same mechanism, just with bigger numbers in each box.
+
+| Component | Spec | What llama.cpp does with it |
+|---|---|---|
+| 2 × RTX 4090 | 2 × 24 GB GDDR6X = **48 GB VRAM**, ~1 TB/s each | Multi-GPU split via `--tensor-split` or auto layer-split. Tokens flow through CUDA kernels on whichever GPU owns each tensor. PCIe between the two cards is the inter-GPU link (~30 GB/s, fine for small inter-layer hops). |
+| AMD Ryzen AI 395+ (Strix Halo, 16 Zen 5 cores + Radeon 8060S iGPU + NPU) | 16 cores / 32 threads | CPU offloaded layers run here when `-ncmoe` pushes experts off the GPUs. 16 cores × AVX-512 ≈ 4× our laptop's CPU throughput. |
+| LPDDR5X-8000 | 256 GB unified, **256 GB/s bandwidth** | 3× our laptop's RAM bandwidth → CPU-side computation roughly 3× faster per byte processed. |
+| Radeon 8060S iGPU + XDNA NPU | Real silicon, capable | **Still idle for llama.cpp** — same reason as on our laptop. Mixing CUDA (for the 4090s) with Vulkan/ROCm (for the iGPU) in one process isn't supported; the NPU has no GGUF backend. |
+
+How they actually combine on a real model:
+
+- **70B at Q4 (~40 GB)** → fits entirely in 48 GB VRAM. `-ngl 99` puts everything on the GPUs, split across them. CPU and RAM are *unused for inference*. Generation is GPU-bound: ~50–80 tok/s depending on the model.
+- **DeepSeek V4 Flash 284B/13B at Q2 (~70 GB)** → too big for 48 GB VRAM. Split: attention + some experts on GPUs (using all 48 GB), rest of experts on CPU/RAM (~22 GB used). Now the CPU is doing real work. With Strix Halo's 256 GB/s bandwidth + 16 Zen 5 cores, that 13B-active-param MoE generates ~15–25 tok/s — a level our laptop physically cannot reach with the same model.
+- **Single 7B-class model** → wastes the workstation. Use 1 GPU, leave the other idle, ignore the CPU. Speed is determined entirely by the 4090's compute/memory bandwidth.
+
+The takeaway: **two 4090s + Strix Halo do not magically combine into one fast computer**. They are three accelerators that llama.cpp lights up *only when the model is sized to need them*. A 7B fits one GPU and that's all you'll ever use; a 70B uses both GPUs and ignores the CPU; a 284B MoE finally uses everything.
+
+### e) Two CPUs on a dual-socket motherboard — does it scale like two GPUs?
+
+Short answer: **no, not the same way**. The two scaling stories are asymmetric.
+
+| | 2 × GPU | 2 × CPU (dual-socket) |
+|---|---|---|
+| What gets doubled | VRAM **and** compute | Cores (compute) |
+| What does *not* get doubled | — | Memory bandwidth (each socket only sees its own channels) |
+| Inter-component link | PCIe between cards (~30 GB/s — fine, hidden states are tiny) | Infinity Fabric / UPI between sockets (~50 GB/s, but cross-socket *data* access goes through it constantly) |
+| The wall it raises | The "fits in VRAM" wall — bigger models suddenly need no CPU offload | Roughly none — the bandwidth-per-socket ceiling that bottlenecks CPU inference is unchanged |
+| Realistic speedup for LLM inference | 1.6–2× when model spans both GPUs | 1.3–1.8× with NUMA-aware threads (llama.cpp's `--numa distribute`) |
+
+The deep reason: LLM inference on the CPU side is **memory-bandwidth-bound**, not core-bound. When the CPU runs an offloaded layer's matmul, it spends most of its time waiting for weight bytes to arrive from DRAM. Adding more cores past the point where bandwidth saturates buys you almost nothing.
+
+What actually happens on a dual-socket box (e.g. 2 × EPYC 9654, 96 cores each):
+- Each socket has its own 12-channel DDR5-4800 → ~460 GB/s local. Combined: ~920 GB/s aggregate.
+- But weights are interleaved across both NUMA nodes. Threads on CPU0 reading weight bytes from CPU1's DRAM go over the inter-socket link — slower than local access. llama.cpp's NUMA flags (`--numa distribute`, `--numa isolate`) help but don't fully recover the cross-node penalty.
+- Net effect: ~1.5× faster than one socket, not 2×.
+
+What actually happens with two NVIDIA GPUs (e.g. 2 × RTX 4090):
+- Layers 0–N live in GPU0's VRAM; layers N+1–end in GPU1's VRAM. Each card's CUDA kernels operate on its own weights at full ~1 TB/s.
+- Hidden states (a tiny vector, KBs) cross PCIe between layers. PCIe latency is non-zero but trivial vs the work each card is doing.
+- Crucially, **VRAM doubles**: 24 → 48 GB. A 70B Q4 model that needed CPU offload on one card now fits entirely on GPU. *That's* where the big speedup comes from — not from "2× GPUs" but from "no longer needs to offload."
+
+**The asymmetry, restated**: GPU scaling raises a wall (the "fits in fast memory" wall). CPU scaling raises a slope (a bit more compute) but doesn't move the wall. For LLM inference, walls matter more than slopes.
+
+**Practical takeaways**:
+
+- **One Strix Halo (16 cores, 256 GB/s LPDDR5X)** often beats a *dual-socket DDR5 desktop pair* at single-user LLM inference, because LPDDR5X bandwidth-per-core is higher than what desktop dual-channel DDR5 delivers per socket. Bandwidth wins.
+- **One Threadripper PRO 7995WX (96 cores, 8-channel DDR5 ≈ 330 GB/s)** is usually the better "big-LLM workstation" CPU than a dual-socket EPYC pair, for the same reason: bandwidth per dollar, not cores per dollar.
+- Dual-socket motherboards are common in **training** (where extra flops help fill long-running compute) and rare in **inference** (where bandwidth dominates).
+- If your goal is "run bigger LLMs faster on CPU," look at memory bandwidth (channels × frequency) before core count. A 12-channel server CPU at DDR5-4800 beats a 16-channel server CPU at DDR4-3200, every time.
+
+### f) Heterogeneous backends in one process — generally don't
+
+A common question: "I have a 4090 *and* an iGPU *and* an NPU. Why not use them all?" Reality:
+
+- llama.cpp picks **one accelerator backend per build**: CUDA, ROCm, Vulkan, Metal, or pure CPU. You can't have CUDA + ROCm + Vulkan kernels co-running for the same model.
+- The CPU SIMD path runs alongside any GPU backend — that's how `-ncmoe` works.
+- Multi-GPU works *within the same backend* — two NVIDIA cards under CUDA, two AMD cards under ROCm. Mixing vendors is not supported.
+- The NPU is a separate world (Microsoft DirectML / AMD Ryzen AI / Apple Neural Engine) with its own model formats. It doesn't run GGUFs.
+
+**Lesson**: when you read marketing about "70 TOPS NPU + 40 CU iGPU + 16 cores!", remember that for GGUF inference today, you get the discrete GPU (if any) + the CPU. The other accelerators are used by other workloads (image gen, on-device assistants, video encode), not by llama.cpp.
+
+### Decision summary
+
+```mermaid
+flowchart TD
+    Q["Your machine has..."] --> A1{"NVIDIA discrete<br/>GPU?"}
+    A1 -->|"Yes"| C["Build with GGML_CUDA=ON<br/>+ correct sm_XX"]
+    A1 -->|"No"| A2{"AMD discrete<br/>GPU?"}
+    A2 -->|"Yes"| AR["Build with GGML_HIP=ON<br/>+ correct gfx_XXXX"]
+    A2 -->|"No"| A3{"Apple Silicon?"}
+    A3 -->|"Yes"| AM["Build with GGML_METAL=ON<br/>(unified memory — easy mode)"]
+    A3 -->|"No"| AC["CPU only: GGML_CPU=ON<br/>(slow but works)"]
+    C --> RES["+ CPU SIMD always available<br/>via -ncmoe / partial -ngl"]:::res
+    AR --> RES
+    AM --> RES
+    AC --> RES
+    classDef res fill:#dcfce7,stroke:#16a34a,color:#000
+```
+
+The CPU path is **always there in addition** to whatever GPU backend you chose. It's never the only piece of silicon doing work — and on this laptop, with `-ncmoe 31`, it's doing roughly as much per-token work as the GPU does.
 
 ---
 
