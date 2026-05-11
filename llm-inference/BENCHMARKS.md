@@ -90,6 +90,29 @@ Other forks surveyed and rejected:
 
 ---
 
+## Alternative backend — Vulkan on the AMD Radeon 890M iGPU
+
+We built a second llama.cpp (`build-vulkan/`, `-DGGML_VULKAN=ON`) and ran the same `llama-bench` recipe on the integrated GPU via Mesa RADV. Same build commit (`50494a2`), same models, just `--device Vulkan1`. Full reasoning + use-cases for this path: [HARDWARE_BEYOND_CUDA.md §2.5](HARDWARE_BEYOND_CUDA.md).
+
+| Model | Size | CUDA (5060) tg128 | Vulkan (Radeon 890M iGPU) tg128 | iGPU slowdown |
+|---|---:|---:|---:|---:|
+| Qwen 3 8B Q4_K_M | 4.7 GB | **63.7** | 15.2 | 4.2× |
+| Phi-4-reasoning 14B Q4_K_M | 8.4 GB | **23.8** | 8.2 (all on iGPU) | 2.9× |
+| Qwen3.6-27B Q3_K_M | 12.6 GB | **7.8** | 5.2 (all on iGPU) | 1.5× |
+| Qwen 3 30B-A3B MoE Q4_K_M | 17.3 GB | **53.8** | 23.8 (`-ncmoe 31`) | 2.3× |
+
+**The iGPU never wins on this laptop**, even when models fit fully on its 15.8 GB UMA but bust the 5060's 7.7 GB VRAM. Reason: the 890M reads weights through DDR5-5600 (~80 GB/s, shared with the CPU); the 5060 uses private GDDR6 (~448 GB/s). The bandwidth gap dominates the memory-ceiling advantage.
+
+**The MoE case is the interesting one**: 2.3× slowdown, much smaller than the 3–4× we see on dense models. Because most MoE weights are cold experts in RAM either way, both backends touch mostly the same DDR5 bus, and the gap narrows to whatever the *active-path* speed difference is.
+
+**Useful regardless of speed**: the iGPU is a separate Vulkan device from the 5060, so you can run a small model on it *concurrently* with CUDA work — useful for embeddings, a small helper LLM, or any task that should not contend with the dGPU. And the iGPU draws ~5–10 W under load vs the 5060's ~50–80 W: real battery savings for idle assistant tasks.
+
+ROCm on this iGPU (RDNA 3.5 / gfx1150) is not officially supported by AMD as of 2026; the community `HSA_OVERRIDE_GFX_VERSION` route is fragile. **Vulkan is the right path for this iGPU.** ROCm becomes the right call only when you have an AMD *discrete* GPU (RX 7900, MI300).
+
+The XDNA 2 NPU on this laptop (~50 TOPS INT8) is real and has Linux support via FastFlowLM and AMD's Ryzen AI 1.7.1 stack, but it's a separate toolchain (ONNX, not GGUF) and the userspace driver isn't installed here yet. See [HARDWARE_BEYOND_CUDA.md §3](HARDWARE_BEYOND_CUDA.md) for the install path and realistic use cases (Whisper, embeddings, INT8 small LLMs running in parallel with CUDA).
+
+---
+
 ## The headline chart
 
 ```

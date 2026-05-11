@@ -656,6 +656,22 @@ Replace `<MODEL>` with the absolute path to your `.gguf`. Always run from `build
 watch -n 1 nvidia-smi
 ```
 
+### Run on the iGPU instead (Vulkan backend, separate build)
+```bash
+# One-time: install Vulkan SDK + headers
+sudo apt install -y mesa-vulkan-drivers vulkan-tools spirv-headers libvulkan-dev
+
+# One-time: build llama.cpp with Vulkan (parallel to the CUDA build)
+cd build/llama.cpp
+cmake -B build-vulkan -DGGML_VULKAN=ON -DCMAKE_BUILD_TYPE=Release -DLLAMA_CURL=ON
+cmake --build build-vulkan -j $(nproc)
+
+# Run a model on the iGPU (Vulkan1 = Radeon 890M; Vulkan0 = NVIDIA via its Vulkan driver)
+cd build-vulkan/bin
+LD_LIBRARY_PATH=. ./llama-bench -m <MODEL> --device Vulkan1 -ngl 99 -p 512 -n 128
+```
+Expected on this laptop: ~4× slower than CUDA on the 5060 for dense, ~2× slower for MoE. Useful for concurrent small models on battery, *not* a replacement. See [HARDWARE_BEYOND_CUDA.md](HARDWARE_BEYOND_CUDA.md) for when each backend is the right call.
+
 ---
 
 ## 11. What we're doing here, the whole arc

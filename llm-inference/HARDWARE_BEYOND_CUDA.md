@@ -107,11 +107,38 @@ GGML_VK_VISIBLE_DEVICES=1 ./llama-server ...
 # index 0/1 depends on enumeration order — `vulkaninfo --summary` shows the order
 ```
 
-**Realistic expectations** on the Radeon 880M (Strix iGPU, ~3 TFLOPS FP16, system-RAM bandwidth ~80 GB/s):
-- Qwen 3 0.6B: very fast, real-time chat speed
-- Qwen 3 4B: usable (~10-20 tok/s)
-- Qwen 3 8B: marginal (5-12 tok/s)
-- Anything > 14B: not the right tool
+**Realistic expectations** on the Radeon 890M (Strix iGPU, ~3 TFLOPS FP16, system-RAM bandwidth ~80 GB/s):
+- Qwen 3 0.6B: very fast, real-time chat speed (untested but well in range)
+- Qwen 3 4B: usable (~10-20 tok/s, projected)
+- Qwen 3 8B: **better than expected — 15.2 tok/s measured** (see §2.5)
+- Phi-4 14B dense fits fully (uses 8.4 of 15.8 GB iGPU UMA) but is slow (~8 tok/s) — bandwidth-bound
+- Qwen 3 30B-A3B MoE with `-ncmoe 31`: surprisingly viable at 23.8 tok/s — MoE patterns mute the bandwidth disadvantage
+- Dense > 14B: not the right tool — the dGPU+offload path beats it even when it has to spill heavily
+
+### 2.5 Measured iGPU benchmarks (May 2026, this laptop)
+
+Built `build-vulkan/` next to `build-cuda/` from the same commit (`50494a2`). Same `llama-bench` recipe (`-p 512 -n 128 -r 2`), same GGUFs, just `--device Vulkan1` targeting the Radeon 890M.
+
+| Model | Size | CUDA path (5060) | iGPU path (Vulkan 890M) | iGPU slowdown |
+|---|---:|---|---|---:|
+| Qwen 3 8B Q4_K_M | 4.7 GB | `-ngl 99` → **pp 2263 / tg 63.7** | `-ngl 99` → pp 232 / **tg 15.2** | **4.2× tg** |
+| Phi-4-reasoning 14B Q4_K_M | 8.4 GB | `-ngl 35` (partial offload) → pp 969 / **tg 23.8** | `-ngl 99` (all on iGPU) → pp 119 / **tg 8.2** | **2.9× tg** |
+| Qwen3.6-27B Q3_K_M | 12.6 GB | `-ngl 33` (heavy offload) → pp 343 / **tg 7.8** | `-ngl 99` (all on iGPU) → pp 65 / **tg 5.2** | **1.5× tg** |
+| Qwen 3 30B-A3B MoE Q4_K_M | 17.3 GB | `-ngl 99 -ncmoe 31` → pp 599 / **tg 53.8** | `-ngl 99 -ncmoe 31` → pp 203 / **tg 23.8** | **2.3× tg** |
+
+**Three lessons from this table:**
+
+1. **The iGPU never wins on this laptop — not even on models that fit its larger UMA but bust the dGPU's VRAM.** Phi-4 14B fits fully in the 890M's 15.8 GB. The dGPU has to spill 5 of 40 layers to CPU. The dGPU+spill still wins 2.9×. Lesson: GDDR6 bandwidth on the discrete card beats DDR5-shared-with-CPU even when the discrete card is doing extra work.
+
+2. **The gap shrinks dramatically for MoE.** For dense models the iGPU is 3–4× slower; for the 30B-A3B MoE the gap drops to 2.3×. Because most of an MoE's weights are *cold experts that live in RAM regardless of which GPU is driving*, both paths read mostly from the same DDR5 bus — and the gap narrows to whatever the active-path advantage is.
+
+3. **15.2 tok/s on the iGPU for an 8B model is actually useful**, given the iGPU pulls ~5–10 W vs ~50–80 W for the dGPU under load. Real use case: chat-quality model on battery, or a small concurrent helper while CUDA does heavy work.
+
+### When would the iGPU win? Not on *this* laptop
+
+The math: the iGPU's pp512/tg128 ratio is dominated by DDR5 system bandwidth, which is **~80 GB/s shared with the CPU**. The 5060's VRAM is **~448 GB/s, private**. That's a 5.6× bandwidth gap before any other factor. No amount of memory headroom flips that.
+
+A **Strix Halo** chip (Ryzen AI Max+ 395) has the *same iGPU lineage* but ships with LPDDR5X-8000 quad-channel ≈ **256 GB/s** unified memory and no discrete GPU at all. On that machine the iGPU is the fast path. **Architecture matters more than the iGPU label.**
 
 Best uses on this laptop:
 - **Embeddings** (BGE, E5) — hundreds per second
@@ -310,9 +337,9 @@ For a single-user laptop running creative AI workflows, that's a meaningful capa
 
 ## 7. Open questions / TODO
 
-1. **Benchmark Qwen 3 4B and Phi-3-mini on Vulkan** — measure tok/s, compare to CUDA on the same models.
-2. **Test concurrent dGPU + iGPU inference** — does running Qwen 30B-A3B on CUDA *and* a 4B model on Vulkan share the system DRAM gracefully, or do bandwidth fights tank both?
-3. **NPU Whisper benchmark** — AMD claims real-time-30x throughput on the NPU. Verify on this laptop.
+1. ~~**Benchmark Qwen 3 4B and Phi-3-mini on Vulkan**~~ → **Done in §2.5** (covers 8B / 14B dense / 27B dense / 30B-A3B MoE — the right size range was different from what we initially guessed). Open: Qwen 3 4B and Phi-3-mini specifically, for the smallest size tier.
+2. **Test concurrent dGPU + iGPU inference** — does running Qwen 30B-A3B on CUDA *and* a 4B model on Vulkan share the system DRAM gracefully, or do bandwidth fights tank both? With both paths reading from DDR5, the answer probably depends on how much the CUDA path is actually offloading per token.
+3. **NPU Whisper benchmark** — AMD claims real-time-30x throughput on the NPU. Requires installing the XDNA userspace stack (XRT + amdxdna driver) — **not yet done on this laptop** (the kernel module isn't currently loaded, and the install touches things we haven't validated against the working CUDA setup). Defer until a clean test window.
 4. **NPU model porting workflow** — figure out how to take a Hugging Face ONNX model (e.g., a small LLM) and compile it for XDNA without using AMD's Windows-first GUI tools.
 5. **Power draw with all three running** — laptop battery sustains how long?
 

@@ -42,6 +42,7 @@ flowchart TD
 | **[BENCHMARKS.md](BENCHMARKS.md)** | Measured speed results on the test machine. Updated as new models are tested. | When deciding which model to download for *your* machine. |
 | **[HARDWARE_BEYOND_CUDA.md](HARDWARE_BEYOND_CUDA.md)** | Waking up the *other* accelerators on this laptop — Radeon 880M iGPU via Vulkan, XDNA NPU via XRT / onnxruntime-vitisai, ROCm. What's installed at the kernel level, what's missing in userspace, install commands, and per-accelerator workload fit. | When you want to use the iGPU or NPU concurrently with the RTX 5060. |
 | **[run_bench.sh](run_bench.sh)** | One-line benchmark wrapper around `llama-bench`. | When iterating on `-ngl` / `-ncmoe` settings. |
+| **[HARDWARE_BEYOND_CUDA.md](HARDWARE_BEYOND_CUDA.md)** | The other accelerators on this laptop: AMD Radeon 890M iGPU (Vulkan), XDNA 2 NPU (FastFlowLM / Ryzen AI), and why ROCm doesn't apply here. Real measured numbers showing the iGPU is 1.5–4× slower than CUDA — but useful for concurrent / battery-light workloads. | When you're wondering "is my AMD silicon idle?" or "can I use the NPU?" |
 
 ---
 
