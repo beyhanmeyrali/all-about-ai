@@ -174,7 +174,11 @@ rocminfo | head -30
 
 ---
 
-## 3. The NPU — AMD XDNA (~50 TOPS, INT8)
+## 3. The NPU — AMD XDNA 2 (~50 TOPS, INT8)
+
+> **2026-05 update**: We installed and benchmarked the NPU. **The standalone [NPU.md](NPU.md) is the canonical doc** — full install (one `.deb` + memlock tweak, no reboot), measured numbers (Qwen 3 0.6 B at **92.6 tok/s @ ~+10 W**, dGPU idle), embedding throughput, gotchas, and reproducible scripts. The section below remains as the historical orientation; for what to actually run, jump to NPU.md.
+
+
 
 The NPU is fundamentally different from the iGPU/dGPU:
 - Fixed-function INT8 matrix multiply blocks (not general-purpose compute)
@@ -339,7 +343,7 @@ For a single-user laptop running creative AI workflows, that's a meaningful capa
 
 1. ~~**Benchmark Qwen 3 4B and Phi-3-mini on Vulkan**~~ → **Done in §2.5** (covers 8B / 14B dense / 27B dense / 30B-A3B MoE — the right size range was different from what we initially guessed). Open: Qwen 3 4B and Phi-3-mini specifically, for the smallest size tier.
 2. **Test concurrent dGPU + iGPU inference** — does running Qwen 30B-A3B on CUDA *and* a 4B model on Vulkan share the system DRAM gracefully, or do bandwidth fights tank both? With both paths reading from DDR5, the answer probably depends on how much the CUDA path is actually offloading per token.
-3. **NPU Whisper benchmark** — AMD claims real-time-30x throughput on the NPU. Requires installing the XDNA userspace stack (XRT + amdxdna driver) — **not yet done on this laptop** (the kernel module isn't currently loaded, and the install touches things we haven't validated against the working CUDA setup). Defer until a clean test window.
+3. **NPU LLM + embedding benchmarks** → **Done.** See [NPU.md](NPU.md). XDNA userspace installed via FastFlowLM v0.9.41 (kernel module was already loaded since Linux 7.0). Numbers: Qwen 3 0.6B at 92.6 tok/s decode @ +10 W, Qwen 3 8B at 10.9 tok/s, embed-gemma:300m at 5.3 embeds/s. dGPU stays idle. Open: **Whisper specifically** — still pending the NPU-compiled Whisper-v3 from AMD.
 4. **NPU model porting workflow** — figure out how to take a Hugging Face ONNX model (e.g., a small LLM) and compile it for XDNA without using AMD's Windows-first GUI tools.
 5. **Power draw with all three running** — laptop battery sustains how long?
 

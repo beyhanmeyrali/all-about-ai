@@ -109,7 +109,42 @@ We built a second llama.cpp (`build-vulkan/`, `-DGGML_VULKAN=ON`) and ran the sa
 
 ROCm on this iGPU (RDNA 3.5 / gfx1150) is not officially supported by AMD as of 2026; the community `HSA_OVERRIDE_GFX_VERSION` route is fragile. **Vulkan is the right path for this iGPU.** ROCm becomes the right call only when you have an AMD *discrete* GPU (RX 7900, MI300).
 
-The XDNA 2 NPU on this laptop (~50 TOPS INT8) is real and has Linux support via FastFlowLM and AMD's Ryzen AI 1.7.1 stack, but it's a separate toolchain (ONNX, not GGUF) and the userspace driver isn't installed here yet. See [HARDWARE_BEYOND_CUDA.md §3](HARDWARE_BEYOND_CUDA.md) for the install path and realistic use cases (Whisper, embeddings, INT8 small LLMs running in parallel with CUDA).
+The XDNA 2 NPU on this laptop (~50 TOPS INT8) is real and has Linux support via FastFlowLM and AMD's Ryzen AI 1.7.1 stack. We installed it (one `.deb` + memlock tweak, no reboot) and measured it. See [NPU.md](NPU.md) for the full install walkthrough and benchmark methodology.
+
+---
+
+## Third backend — AMD XDNA 2 NPU via FastFlowLM
+
+Measured with `flm v0.9.41`, FW 1.1.2.64, kernel 7.0.0-14, on AC power. NPU's own `prefill_speed_tps` / `decoding_speed_tps` from the server's `usage` field; package power from `intel-rapl` package counter delta.
+
+### Chat models — single-stream tok/s
+
+| Model | Active | Prefill (medium prompt) | **Decode (stable)** | vs CUDA 5060 |
+|---|:---:|---:|---:|---|
+| qwen3:0.6b | 0.6 B | 83 tok/s | **96.8** | n/a (no 0.6B CUDA bench here) |
+| llama3.2:1b | 1.2 B | 131 tok/s | **62.7** | n/a |
+| qwen3:8b | 8.2 B | 25 tok/s | **11.0** | 63.7 (5060 wins 5.8×) |
+
+### Embeddings — embed-gemma:300m, 768-dim output
+
+| Input | Latency (best of 5) | Effective rate |
+|---|---:|---:|
+| Short sentence | 188 ms | 5.3 embeds/s |
+| Long paragraph (~120 tokens) | 256 ms | 3.9 embeds/s |
+
+### Package power (Intel RAPL counter delta)
+
+| State | Avg watts |
+|---|---:|
+| Idle baseline | 10.1 W |
+| NPU running qwen3:0.6b (sustained decode) | **20.4 W** |
+| NPU running qwen3:8b (sustained decode) | **20.5 W** |
+
+**Two findings to remember**:
+1. **NPU power is ~constant in model size**: the NPU itself is the active component, and its envelope doesn't grow with the model. The 0.6 B model gets ~9× more tokens-per-joule than the 8 B from this fact alone.
+2. **While the NPU runs the 8 B at 11 tok/s, `nvidia-smi` reports the RTX 5060 sitting at 0 % util, 15 MiB, 8.55 W** — completely idle. NPU work does not contend with the dGPU for compute or VRAM. *Use them concurrently.*
+
+Full install + methodology + scripts: [NPU.md](NPU.md).
 
 ---
 

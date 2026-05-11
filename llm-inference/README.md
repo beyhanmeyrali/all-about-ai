@@ -43,6 +43,7 @@ flowchart TD
 | **[HARDWARE_BEYOND_CUDA.md](HARDWARE_BEYOND_CUDA.md)** | Waking up the *other* accelerators on this laptop — Radeon 880M iGPU via Vulkan, XDNA NPU via XRT / onnxruntime-vitisai, ROCm. What's installed at the kernel level, what's missing in userspace, install commands, and per-accelerator workload fit. | When you want to use the iGPU or NPU concurrently with the RTX 5060. |
 | **[run_bench.sh](run_bench.sh)** | One-line benchmark wrapper around `llama-bench`. | When iterating on `-ngl` / `-ncmoe` settings. |
 | **[HARDWARE_BEYOND_CUDA.md](HARDWARE_BEYOND_CUDA.md)** | The other accelerators on this laptop: AMD Radeon 890M iGPU (Vulkan), XDNA 2 NPU (FastFlowLM / Ryzen AI), and why ROCm doesn't apply here. Real measured numbers showing the iGPU is 1.5–4× slower than CUDA — but useful for concurrent / battery-light workloads. | When you're wondering "is my AMD silicon idle?" or "can I use the NPU?" |
+| **[NPU.md](NPU.md)** | Deep dive on the XDNA 2 NPU: install steps (one `.deb` + memlock tweak, no reboot), measured benchmarks (Qwen 3 0.6 B at 92.6 tok/s @ +10 W, 8 B at 11 tok/s — dGPU completely idle the whole time), embeddings (5/sec), and the use cases where it pulls its weight (RAG, voice, parallel-helper LLMs). | When you want to actually use the NPU, not just know it exists. |
 
 ---
 
@@ -72,14 +73,18 @@ flowchart TD
 | Phi-4-reasoning 14B (Q4) | 8.5 GB | 23.8 | Smartest dense at usable speed. |
 | Qwen3.6-27B dense (Q3) | 13 GB | 7.8 | The dense penalty: 7× slower than the 30B MoE. |
 | Qwen 3 8B + **TurboQuant turbo2** | 4.7 GB | **28.5 @ 32K** | **Long context unlocked** — FP16 OOMs at 32K. |
+| Qwen 3 0.6B on **AMD XDNA 2 NPU** | 0.4 GB | **92.6** | Tiny + chat-fast + ~10 W. dGPU stays free. |
+| Qwen 3 8B on **AMD XDNA 2 NPU** | 2.5 GB | 10.9 | Same model, 6× slower than CUDA — but the NPU draws ~10 W vs dGPU's ~50–80 W. |
 
-**Three punchlines in one machine:**
+**Four punchlines in one machine:**
 
 1. **MoE wins on tiny VRAM.** A 30-billion-parameter MoE model runs at near-chat speed on an 8 GB laptop GPU. The trick is `-ncmoe` (CPU-offloaded expert sets) — explained in [HOW_TO_RUN.md §5](HOW_TO_RUN.md).
 
 2. **MoE generation is not free, even at constant active-param count.** The newer **Qwen3.6-35B-A3B** has the same 3 B active params as Qwen 3 30B-A3B, yet runs ~30 % slower on the same hardware (37.8 vs 53.8 t/s). Total weights, expert count (256 vs 128) and hybrid linear/full attention all bend the memory-bandwidth curve — see [BENCHMARKS.md](BENCHMARKS.md) for the full sweep.
 
 3. **TurboQuant unlocks long context.** Stock llama.cpp can't even load Qwen 3 8B at 32K context on this laptop (FP16 KV cache busts VRAM). With [Madreag's TurboQuant fork](https://github.com/Madreag/turbo3-cuda) and `-ctk turbo2 -ctv turbo2` the same model runs at 28.5 tok/s with a 32K-token window — and the 7.5× KV compression is actually *faster* than the 5× variant at long context. Details in [BENCHMARKS.md](BENCHMARKS.md) and [HOW_TO_RUN.md §7.5](HOW_TO_RUN.md).
+
+4. **The XDNA 2 NPU is real, on Linux, and runs alongside the dGPU.** Installed FastFlowLM (one `.deb`, no reboot) and got **92.6 tok/s on Qwen 3 0.6 B at ~+10 W incremental package power** — while `nvidia-smi` confirmed the RTX 5060 sitting idle. Right tool for embeddings, voice, and small parallel helper LLMs while CUDA does the heavy lifting. Install + measurements in [NPU.md](NPU.md).
 
 ---
 
