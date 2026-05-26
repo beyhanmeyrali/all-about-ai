@@ -220,6 +220,95 @@ So when we benchmark Qwen 3 30B-A3B at `-ngl 99 -ncmoe 31` and see 53.8 tok/s �
 
 ---
 
+## 5.7 Why three MoE models run at three different speeds — a worked example
+
+We benchmarked three Mixture-of-Experts models on this exact laptop (full numbers in `BENCHMARKS.md`):
+
+| Model | Total params | Disk (Q4) | **Decode tok/s** |
+|---|---:|---:|---:|
+| Qwen 3 30B-A3B | 30 B | 17.3 GiB | **53.8** |
+| Qwen3.6-35B-A3B | 35 B | 20.6 GiB | **37.8** |
+| Gemma 4 26B-A4B | 25 B | 15.8 GiB | **28.7** |
+
+Look at that ranking against the sizes. The **smallest** model on disk (Gemma, 15.8 GiB) is the **slowest**. The **largest** (Qwen3.6, 20.6 GiB) is in the **middle**. The "30B" beats the "35B" beats the "26B". If parameter count predicted speed, this table would be impossible. So what's really going on?
+
+### Step 1 — decode speed is set by memory *bandwidth*, not by parameter count
+
+To generate one token, the model reads every active parameter for that token out of memory and does a little math on it. The math is trivial (a matrix × vector — almost no arithmetic per byte loaded), so the token clock is essentially:
+
+```
+time per token  ≈   bytes you must read   ÷   bandwidth of where those bytes live
+```
+
+This is the single most important sentence in this section. Decode is **bandwidth-bound**. The GPU's compute units spend most of each token waiting for weight bytes to arrive.
+
+### Step 2 — the two memories are 5.6× apart
+
+From §5.5, our hot path is split across two memory pools with very different speeds:
+
+```
+RTX 5060 GDDR (private to the GPU):    ~448 GB/s   ← experts we kept on the GPU
+System DDR5 (shared with the CPU):      ~80 GB/s   ← experts we offloaded to RAM
+                                        ~5.6× slower
+```
+
+So the whole game reduces to one ratio: **what fraction of each token's active bytes come from the fast 448 GB/s pool versus the slow 80 GB/s pool?** Move more of the hot path into VRAM → faster. Spill more to RAM → slower, by up to 5.6× on the spilled portion.
+
+### Step 3 — three levers decide that fraction
+
+```mermaid
+flowchart TD
+    SPEED["Decode speed"]:::out
+    L1["Lever 1: active params/token<br/>(raw bytes to move)"]:::lever --> SPEED
+    L2["Lever 2: % of hot path in fast VRAM<br/>(the offload fraction)"]:::lever --> SPEED
+    L3["Lever 3: VRAM stolen by fixed tensors<br/>(vocab embeddings, KV, attention)"]:::lever --> L2
+    classDef lever fill:#fde68a,stroke:#ca8a04,color:#000
+    classDef out fill:#86efac,stroke:#16a34a,color:#000,stroke-width:3px
+```
+
+| Model | Lever 1: active/token | Lever 2: expert layers on GPU | → % hot path in fast VRAM |
+|---|---:|---:|---:|
+| Qwen 3 30B-A3B | **3 B** | 17 of 48 | **35 %** |
+| Qwen3.6-35B-A3B | 3 B | 6 of 40 | 15 % |
+| Gemma 4 26B-A4B | **4 B** | 2 of 30 | 7 % |
+
+**Lever 1 — active parameters per token.** Gemma activates **4 B vs 3 B** for the Qwen pair. That's 33 % more bytes to read *every single token*, before anything else. A direct, unavoidable tax.
+
+**Lever 2 — the offload fraction (the dominant lever).** Qwen 3 30B-A3B keeps 35 % of its expert layers on the fast GPU; Gemma keeps only 7 %. Because RAM is 5.6× slower, the model reading more of its experts from RAM decodes much slower. This is the biggest single factor in the ranking.
+
+**Lever 3 — what eats the VRAM budget, so fewer experts fit.** The GPU must hold *fixed* non-expert tensors before a single expert gets a seat: all-layer attention, the KV cache, compute buffers, and — critically — the **embedding and output (LM-head) matrices, whose size scales with vocabulary**:
+
+- Qwen 3 / Qwen3.6: ~151 K-token vocab
+- **Gemma 4: 262 K-token vocab (1.7×)** → ~1 GB+ of fixed weights parked on the GPU, stealing exactly the room experts would have used. *That's* why Gemma offloads only 2 of 30 layers.
+- Qwen3.6-35B is squeezed differently: its 20.6 GiB total makes each expert layer "fatter," so fewer fit per GB of VRAM, and its 256-expert + linear-attention design adds per-token state to read.
+
+### Step 4 — the back-of-envelope that matches the measurements
+
+Per token, active data ≈ active_params × ~0.56 bytes (effective bytes/param for Q4 K-quants). Split that by where it's read and divide by the bandwidth of each pool:
+
+**Qwen 3 30B-A3B** — 3 B active, 65 % of experts in RAM:
+- from RAM: 1.68 GB × 0.65 ÷ 80 GB/s ≈ **13.6 ms**
+- from VRAM: 1.68 GB × 0.35 ÷ 448 GB/s ≈ **1.3 ms**
+- ≈ 15 ms/token → **~66 tok/s** ceiling (measured 53.8, the rest is attention + KV reads + overhead)
+
+**Gemma 4 26B-A4B** — 4 B active, 93 % of experts in RAM:
+- from RAM: 2.24 GB × 0.93 ÷ 80 GB/s ≈ **26 ms**
+- from VRAM: negligible
+- ≈ 26 ms/token → **~38 tok/s** ceiling (measured 28.7)
+
+The slow-RAM traffic per token is **~2.08 GB for Gemma versus ~1.1 GB for Qwen 3 30B-A3B** — nearly double. That single ratio is most of the ~2× speed difference. Lever 1 (more active params) and Lever 2 (worse offload fraction) compound in the same direction for Gemma, which is why it lands at the bottom of the MoE group despite being the smallest file.
+
+### The takeaway
+
+**Total parameter count predicts almost nothing about decode speed.** What predicts it:
+1. How many active-parameter bytes you move per token (active count × bytes/param).
+2. What fraction of those bytes you can serve from fast VRAM instead of slow RAM.
+3. How much VRAM the *fixed* tensors — vocabulary embeddings especially — steal before experts get a seat.
+
+This is the same lesson as §4 (MoE makes the *active* set small) and §5.5 (offload puts the hot set in fast memory), now visible in three real numbers. When you size up a new MoE model, ask "how many active params, how big is the vocab, and how many expert layers will fit on my GPU?" — *not* "how many billion parameters total?"
+
+---
+
 ## 6. The KV cache — the model's short-term memory
 
 Every time the model generates a token, it has to remember the previous tokens. It does this by storing two vectors per token per layer, called **K** and **V** (Keys and Values). All those stored vectors together = the **KV cache**.
