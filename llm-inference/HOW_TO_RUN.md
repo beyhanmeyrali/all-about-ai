@@ -404,6 +404,11 @@ Worked example for **Qwen3.6-35B-A3B** (40 layers, ~22 GB at UD-Q4_K_M, hybrid a
 - Predicted ncmoe: 40 - 10 = **30**
 - Reality: ncmoe=29 OOMs, ncmoe=30 loads but is volatile, **ncmoe=34 is the actual fast plateau** (37.8 t/s). The predictor finds the OOM cliff, not the fastest stable point — you still need to walk back up a step or two when KV-cache and compute buffers crowd the GPU. *Lesson: predict the floor, then sweep for the plateau.*
 
+Worked example for **Gemma 4 26B-A4B** (30 layers, ~16 GB at UD-Q4_K_M, **262K vocab**) — where the naive prediction fails:
+- Per-layer cost: 16 / 30 ≈ 0.53 GB → predict GPU-able (7.7-2)/0.53 ≈ 10 layers → predicted ncmoe ≈ **20**
+- Reality: ncmoe=20 **OOMs**, ncmoe=22 thrashes (11 t/s), and the sweet spot is **ncmoe=28** (28.7 t/s) — only *2* expert layers on GPU.
+- Why the prediction is so far off: the per-layer estimate ignores the **fixed non-expert tensors**, and Gemma's 262K-token vocab makes the embedding + output matrices ~1 GB+ *each* at Q4. Those sit on the GPU before any expert does, so the real GPU budget for experts is tiny. *Lesson: when a model has a huge vocab (Gemma, some multilingual models), subtract ~2-3 GB of fixed overhead from your VRAM budget before estimating offload — or just start the sweep near ncmoe=total_layers and walk down carefully.*
+
 ### 5.8 What if it's a *dense* model that doesn't fit?
 
 `-ncmoe` does nothing for dense models — they have no experts to offload separately. For dense models that overflow VRAM, you only have `-ngl <N>` to play with: lower N = more on CPU. The speed cost is much harsher than for MoE because the entire layer (attention *and* FFN) gets pushed to slower memory.
@@ -629,6 +634,7 @@ Replace `<MODEL>` with the absolute path to your `.gguf`. Always run from `build
 ```bash
 ./llama-cli -m <MODEL> -ngl 99 -ncmoe 31 -c 8192     # Qwen 3 30B-A3B sweet spot
 ./llama-cli -m <MODEL> -ngl 99 -ncmoe 34 -c 8192     # Qwen3.6-35B-A3B sweet spot
+./llama-cli -m <MODEL> -ngl 99 -ncmoe 28 -c 8192     # Gemma 4 26B-A4B sweet spot (big vocab → little offload)
 ```
 
 ### Chat (dense model that doesn't fit, e.g. Qwen3.6-27B)

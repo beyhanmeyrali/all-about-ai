@@ -25,6 +25,11 @@ Method: `llama-bench -p 512 -n 128`. Two metrics:
 | Qwen3.6-35B-A3B (MoE, hybrid attn) | UD-Q4_K_M | 20.60 GiB | 99 + ncmoe=31 | 514.3 | 36.7 | pp climbs, tg dips — bandwidth hits. |
 | Qwen3.6-35B-A3B (MoE, hybrid attn) | UD-Q4_K_M | 20.60 GiB | 99 + ncmoe=30 | 508.1 | 33.7 | Volatile (±5.2) — near the wall. |
 | Qwen3.6-35B-A3B (MoE, hybrid attn) | UD-Q4_K_M | 20.60 GiB | 99 + ncmoe=29 | — | — | **OOM — won't load.** |
+| Gemma 4 26B-A4B (MoE, hybrid SWA) | UD-Q4_K_M | 15.77 GiB | 99 + ncmoe=30 | 527.3 | 27.9 | All experts on CPU — safe baseline. |
+| Gemma 4 26B-A4B (MoE, hybrid SWA) | UD-Q4_K_M | 15.77 GiB | **99 + ncmoe=28** | **546.2** | **28.7** | **Sweet spot.** Only 2 of 30 expert layers fit on GPU. |
+| Gemma 4 26B-A4B (MoE, hybrid SWA) | UD-Q4_K_M | 15.77 GiB | 99 + ncmoe=26 | 577.2 | 26.0 | Variance rising (±3.0) — VRAM pressure. |
+| Gemma 4 26B-A4B (MoE, hybrid SWA) | UD-Q4_K_M | 15.77 GiB | 99 + ncmoe=22 | 666.2 | 11.2 | Thrashing — past the usable wall. |
+| Gemma 4 26B-A4B (MoE, hybrid SWA) | UD-Q4_K_M | 15.77 GiB | 99 + ncmoe=20 | — | — | **OOM — won't load.** |
 | Phi-4-reasoning 14B (dense) | Q4_K_M | 8.43 GiB | 32 | 810.3 | 21.0 | Conservative — 32 of 40 layers on GPU. |
 | Phi-4-reasoning 14B (dense) | Q4_K_M | 8.43 GiB | 34 | 917.0 | 22.7 | Tighter. |
 | Phi-4-reasoning 14B (dense) | Q4_K_M | 8.43 GiB | **35** | **969.2** | **23.8** | **Sweet spot.** ngl=36 OOMs. |
@@ -38,6 +43,7 @@ Method: `llama-bench -p 512 -n 128`. Two metrics:
 - **Qwen 3 8B** at 63.7 t/s: a 100-token reply in ~1.5 s. Feels instant.
 - **Qwen 3 30B-A3B at 53.8 t/s**: 30B-class model, MoE with 3B active per token, runs on an 8 GB laptop at near-chat speed. The MoE thesis (§4 of LESSONS_LEARNED.md) is fully validated — and *better* than the 15-25 t/s prediction.
 - **Qwen3.6-35B-A3B at 37.8 t/s**: the newer 35B/A3B MoE — same active count, but bigger total weights, more experts (256 vs 128), and a hybrid Gated-DeltaNet+Gated-Attention stack. Still chat-speed on 8 GB VRAM, but **~30 % slower than Qwen 3 30B-A3B**. The penalty is real and traces to (a) bigger model = more weights to push when experts hit, and (b) hybrid attention pulls more memory bandwidth than pure attention.
+- **Gemma 4 26B-A4B at 28.7 t/s**: a third MoE, and the most instructive contrast. It's the *smallest* of the three MoEs on disk (15.8 GiB) yet the *second-slowest* — and it can only push **2 of 30 expert layers onto the GPU** before OOM, vs the 17 that Qwen 3 30B-A3B managed. Two causes: (a) Gemma's **262K-token vocabulary** makes the embedding + output tensors enormous (~1 GB+ each at Q4) and those sit on the GPU, eating the VRAM that would otherwise hold experts; (b) **4B active params** (vs 3B for the Qwen MoEs) is 33 % more compute per token. The MoE trick still works — 28.7 t/s is very usable — but vocabulary size and active-param count both bend the result. *Total parameter count tells you almost nothing about speed.*
 - **Phi-4-reasoning 14B at 23.8 t/s**: smartest *dense* model that still feels usable. Best per-byte reasoning quality.
 - **Qwen3.6-27B dense at 7.8 t/s**: the dense penalty is dramatic. A 27B *dense* model is **~7× slower** than a 30B *MoE* on the same hardware. This is the most important contrast in the table — it makes the case for MoE on small VRAM concrete.
 - Pattern for MoE on small VRAM: use `-ngl 99 -ncmoe N` to keep attention on GPU, push experts to CPU. Tune N down until OOM, then back off by 1.
@@ -157,6 +163,7 @@ Full install + methodology + scripts: [NPU.md](NPU.md).
 Qwen 3 8B       ████████████████████████████████ 63.7  ← fits VRAM, full GPU
 30B-A3B MoE     █████████████████████████████ 53.8     ← MoE magic: 30B via expert offload
 3.6 35B-A3B MoE ███████████████████ 37.8                ← bigger MoE, hybrid attn — pays for the size
+Gemma4 26B-A4B  ██████████████ 28.7                      ← MoE, but 262K vocab + 4B active limit offload
 Phi-4 14B       ████████████ 23.8                       ← dense, tight fit
 Qwen3.6-27B     ████ 7.8                                 ← dense penalty: 27B busts VRAM
 ```

@@ -70,6 +70,7 @@ flowchart TD
 | Qwen 3 8B (Q4) | 4.7 GB | **63.7** | Daily-fast baseline. Snappy chat. |
 | **Qwen 3 30B-A3B MoE** (Q4) | 18 GB | **53.8** | A 30B model at 8B speeds — the headline result. |
 | Qwen3.6-35B-A3B MoE (Q4) | 22 GB | **37.8** | Newer 35B MoE with hybrid attn — chat-speed, but ~30 % slower than 30B-A3B. |
+| Gemma 4 26B-A4B MoE (Q4) | 17 GB | **28.7** | Smaller MoE, but 262K vocab + 4B active cap offload — only 2 expert layers fit GPU. |
 | Phi-4-reasoning 14B (Q4) | 8.5 GB | 23.8 | Smartest dense at usable speed. |
 | Qwen3.6-27B dense (Q3) | 13 GB | 7.8 | The dense penalty: 7× slower than the 30B MoE. |
 | Qwen 3 8B + **TurboQuant turbo2** | 4.7 GB | **28.5 @ 32K** | **Long context unlocked** — FP16 OOMs at 32K. |
@@ -156,7 +157,7 @@ By following [HOW_TO_RUN.md](HOW_TO_RUN.md) you'll be able to:
 
 Planned:
 
-- More models in [BENCHMARKS.md](BENCHMARKS.md): Gemma 4 26B/4B, GLM-4.6-9B, the Qwen3.6 hybrid-attn family at long context.
+- More models in [BENCHMARKS.md](BENCHMARKS.md): GLM-4.6-9B, the Qwen3.6 hybrid-attn family at long context. *(Gemma 4 26B-A4B — done, 28.7 tok/s.)*
 - A trophy run with DeepSeek V4 Flash 284B/13B (mmap from disk — yes, on a laptop).
 - Long-context numbers for Qwen3.6-35B-A3B with TurboQuant (262 K native, extensible to 1 M — KV compression should make a real-world long-context test fit).
 - Comparison column for Ollama vs raw llama.cpp on the same models.
