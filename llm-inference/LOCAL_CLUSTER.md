@@ -14,10 +14,11 @@
 |---|---|---|
 | **You own one GPU already** | **A second card in the same box** — not a second machine | 48 GB, tensor parallelism actually works at motherboard distance, no risers, ~1000 W PSU. Best value move in this entire guide. |
 | **You want one calm purchase, big models, chat-shaped work** | **Mac Studio M3 Ultra** | 819 GB/s — ~3× any other whole-machine option — and up to 512 GB unified. Quiet, one box, no assembly. |
-| **You genuinely intend to cluster** | **2× DGX Spark**, joined by the ConnectX-7 200 GbE link | The only consumer-priced fabric with a *measured* payoff: ~75 → up to 120 tok/s on gpt-oss-120B going from one node to two. Plus the CUDA ecosystem. |
+| **You genuinely intend to cluster** | **2× DGX Spark** (*not* RTX Spark — see §7), joined by the ConnectX-7 200 GbE link | The only consumer-priced fabric with a *measured* payoff: ~75 → up to 120 tok/s on gpt-oss-120B going from one node to two. Plus the CUDA ecosystem. |
 | **You want a huge model cheaply and quietly** | **4× Mac mini M4 Pro** | 192 GB pooled for ~$7,000, and ~200 W for the *whole cluster* — less than a single RTX 5090. Slow, but it runs 671B models at all. |
 | **You are serving several people at once** | **Multiple GPUs, running separate model instances** — not one model split | 2.07–3.40× more aggregate throughput than tensor-parallel on the same 4 cards. Most underused result in local AI. |
 | **One machine, forever, on a budget** | **The cheapest Strix Halo box** (~$3,650) | Competitive single-box decode, 128 GB, OS freedom. Only at the *bottom* of its price range — see below. |
+| **You want one affordable CUDA box, and can wait** | **RTX Spark** (fall 2026, ~$1,799–2,899 projected) | Same GB10 silicon family at ~40 % of DGX Spark's price — but a single machine with no published cluster fabric. |
 | **You already own several machines** | **Cluster what you have, first** | Costs nothing to find out. |
 | **Light or occasional use** | **Rent** | A 3090 is ~$0.22/GPU-hr. Two hours a day ≈ $13/month. Buying takes years to catch up. |
 
@@ -194,6 +195,27 @@ Every one is well above launch price — if you're reading a review quoting laun
 
 Alone, within ~7 % on bandwidth — price should decide. **Connected, ~20× the link.**
 
+### ⚠️ "Spark" is two different machines — don't buy the wrong one
+
+This trips people up, because both are GB10-family Grace-Blackwell boxes with 20-core Grace CPUs, a Blackwell GPU, up to 128 GB unified memory, ~1 PFLOP FP4, and an internal NVLink-C2C link. They are **not interchangeable**, and the difference is exactly the thing this guide is about.
+
+| | **DGX Spark** | **RTX Spark** |
+|---|---|---|
+| Price | $4,699 | **~$1,799 (N1) – $2,899 (N1X)**, projected |
+| Availability | shipping now | **fall 2026** (ASUS, MSI, Acer, GIGABYTE; later HP, Microsoft) |
+| Unified memory | 128 GB LPDDR5X | up to 128 GB LPDDR5X |
+| Internal link | NVLink-C2C | NVLink-C2C, up to 300 GB/s |
+| **Cluster fabric** | **onboard ConnectX-7, 200 GbE, RoCE/RDMA** | **none published** |
+| 2-node scaling | **measured: ~75 → up to 120 tok/s** | no published figure |
+| What it is | a **cluster node** | an **AI PC** |
+
+**The ConnectX-7 NIC is the entire reason DGX Spark is in this guide.** Strip it out and you have a well-built single box with mediocre memory bandwidth. So:
+
+- **Want to cluster? DGX Spark.** It is the cheapest machine with a real RDMA fabric and a published two-node result.
+- **Want one affordable CUDA box? RTX Spark looks strong** — roughly 40 % of the price for the same silicon family — but you are buying a single machine, and if you later want a second one there is no published fabric to join them with.
+
+> **Treat every RTX Spark number here as unconfirmed.** Prices are analyst projections and press reporting for an unreleased product, not measurements. Nobody has benchmarked one for local inference yet. Re-check at launch — and apply §6: if there is no published measurement of its networking, assume the worst.
+
 ### Clustering, measured
 
 | Setup | Model | Result |
@@ -348,6 +370,7 @@ Owning wins on: data that can't leave the building · always-on availability · 
 - Current prices for the A6000, A100 and P40 could not be confirmed.
 - DGX Spark's memory bandwidth is a manufacturer spec figure; I found no independent measurement of it.
 - Sources disagree on whether PCIe x8 meaningfully throttles 4-GPU inference — one report says power and cooling bind first, another that x8 "throttles noticeably." Both are cited; I have not resolved it.
+- **RTX Spark is unreleased.** Its prices are analyst projections and press reporting, and no one has benchmarked one for local inference. I found no published cluster fabric for it at all — absence of a spec is not proof it lacks one, but §6 says assume the worst until measured.
 - Prices move fast enough that some numbers here will be wrong by the time you read this. **The method survives that. The prices won't.**
 
 ---
