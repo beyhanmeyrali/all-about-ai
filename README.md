@@ -151,6 +151,7 @@ We build from the ground up:
 - 🛠️ **HOW_TO_RUN.md** — Every flag, every recipe, MoE tuning walkthrough, troubleshooting.
 - 📊 **BENCHMARKS.md** — Measured tok/s table + TurboQuant long-context demo.
 - ⚡ **run_bench.sh** — One-line `llama-bench` wrapper.
+- 🧮 **LOCAL_CLUSTER.md** — **Buyer's guide to a local LLM cluster.** Recommendations first, then the reasoning: whether you need a cluster at all, the three numbers that decide it, every option priced (used 3090s, Threadripper, Mac Studio, Mac mini clusters, DGX Spark vs RTX Spark, Strix Halo), the traps, and `cluster_roofline.py` to price your own shopping list before you pay.
 
 **Headline Results** (RTX 5060 Laptop, 8 GB VRAM):
 
