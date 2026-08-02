@@ -153,6 +153,69 @@ So **do not autoscale GPUs on connection count.** Scale on **inference queue dep
 
 ---
 
+## 7½. Measured on one 8 GB laptop — first-party results
+
+Everything above this point is other people's papers. This section is **ours**:
+one RTX 5060 Laptop (8 GB), Gemma-3 4B Q4, `llama-server`, 16K total context split
+across slots, mixed output lengths (32–512 tokens) with staggered arrivals.
+Reproduce with `serving_bench.py` in this folder.
+
+| Concurrency | Aggregate tok/s<br/>**CB / no-CB** | Per-stream tok/s<br/>(CB) | **TTFT** sec<br/>**CB / no-CB** | TTFT penalty | VRAM |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 104.7 / 101.5 | 105.0 | 0.03 / 0.03 | — | 3815 MB |
+| 2 | 99.1 / 97.4 | 101.7 | 0.03 / 0.03 | — | 3989 MB |
+| 4 | 136.1 / 101.6 | 95.7 | 0.05 / 0.33 | **7×** | 4337 MB |
+| 8 | 145.3 / 150.9 | 46.4 | 0.08 / 1.24 | **16×** | 5033 MB |
+| **16** | **198.8** / 144.0 | 31.1 | 0.10 / 2.65 | **26×** | 5497 MB |
+| 32 | 186.1 / 184.6 | 20.1 | 0.14 / **5.49** | **39×** | 5497 MB |
+
+Four things came out of this, and one of them **corrected an earlier draft of this
+very document.**
+
+**1. Continuous batching is a LATENCY mechanism here, not a throughput one.**
+Aggregate throughput with and without it is often within noise — at 32 concurrent
+it is 186.1 vs 184.6. But **time-to-first-token diverges by 39×**: 0.14 s against
+5.49 s. Without continuous batching a new arrival waits for the batch to drain;
+with it, they join the next token step. Throughput graphs hide this completely.
+The user does not feel tokens per second. They feel the wait before the first word.
+
+**2. Batching buys ~1.9× aggregate throughput on this GPU** (104.7 → 198.8 tok/s
+going from 1 to 16 concurrent streams). That is squarely in the **2–4×** range the
+vLLM paper reports — and nowhere near the "10 users → 800–1000 users" claim in the
+[audit](#8-a-claims-audit). Our own hardware independently contradicts it.
+
+**3. Throughput peaks and then falls.** 198.8 tok/s at 16 concurrent, 186.1 at 32.
+Past the knee you are adding contention, not capacity.
+
+**4. The wall shows up as context, not VRAM.** Note that VRAM is *identical* at 16
+and 32 concurrent — 5497 MB both times. Total KV cache is fixed by `-c 16384`, so
+doubling the slots does not consume more memory, it **halves the context each user
+gets**: 1024 tokens each at 16 slots, 512 at 32. This is the memory wall in its
+everyday form on a small machine. You do not run out of VRAM; you run out of
+*conversation* — which is exactly the waste PagedAttention exists to reclaim.
+
+> **The honest headline for this hardware:** one 8 GB laptop GPU serves roughly
+> **16 concurrent users** at ~31 tok/s each with sub-100 ms first-token latency.
+> Push to 32 and each user drops to 20 tok/s with half the context. That is the
+> real shape of the curve, measured, on hardware anyone can buy.
+
+### A test-design failure worth publishing
+
+The first version of this experiment sent **identical requests, all at once**, and
+measured **no difference at all** between `-cb` and `-nocb`. I nearly reported that
+as a null result.
+
+It was a null result about the *workload*, not about batching. Static batching's
+penalty is waiting for the slowest request in the batch — and if every request is
+the same length and arrives at the same instant, there is no slowest one. The test
+structurally could not observe the thing it existed to measure.
+
+Mixed lengths plus staggered arrivals — i.e. traffic that looks like traffic —
+made the effect appear immediately, and it was large. **A benchmark that cannot
+see the effect returns a clean, confident, meaningless number.**
+
+---
+
 ## 8. A claims audit
 
 A widely-shared version of this story circulates on social media. Most of it is right. **One number is wrong by two orders of magnitude**, and a couple more need labelling. Since the whole point of this repo is checkable numbers, here is the audit.
@@ -163,7 +226,7 @@ A widely-shared version of this story circulates on social media. Most of it is 
 | PagedAttention cuts waste to <4% | ✅ **True** — same paper |
 | ~2 GB KV cache per session at 8K | ✅ **Fair** — my arithmetic gives ~2.7 GB for a 70B/GQA model |
 | 1M sessions ≈ 2 PB of KV cache | ✅ **Arithmetic holds** |
-| Continuous batching lifts utilisation a lot | ✅ **Directionally true** — 17% → 35–41% measured in one published comparison |
+| Continuous batching lifts utilisation a lot | ⚠️ **Refined by our own test.** On our GPU it barely moves aggregate throughput — but it improves **time-to-first-token by up to 39×** (§7½). It is a latency mechanism, and describing it as a throughput multiplier misses the point. |
 | Prefill/decode run as separate clusters | ✅ **Real** — DistServe, Splitwise |
 | **"A GPU that served ~10 users now serves 800–1000"** | ❌ **WRONG.** The paper reports **2–4×** throughput. This confuses *memory-waste reduction* with *throughput gain*. You cannot get 100× more users by reclaiming 80% of one resource — there is not 100× of it to reclaim. |
 | "40–50% → 90%+ utilisation" | ⚠️ **Unsourced specifics.** Direction right, exact numbers not supported by anything I could find. |

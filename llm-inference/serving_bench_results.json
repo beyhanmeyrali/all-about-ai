@@ -1,0 +1,134 @@
+[
+  {
+    "ok": true,
+    "concurrency": 1,
+    "cont_batching": true,
+    "requests_ok": 1,
+    "wall_sec": 0.32,
+    "aggregate_tps": 104.7,
+    "per_stream_tps": 105.0,
+    "mean_ttft_sec": 0.03,
+    "vram_mb": 3815
+  },
+  {
+    "ok": true,
+    "concurrency": 2,
+    "cont_batching": true,
+    "requests_ok": 2,
+    "wall_sec": 0.99,
+    "aggregate_tps": 99.1,
+    "per_stream_tps": 101.7,
+    "mean_ttft_sec": 0.03,
+    "vram_mb": 3989
+  },
+  {
+    "ok": true,
+    "concurrency": 4,
+    "cont_batching": true,
+    "requests_ok": 4,
+    "wall_sec": 2.38,
+    "aggregate_tps": 136.1,
+    "per_stream_tps": 95.7,
+    "mean_ttft_sec": 0.05,
+    "vram_mb": 4337
+  },
+  {
+    "ok": true,
+    "concurrency": 8,
+    "cont_batching": true,
+    "requests_ok": 8,
+    "wall_sec": 11.2,
+    "aggregate_tps": 145.3,
+    "per_stream_tps": 46.4,
+    "mean_ttft_sec": 0.08,
+    "vram_mb": 5033
+  },
+  {
+    "ok": true,
+    "concurrency": 16,
+    "cont_batching": true,
+    "requests_ok": 16,
+    "wall_sec": 16.51,
+    "aggregate_tps": 198.8,
+    "per_stream_tps": 31.1,
+    "mean_ttft_sec": 0.1,
+    "vram_mb": 5497
+  },
+  {
+    "ok": true,
+    "concurrency": 32,
+    "cont_batching": true,
+    "requests_ok": 32,
+    "wall_sec": 34.95,
+    "aggregate_tps": 186.1,
+    "per_stream_tps": 20.1,
+    "mean_ttft_sec": 0.14,
+    "vram_mb": 5497
+  },
+  {
+    "ok": true,
+    "concurrency": 1,
+    "cont_batching": false,
+    "requests_ok": 1,
+    "wall_sec": 0.33,
+    "aggregate_tps": 101.5,
+    "per_stream_tps": 101.8,
+    "mean_ttft_sec": 0.03,
+    "vram_mb": 3815
+  },
+  {
+    "ok": true,
+    "concurrency": 2,
+    "cont_batching": false,
+    "requests_ok": 2,
+    "wall_sec": 1.01,
+    "aggregate_tps": 97.4,
+    "per_stream_tps": 100.0,
+    "mean_ttft_sec": 0.03,
+    "vram_mb": 3989
+  },
+  {
+    "ok": true,
+    "concurrency": 4,
+    "cont_batching": false,
+    "requests_ok": 4,
+    "wall_sec": 3.19,
+    "aggregate_tps": 101.6,
+    "per_stream_tps": 85.5,
+    "mean_ttft_sec": 0.33,
+    "vram_mb": 4337
+  },
+  {
+    "ok": true,
+    "concurrency": 8,
+    "cont_batching": false,
+    "requests_ok": 8,
+    "wall_sec": 10.97,
+    "aggregate_tps": 150.9,
+    "per_stream_tps": 47.0,
+    "mean_ttft_sec": 1.24,
+    "vram_mb": 5033
+  },
+  {
+    "ok": true,
+    "concurrency": 16,
+    "cont_batching": false,
+    "requests_ok": 16,
+    "wall_sec": 23.15,
+    "aggregate_tps": 144.0,
+    "per_stream_tps": 26.9,
+    "mean_ttft_sec": 2.65,
+    "vram_mb": 5497
+  },
+  {
+    "ok": true,
+    "concurrency": 32,
+    "cont_batching": false,
+    "requests_ok": 32,
+    "wall_sec": 35.3,
+    "aggregate_tps": 184.6,
+    "per_stream_tps": 16.3,
+    "mean_ttft_sec": 5.49,
+    "vram_mb": 5497
+  }
+]
