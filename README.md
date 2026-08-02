@@ -151,6 +151,7 @@ We build from the ground up:
 - 🛠️ **HOW_TO_RUN.md** — Every flag, every recipe, MoE tuning walkthrough, troubleshooting.
 - 📊 **BENCHMARKS.md** — Measured tok/s table + TurboQuant long-context demo.
 - ⚡ **run_bench.sh** — One-line `llama-bench` wrapper.
+- 🌐 **SERVING_AT_SCALE.md** — **Why serving an LLM is an OS problem.** The KV-cache wall (one H100 holds ~29 conversations at 8K), PagedAttention as virtual memory, continuous batching as preemptive scheduling, prefill/decode disaggregation, and a claims audit of the viral version. With `kv_cache_calc.py`.
 - 🧮 **LOCAL_CLUSTER.md** — **Buyer's guide to a local LLM cluster.** Recommendations first, then the reasoning: whether you need a cluster at all, the three numbers that decide it, every option priced (used 3090s, Threadripper, Mac Studio, Mac mini clusters, DGX Spark vs RTX Spark, Strix Halo), the traps, and `cluster_roofline.py` to price your own shopping list before you pay.
 
 **Headline Results** (RTX 5060 Laptop, 8 GB VRAM):
