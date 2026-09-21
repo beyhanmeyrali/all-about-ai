@@ -1,0 +1,200 @@
+{
+  "diffusiongemma_read": [
+    {
+      "questions": 1,
+      "cold_ms": 563.0691190017387,
+      "warm_ms": 93.02657999796793,
+      "input_tokens": 111,
+      "output_tokens": 0
+    },
+    {
+      "questions": 2,
+      "cold_ms": 626.5823600115255,
+      "warm_ms": 93.3999809785746,
+      "input_tokens": 129,
+      "output_tokens": 0
+    },
+    {
+      "questions": 5,
+      "cold_ms": 864.3493650015444,
+      "warm_ms": 154.71594099653885,
+      "input_tokens": 182,
+      "output_tokens": 0
+    },
+    {
+      "questions": 10,
+      "cold_ms": 1335.561427025823,
+      "warm_ms": 287.0299000060186,
+      "input_tokens": 274,
+      "output_tokens": 0
+    },
+    {
+      "questions": 20,
+      "cold_ms": 2089.269726013299,
+      "warm_ms": 363.0920359864831,
+      "input_tokens": 465,
+      "output_tokens": 0
+    }
+  ],
+  "qwen_write_no_op_offload": [
+    {
+      "questions": 1,
+      "cold_ms": 613.7575789762195,
+      "warm_ms": 101.69776200200431,
+      "prompt_tokens": 111,
+      "output_tokens": 5,
+      "well_formed": true,
+      "reply": "q1: yes"
+    },
+    {
+      "questions": 2,
+      "cold_ms": 763.3383999927901,
+      "warm_ms": 190.1002099912148,
+      "prompt_tokens": 128,
+      "output_tokens": 10,
+      "well_formed": true,
+      "reply": "q1: yes\nq2: no"
+    },
+    {
+      "questions": 5,
+      "cold_ms": 1213.9691149932332,
+      "warm_ms": 452.4514279910363,
+      "prompt_tokens": 178,
+      "output_tokens": 25,
+      "well_formed": true,
+      "reply": "q1: yes\nq2: no\nq3: no\nq4: no\nq5: no"
+    },
+    {
+      "questions": 10,
+      "cold_ms": 2039.9744389869738,
+      "warm_ms": 931.3015450024977,
+      "prompt_tokens": 265,
+      "output_tokens": 51,
+      "well_formed": true,
+      "reply": "q1: yes\nq2: no\nq3: no\nq4: no\nq5: no\nq6: no\nq7: no\nq8: yes\nq9: yes\nq10: no"
+    },
+    {
+      "questions": 20,
+      "cold_ms": 3144.474156986689,
+      "warm_ms": 1697.2348710114602,
+      "prompt_tokens": 445,
+      "output_tokens": 92,
+      "well_formed": false,
+      "reply": "q1: yes q2: no q3: no q4: no q5: no q6: yes q7: no q8: yes q9: yes q10: no q11: no q12: no q13: no q14: no q15: no q16: no q17: no q18: no q19: no q20: no"
+    }
+  ],
+  "qwen_write": [
+    {
+      "questions": 1,
+      "cold_ms": 883.150003006449,
+      "warm_ms": 96.98791999835521,
+      "prompt_tokens": 111,
+      "output_tokens": 5,
+      "well_formed": true,
+      "reply": "q1: yes"
+    },
+    {
+      "questions": 2,
+      "cold_ms": 989.481174008688,
+      "warm_ms": 183.13320499146357,
+      "prompt_tokens": 128,
+      "output_tokens": 10,
+      "well_formed": true,
+      "reply": "q1: yes\nq2: no"
+    },
+    {
+      "questions": 5,
+      "cold_ms": 1293.8890139921568,
+      "warm_ms": 464.5714490034152,
+      "prompt_tokens": 178,
+      "output_tokens": 25,
+      "well_formed": true,
+      "reply": "q1: yes\nq2: no\nq3: no\nq4: no\nq5: no"
+    },
+    {
+      "questions": 10,
+      "cold_ms": 1905.918942997232,
+      "warm_ms": 1064.4089429988526,
+      "prompt_tokens": 265,
+      "output_tokens": 51,
+      "well_formed": true,
+      "reply": "q1: yes\nq2: no\nq3: no\nq4: no\nq5: no\nq6: no\nq7: no\nq8: yes\nq9: yes\nq10: no"
+    },
+    {
+      "questions": 20,
+      "cold_ms": 2697.412314999383,
+      "warm_ms": 1674.242281995248,
+      "prompt_tokens": 445,
+      "output_tokens": 92,
+      "well_formed": false,
+      "reply": "q1: yes q2: no q3: no q4: no q5: no q6: no q7: no q8: yes q9: yes q10: no q11: no q12: no q13: no q14: no q15: no q16: no q17: no q18: no q19: no q20: no"
+    }
+  ],
+  "jev_openrouter": [
+    {
+      "questions": 1,
+      "cold_ms": 396.3615389948245,
+      "warm_ms": 339.983243989991,
+      "input_tokens": 304,
+      "output_tokens": 21,
+      "cost_usd": 1.2768e-05,
+      "usage": {
+        "input_tokens": 304,
+        "output_tokens": 21,
+        "cost": 1.2768e-05
+      }
+    },
+    {
+      "questions": 2,
+      "cold_ms": 350.43809399940073,
+      "warm_ms": 304.6682770072948,
+      "input_tokens": 318,
+      "output_tokens": 38,
+      "cost_usd": 1.3356e-05,
+      "usage": {
+        "input_tokens": 318,
+        "output_tokens": 38,
+        "cost": 1.3356e-05
+      }
+    },
+    {
+      "questions": 5,
+      "cold_ms": 349.10405197297223,
+      "warm_ms": 328.14481400419027,
+      "input_tokens": 359,
+      "output_tokens": 89,
+      "cost_usd": 1.5078e-05,
+      "usage": {
+        "input_tokens": 359,
+        "output_tokens": 89,
+        "cost": 1.5078e-05
+      }
+    },
+    {
+      "questions": 10,
+      "cold_ms": 353.9246330037713,
+      "warm_ms": 320.0685589981731,
+      "input_tokens": 430,
+      "output_tokens": 174,
+      "cost_usd": 1.806e-05,
+      "usage": {
+        "input_tokens": 430,
+        "output_tokens": 174,
+        "cost": 1.806e-05
+      }
+    },
+    {
+      "questions": 20,
+      "cold_ms": 335.63844897435047,
+      "warm_ms": 314.7632690088358,
+      "input_tokens": 568,
+      "output_tokens": 354,
+      "cost_usd": 2.3856e-05,
+      "usage": {
+        "input_tokens": 568,
+        "output_tokens": 354,
+        "cost": 2.3856e-05
+      }
+    }
+  ]
+}

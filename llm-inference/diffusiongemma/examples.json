@@ -193,5 +193,185 @@
     "ms_cold": 1631.3747680105735,
     "ms_warm_same_request": 650.462917983532
   },
-  "dg_ticket_one_at_a_time_ms": 4680.457133043092
+  "dg_ticket_one_at_a_time_ms": 4680.457133043092,
+  "jev_agnews": [
+    {
+      "i": 8,
+      "gold": "Sci/Tech",
+      "answer": {
+        "type": "choice",
+        "choice": "Business",
+        "probabilities": {
+          "World": 0,
+          "Sports": 0,
+          "Business": 0.82,
+          "Sci/Tech": 0.18
+        },
+        "confidence": 0.76
+      },
+      "ms": 384.0318540169392,
+      "usage": {
+        "input_tokens": 351,
+        "output_tokens": 47,
+        "cost": 1.4742e-05
+      }
+    },
+    {
+      "i": 9,
+      "gold": "Sci/Tech",
+      "answer": {
+        "type": "choice",
+        "choice": "Sci/Tech",
+        "probabilities": {
+          "Sci/Tech": 1,
+          "World": 0,
+          "Business": 0,
+          "Sports": 0
+        },
+        "confidence": 1
+      },
+      "ms": 320.81060198834166,
+      "usage": {
+        "input_tokens": 345,
+        "output_tokens": 49,
+        "cost": 1.449e-05
+      }
+    },
+    {
+      "i": 12,
+      "gold": "Business",
+      "answer": {
+        "type": "choice",
+        "choice": "Business",
+        "probabilities": {
+          "Sci/Tech": 0,
+          "Sports": 0,
+          "Business": 1,
+          "World": 0
+        },
+        "confidence": 1
+      },
+      "ms": 345.4882880032528,
+      "usage": {
+        "input_tokens": 332,
+        "output_tokens": 47,
+        "cost": 1.3944e-05
+      }
+    },
+    {
+      "i": 21,
+      "gold": "Sports",
+      "answer": {
+        "type": "choice",
+        "choice": "Sports",
+        "probabilities": {
+          "World": 0.01,
+          "Sci/Tech": 0,
+          "Sports": 0.98,
+          "Business": 0.01
+        },
+        "confidence": 0.97
+      },
+      "ms": 428.94799399073236,
+      "usage": {
+        "input_tokens": 345,
+        "output_tokens": 47,
+        "cost": 1.449e-05
+      }
+    },
+    {
+      "i": 25,
+      "gold": "Business",
+      "answer": {
+        "type": "choice",
+        "choice": "Business",
+        "probabilities": {
+          "Sci/Tech": 0,
+          "World": 0,
+          "Business": 1,
+          "Sports": 0
+        },
+        "confidence": 1
+      },
+      "ms": 308.41253901598975,
+      "usage": {
+        "input_tokens": 362,
+        "output_tokens": 47,
+        "cost": 1.5204e-05
+      }
+    },
+    {
+      "i": 28,
+      "gold": "Sci/Tech",
+      "answer": {
+        "type": "choice",
+        "choice": "Business",
+        "probabilities": {
+          "Sports": 0,
+          "Business": 0.55,
+          "World": 0,
+          "Sci/Tech": 0.45
+        },
+        "confidence": 0.39
+      },
+      "ms": 333.8849499996286,
+      "usage": {
+        "input_tokens": 373,
+        "output_tokens": 47,
+        "cost": 1.5666e-05
+      }
+    }
+  ],
+  "jev_ticket": {
+    "answer": {
+      "is_billing": {
+        "type": "noul",
+        "noul": 0.99
+      },
+      "is_bug": {
+        "type": "noul",
+        "noul": 0.94
+      },
+      "angry": {
+        "type": "noul",
+        "noul": 0.97
+      },
+      "team": {
+        "type": "choice",
+        "choice": "billing",
+        "probabilities": {
+          "account security": 0.01,
+          "sales": 0,
+          "engineering": 0.03,
+          "billing": 0.96
+        },
+        "confidence": 0.94
+      },
+      "urgency": {
+        "type": "score",
+        "score": 3.27,
+        "legend": {
+          "0": "not urgent",
+          "1": "low",
+          "2": "medium",
+          "3": "high",
+          "4": "critical"
+        },
+        "probabilities": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0.73,
+          "4": 0.27
+        },
+        "confidence": 0.77
+      }
+    },
+    "ms": 404.45524800452404,
+    "usage": {
+      "input_tokens": 440,
+      "output_tokens": 114,
+      "cost": 1.848e-05
+    }
+  }
 }

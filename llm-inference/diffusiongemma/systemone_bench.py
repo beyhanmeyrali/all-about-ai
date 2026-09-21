@@ -256,12 +256,74 @@ def bench_ar_read(url, model_name, tasks):
     return out
 
 
+# ----------------------------------------------------------------- TypeSafe Jev via OpenRouter
+
+JEV_URL = "https://openrouter.ai/api/alpha/decisions"
+
+
+def openrouter_key():
+    import os
+    key = os.environ.get("OPENROUTER_API_KEY")
+    if not key:
+        f = Path.home() / ".config/openrouter/key"
+        key = f.read_text().strip() if f.exists() else None
+    if not key:
+        raise SystemExit("set OPENROUTER_API_KEY or write the key to ~/.config/openrouter/key")
+    return key
+
+
+def jev_decide(client, model, state, questions):
+    """One call to OpenRouter's Decisions endpoint: (answers, usage, wall ms)."""
+    t0 = time.perf_counter()
+    for attempt in range(5):
+        r = client.post(JEV_URL, json={"model": model, "state": state, "questions": questions})
+        if r.status_code not in (429, 500, 502, 503, 529):
+            break
+        time.sleep(2 * (attempt + 1))
+    ms = (time.perf_counter() - t0) * 1000
+    if r.status_code != 200:
+        raise RuntimeError(f"Jev HTTP {r.status_code}: {r.text[:300]}")
+    d = r.json()
+    return d["answers"], d.get("usage", {}), ms
+
+
+def bench_jev(model, tasks, limit=None):
+    """Same questions, same scoring as the local reads; plus billed tokens and cost."""
+    import httpx
+    client = httpx.Client(timeout=120, headers={"Authorization": f"Bearer {openrouter_key()}"})
+    out = {}
+    for name in tasks:
+        t = TASKS[name]
+        rows = json.load(open(HERE / t["file"]))[:limit]
+        lat, correct, conf, probs, gold, tok_in, tok_out, cost = [], [], [], [], [], [], [], []
+        for r in rows:
+            ans, usage, ms = jev_decide(client, model, r["text"], {"q": t["question"]})
+            lat.append(ms)
+            a = ans["q"]
+            p = [1 - a["noul"], a["noul"]] if a["type"] == "noul" else [a["probabilities"][k] for k in t["labels"]]
+            pred = max(range(len(p)), key=p.__getitem__)
+            correct.append(int(pred == r["label"]))
+            conf.append(p[pred])
+            probs.append(p)
+            gold.append(r["label"])
+            tok_in.append(usage.get("input_tokens", usage.get("prompt_tokens", 0)))
+            tok_out.append(usage.get("output_tokens", usage.get("completion_tokens", 0)))
+            cost.append(usage.get("cost", 0.0) or 0.0)
+        out[name] = summarize(lat, correct, conf, probs, gold, {
+            "model": model, "mean_input_tokens": statistics.mean(tok_in), "mean_output_tokens": statistics.mean(tok_out),
+            "total_cost_usd": sum(cost), "cost_per_1k_decisions_usd": 1000 * statistics.mean(cost),
+            "sample_usage": usage})
+        print("jev", name, json.dumps(out[name]), flush=True)
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--reads", action="store_true", help="run System One reads (args after -- go to the server)")
     ap.add_argument("--ar-url", help="llama-server base URL for the autoregressive baseline")
     ap.add_argument("--ar-name", default="ar-baseline")
     ap.add_argument("--ar-max-tokens", type=int, default=16)
+    ap.add_argument("--jev", nargs="?", const="typesafe/jev-1.13", help="benchmark Jev on OpenRouter (model id)")
     ap.add_argument("--tasks", default="sst2,agnews")
     ap.add_argument("--no-sweep", action="store_true")
     ap.add_argument("--limit", type=int, help="first N examples per task (quick --n-cpu-moe sweeps)")
@@ -275,6 +337,8 @@ def main():
     if args.ar_url:
         res[args.ar_name] = bench_ar(args.ar_url, args.ar_name, tasks, args.ar_max_tokens)
         res[args.ar_name + "-read"] = bench_ar_read(args.ar_url, args.ar_name, tasks)
+    if args.jev:
+        res["jev-openrouter"] = bench_jev(args.jev, tasks, args.limit)
     json.dump(res, open(RESULTS, "w"), indent=2)
     print("wrote", RESULTS)
 

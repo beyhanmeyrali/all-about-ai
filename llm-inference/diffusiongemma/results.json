@@ -366,5 +366,47 @@
       "prefill_ms_p50": 601.043404,
       "decode_ms_p50": 94.509548
     }
+  },
+  "jev-openrouter": {
+    "sst2": {
+      "n": 200,
+      "accuracy": 0.94,
+      "p50_ms": 333.71829698444344,
+      "p95_ms": 458.860001002904,
+      "mean_ms": 352.55058402966824,
+      "mean_confidence": 0.8697,
+      "ece": 0.07029999999999999,
+      "brier": 0.110468,
+      "model": "typesafe/jev-1.13",
+      "mean_input_tokens": 299.7,
+      "mean_output_tokens": 20,
+      "total_cost_usd": 0.00251748,
+      "cost_per_1k_decisions_usd": 0.0125874,
+      "sample_usage": {
+        "input_tokens": 313,
+        "output_tokens": 20,
+        "cost": 1.3146e-05
+      }
+    },
+    "agnews": {
+      "n": 200,
+      "accuracy": 0.85,
+      "p50_ms": 335.7221749902237,
+      "p95_ms": 434.866089024581,
+      "mean_ms": 346.32164419977926,
+      "mean_confidence": 0.95085,
+      "ece": 0.10864999999999991,
+      "brier": 0.255891,
+      "model": "typesafe/jev-1.13",
+      "mean_input_tokens": 361.465,
+      "mean_output_tokens": 47.34,
+      "total_cost_usd": 0.003036306,
+      "cost_per_1k_decisions_usd": 0.01518153,
+      "sample_usage": {
+        "input_tokens": 346,
+        "output_tokens": 47,
+        "cost": 1.4532e-05
+      }
+    }
   }
 }

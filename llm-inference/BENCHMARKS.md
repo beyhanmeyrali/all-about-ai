@@ -182,8 +182,9 @@ DiffusionGemma is Google's open text-*diffusion* MoE (Gemma 4 backbone, 128 expe
 | Qwen 3 30B-A3B — next-token label probabilities | 83.0 % | 73.5 % | 0 | 0.170 / 0.230 | 506 / 601 ms |
 | **DiffusionGemma — 1 read** (`-ncmoe 20 --no-op-offload`) | **89.0 %** | **77.0 %** | **0** | **0.077** / 0.167 | **534 / 700 ms** |
 | DiffusionGemma — OpenJev default (≤ 4 reads) | 90.5 % | 78.0 % | 0 | 0.087 / 0.163 | 816 / 991 ms |
+| *Jev 1.13 (TypeSafe cloud via OpenRouter; not local, latency includes the network; $0.013–0.015 per 1,000 decisions)* | *94.0 %* | *85.0 %* | *0* | *0.070 / 0.109* | *334 / 336 ms* |
 
-Questions per request (same article, one read each): **1 → 94 ms, 10 → 294 ms** when the state is already prefilled; 556 ms → 1.33 s for a new state.
+Questions per request (same article, one read each): **1 → 93 ms, 20 → 363 ms** when the text is already read; 563 ms → 2.09 s for a new text. Qwen typing its answers: 97 ms → 1.67 s. Jev in the cloud: flat 0.34–0.40 s. Full speed/token/cost comparison: [DIFFUSIONGEMMA.md TL;DR](DIFFUSIONGEMMA.md#tldr--speed-and-tokens-first).
 
 ### Offload sweep and generation
 

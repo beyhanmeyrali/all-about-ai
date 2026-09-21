@@ -114,11 +114,29 @@ def run_qwen(url):
     print(json.dumps({k: v for k, v in res.items() if k.startswith("qwen")}, indent=1)[:4000])
 
 
+def run_jev(model):
+    from systemone_bench import jev_decide, openrouter_key
+    c = httpx.Client(timeout=120, headers={"Authorization": f"Bearer {openrouter_key()}"})
+    res = load()
+    rows = agnews_cases()
+    res["jev_agnews"] = []
+    for i in res.get("qwen_format_failures_idx") or list(range(6)):
+        ans, usage, ms = jev_decide(c, model, rows[i]["text"], {"q": TOPIC})
+        res["jev_agnews"].append({"i": i, "gold": TOPICS[rows[i]["label"]], "answer": ans["q"], "ms": ms, "usage": usage})
+    ans, usage, ms = jev_decide(c, model, TICKET, TICKET_QS)
+    res["jev_ticket"] = {"answer": ans, "ms": ms, "usage": usage}
+    OUT.write_text(json.dumps(res, indent=2))
+    print(json.dumps({k: v for k, v in res.items() if k.startswith("jev")}, indent=1)[:4000])
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--dg")
     ap.add_argument("--qwen")
+    ap.add_argument("--jev", nargs="?", const="typesafe/jev-1.13")
     a = ap.parse_args()
+    if a.jev:
+        run_jev(a.jev)
     if a.qwen:
         run_qwen(a.qwen)
     if a.dg:

@@ -1,68 +1,119 @@
-# DiffusionGemma as a Decision Engine — Jev, OpenJev, and an 8 GB Laptop
+# Jev vs DiffusionGemma vs Qwen — Fast AI Decisions, Measured
 
-> **In one sentence:** instead of asking an AI to *write* its answer and then picking the text apart, you can hand it a pre-printed form with blank boxes and read off how sure it is about each box. Google's open DiffusionGemma can do that in a single pass. I made it run on an 8 GB laptop GPU and measured it against a normal chat model on the same 400 questions.
+> **The post, ready to copy to LinkedIn** (plain text, no Markdown):
 
-**Every number on this page was measured on this laptop unless marked otherwise.** The page has two halves:
-- **Part 1 (this top part)** is for people who have never heard of "logits", "MoE" or "diffusion models". It covers the TL;DR, the idea explained step by step, code you can copy, real side-by-side answers, and a glossary.
-- **[Part 2](#part-2--the-detailed-version)** is the engineering: how it was made to fit, all the measurements, and a claims audit of the viral post that started this.
+```text
+Everyone is talking about Jev, TypeSafe's "System One" model: typed decisions
+with a probability attached, "70–500 ms", output tokens free. And a viral post
+claims Google's open DiffusionGemma is a free Jev you can run yourself.
+
+So I measured all three on the same 400 questions: real Jev 1.13 (via
+OpenRouter), DiffusionGemma run locally on an 8 GB laptop GPU, and a normal chat
+model (Qwen 3 30B) as the baseline.
+
+⚡ SPEED — time to answer N yes/no questions about one text
+• Jev (cloud, network included): 0.40 s for 1 question. 0.34 s for 20. Flat.
+• DiffusionGemma (8 GB laptop): 0.09 s for 1, 0.36 s for 20 once the text is
+  loaded; 0.56 → 2.1 s when it's a new text.
+• Qwen typing the answers: 0.10 s → 1.7 s, growing with every question. At 20
+  questions it broke its own output format.
+
+🔢 TOKENS
+• Qwen has to WRITE its answer: 5 output tokens per question, 92 for 20.
+• DiffusionGemma writes nothing: 0 output tokens. It reads the answer straight
+  out of one pass over a pre-printed form.
+• Jev bills only input ($0.042 per million tokens); output is free.
+
+💰 COST per 1,000 decisions
+• Jev: $0.013–0.015 (all 400 test decisions cost me $0.0056).
+• Local models: $0 (my electricity is cheap).
+
+🎯 QUALITY (movie-review sentiment / news topic)
+• Jev: 94% / 85%, and the best calibrated.
+• DiffusionGemma: 89% / 77%, zero broken replies.
+• Qwen writing answers: 83% / 65.5%, with 31 malformed replies out of 400.
+
+My take:
+1. Jev's speed story is real. Flat 0.34–0.40 s whether you ask 1 question or 20.
+2. The "free Jev" story is half true. DiffusionGemma really does answer many
+   questions in one pass with zero output tokens, but on an 8 GB GPU it isn't
+   flat, and it's 5–8 points less accurate than Jev.
+3. For decisions, stop making LLMs type. Reading probabilities instead of
+   parsing text removed every format error, for every model.
+
+Full numbers, code, and every test case are in the write-up. #AI #LLM #Jev #DiffusionGemma #OpenSource
+```
+
+**Every number on this page was measured by me unless marked otherwise.** Local runs used an RTX 5060 Laptop (8 GB) with a Ryzen AI 9 365 and 29 GB RAM. Jev was called over the internet through OpenRouter, so its times include the network round trip. [Every test case and exact query](#every-test-exactly) is listed below. The page has two parts:
+- **Part 1** (this top part): the TL;DR, the idea explained from zero, code you can copy, and real side-by-side answers.
+- **[Part 2](#part-2--the-detailed-version)**: the engineering and a claims audit of the viral post.
 
 ---
 
-## TL;DR
+## TL;DR — speed and tokens first
 
-I tried three ways of getting a yes/no or multiple-choice decision out of a language model. All three got the same instructions and the same 400 questions: 200 movie reviews (*is it positive?*) and 200 news articles (*World, Sports, Business or Sci/Tech?*).
+### The three contenders
 
-| Method | What it does | Nickname below |
-|---|---|---|
-| Qwen 3 30B-A3B **writes** its answer as text, and my code parses it | The normal way | **Qwen: write** |
-| Qwen 3 30B-A3B is stopped just before the answer, and I **read** how likely each option is | A trick that works on any chat model, but only one question at a time | **Qwen: read** |
-| DiffusionGemma 26B-A4B fills in **all the answer boxes of a form at once**, and I read how likely each option is | The "System One read" this page is about | **DiffusionGemma: read** |
+| | What it is | How it answers | Where it ran |
+|---|---|---|---|
+| **Jev 1.13** (TypeSafe) | A commercial "System One" decision model | Returns a probability per option. No text. | TypeSafe's cloud, called through OpenRouter (`typesafe/jev-1.13`) |
+| **DiffusionGemma 26B-A4B** (Google, open) | A text-*diffusion* model, run as an open Jev clone (OpenJev + my llama.cpp backend) | Fills every answer box of a pre-printed form in **one pass** and reads the probabilities. 0 output tokens. | My 8 GB laptop GPU, with most of the model in system RAM |
+| **Qwen 3 30B-A3B** (Alibaba, open) | A normal chat model: the baseline | **Types** its answers token by token (`q1: yes`), and my code parses the text | The same laptop |
 
-### Accuracy and broken replies
+### ⚡ Speed: time to answer N yes/no questions about one news article
 
-| | Qwen: write | Qwen: read | DiffusionGemma: read (1 pass) | DiffusionGemma: read (default, up to 4 passes) |
-|---|---:|---:|---:|---:|
-| Movie reviews correct | 83.0 % | 83.0 % | **89.0 %** | **90.5 %** |
-| News topics correct | 65.5 % (75.0 % if I forgive the format) | 73.5 % | **77.0 %** | **78.0 %** |
-| Replies in the wrong format | **31 of 400** (42 of 200 news on a re-run) | 0 | 0 | 0 |
+"Text already loaded" means the model has already read this text, so only the answering is timed. "New text" includes reading it first. Median of 3 runs each. Qwen's columns show the faster of its two server settings for each row (llama.cpp op-offload on or off; both runs are in `speed_scaling.json`).
 
-The broken replies are real. Qwen was told to answer exactly `q1: D`, and instead it wrote `D: D`, `D: Sci/Tech`, or just `A` ([examples below](#real-answers-side-by-side)).
+| Questions in one request | **Jev**, new text (cloud, incl. network) | **DiffusionGemma**, text already loaded | DiffusionGemma, new text | **Qwen types the answers**, text already loaded | Qwen, new text |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 396 ms | **93 ms** | 563 ms | 97 ms | 614 ms |
+| 2 | 350 ms | **93 ms** | 627 ms | 183 ms | 763 ms |
+| 5 | 349 ms | **155 ms** | 864 ms | 452 ms | 1,214 ms |
+| 10 | 354 ms | **287 ms** | 1,336 ms | 931 ms | 1,906 ms |
+| 20 | **336 ms** | 363 ms | 2,089 ms | 1,674 ms ❌ *format broke* | 2,697 ms |
 
-### Calibration: when it says "95 % sure", is it right 95 % of the time?
+- **Jev is flat.** 1 question or 20, 0.34–0.40 s including the trip over the internet. That's the whole pitch, and it holds.
+- **DiffusionGemma is nearly flat once it has read the text.** 20 answers cost 4× one answer, not 20×, because every answer box is filled in the same pass. Reading a *new* text on a laptop is the slow part (0.5–2 s). No trick removes that, but Jev's datacentre hardware hides it.
+- **Qwen gets slower with every question**, because it has to type each answer. At 20 questions it's 4.6× slower than DiffusionGemma, and its reply no longer matched the requested format.
 
-| | Qwen: read | DiffusionGemma: read (1 pass) |
-|---|---:|---:|
-| Movie reviews: average stated confidence → actually right | 99.2 % → 83.0 % | 96.7 % → 89.0 % |
-| Movie reviews: calibration error (ECE, 0 = perfect) | 0.170 | **0.077** |
-| News topics: average stated confidence → actually right | 96.5 % → 73.5 % | 93.7 % → 77.0 % |
-| News topics: calibration error (ECE) | 0.230 | **0.167** |
+### 🔢 Tokens and 💰 cost per decision
 
-Both models are over-confident. DiffusionGemma is less so, and that's what makes a rule like "auto-approve above 0.95" usable at all. **Qwen: write** has no confidence number to put in this table, which is itself a point against it.
+| | **Jev** | **DiffusionGemma** | **Qwen: types the answer** |
+|---|---:|---:|---:|
+| Input tokens, one question (movie review / news article) | 300 / 361 | ~103 / ~152 | ~110 |
+| **Output tokens, one question** | 20 / 47 (reported, billed at $0) | **0** | 5 |
+| Output tokens, 20 questions | 354 (billed at $0) | **0** | 92 |
+| Price | $0.042 per 1M input tokens; output free | $0 (my hardware) | $0 (my hardware) |
+| **Cost per 1,000 decisions** | **$0.013–0.015** | **$0** | **$0** |
+| Whole 400-question benchmark | **$0.0056** | $0 | $0 |
 
-### Speed
+*Token counts use each model's own tokenizer and prompt wrapper, so compare them as orders of magnitude, not exactly. Jev's input count is ~3× the others for the same text because TypeSafe adds its own instructions. Its "output tokens" are what the API reports; it doesn't return any text.*
 
-| | Qwen: write | Qwen: read | DiffusionGemma: read (1 pass) | DiffusionGemma: read (default) |
-|---|---:|---:|---:|---:|
-| One question, new text (movie reviews / news) | 549 / 652 ms | 506 / 601 ms | 534 / 700 ms | 816 / 991 ms |
-| Another question about the *same* text | — | — | **94 ms** | — |
-| 10 yes/no questions about the same text, one request | — | — | **294 ms** | — |
-| 10 yes/no questions about a *new* text, one request | — | — | 1,331 ms | — |
-| 5-question support ticket, one request ([below](#example-2-a-support-ticket-five-questions-at-once)) | 1,359 ms, 2 lines malformed | — | — | 1,631 ms, all well-formed |
-| Writing free text | 53.8 tok/s | — | **14.6 tok/s** | — |
+### 🎯 Quality: same 400 questions (200 movie reviews: *positive?* · 200 news articles: *which of 4 topics?*)
 
-For one question on a fresh piece of text, all three methods cost about half a second, and almost all of that is the model *reading your text*. Diffusion's advantage shows up when you ask many questions about the same text: ten answers cost 3.1× one answer, not 10×. Its weak spot is free text: writing is about half the speed of a normal model of the same size on this laptop (Gemma 4 26B-A4B writes at 28.7 tok/s).
+| | **Jev** | **DiffusionGemma** (1 pass) | DiffusionGemma (OpenJev default, ≤4 passes) | Qwen: reads probabilities | **Qwen: types the answer** |
+|---|---:|---:|---:|---:|---:|
+| Movie reviews correct | **94.0 %** | 89.0 % | 90.5 % | 83.0 % | 83.0 % |
+| News topics correct | **85.0 %** | 77.0 % | 78.0 % | 73.5 % | 65.5 % |
+| Broken replies | 0 | 0 | 0 | 0 | **31 of 400** |
+| Calibration error, ECE (0 = perfect) | **0.070 / 0.109** | 0.077 / 0.167 | 0.087 / 0.163 | 0.170 / 0.230 | — (no probabilities) |
+| Median time per decision | **334 / 336 ms** | 534 / 700 ms | 816 / 991 ms | 506 / 601 ms | 549 / 652 ms |
+
+*Calibration asks whether a stated "95 % sure" is right 95 % of the time. Lower ECE is better; [Step 4](#step-4-what-calibrated-means) explains it.*
 
 ### When to use which
 
-| You want… | Use |
+| You need… | Use |
 |---|---|
-| Chat, code, writing, summaries, free-text extraction | A normal model (Qwen, Gemma 4, …) |
-| One yes/no or multiple-choice decision with a confidence number | The Qwen read trick or DiffusionGemma: about the same speed. DiffusionGemma was more accurate here. |
-| Several fixed-choice questions about the same text (triage, routing, "check these 10 attributes") | **DiffusionGemma read** |
-| A confidence you can put a threshold on | **DiffusionGemma read**: better calibrated, but still over-confident |
-| Visible reasoning before the answer | A normal model with thinking turned on |
+| Decisions at scale, fastest and most accurate, and a cloud API is fine | **Jev**: ~0.34 s flat, 94 % / 85 %, ~$0.014 per 1,000 decisions |
+| Decisions that must stay on your own hardware (privacy, offline, no API bill) | **DiffusionGemma** as a local Jev: 0 output tokens, 0 broken replies, many questions per pass |
+| One quick local decision and you already run a chat model | **Qwen reading probabilities** ([code below](#the-read-trick-on-a-normal-model)): same speed, no format errors |
+| Chat, writing, code, summaries | A normal model. Neither Jev nor a System One read writes text. |
 
-**Verdict:** it's a genuinely good *decision* engine and a poor *chat* model on 8 GB. It's also not the "0.2 s flat, zero hallucinations" miracle the viral post described: it still gets 10–23 % of answers wrong, sometimes while claiming 99.99 % confidence.
+**Verdict:**
+- **Jev's speed claim holds:** flat 0.34–0.40 s from 1 to 20 questions.
+- **The "free open-source Jev" claim is half true.** DiffusionGemma really does answer many questions in one pass with zero output tokens. On an 8 GB laptop it isn't flat for new text, and it's 5–8 points less accurate than Jev.
+- **Every model stopped producing broken replies** once we read probabilities instead of parsing typed text. If you take one lesson from this page, take that one.
 
 ---
 
@@ -123,6 +174,8 @@ That's a **read**: one pass, all boxes at once, every box able to see the others
 
 **OpenJev** is an open-source server that wraps this trick in exactly the same web API that Jev uses. By default, if the first read looks unsure, it does the read up to **4 times** with different noise and averages them. That's the "default, up to 4 passes" column in the tables: 1–1.5 points more accurate, about 280 ms slower on this laptop.
 
+The real Jev is a different, commercial model trained specifically for this job. It's measured in the TL;DR tables through OpenRouter, so you can compare the copy against the original.
+
 ### Step 7: Why 8 GB is a problem, and what "offloading experts" means
 
 DiffusionGemma has about 26 billion numbers. Even squeezed to about 4 bits each (**quantization**, "Q4"), that's a 16.8 GB file. The laptop's GPU has 8 GB of its own fast memory (**VRAM**, the countertop in this repo's kitchen analogy), so the model doesn't fit.
@@ -133,8 +186,9 @@ Two more things had to be fixed before it fit: a 4 GB scratch buffer that wasn't
 
 ### Step 8: What the measurements showed
 
+- **The real Jev wins on every quality and speed number**: 94 % / 85 % correct, the best calibration, and 0.34–0.40 s flat whether you ask 1 question or 20, for about $0.014 per 1,000 decisions.
 - **Zero broken replies** out of 400, against 31 when Qwen types its answer. But the *Qwen: read* trick also gets zero, so this is a win for "read the probabilities" in general, not for diffusion in particular.
-- **More accurate on both tasks**: 89 % vs 83 % and 77 % vs 73.5 % against *Qwen: read*, with identical instructions. Caveat: these are different model families, so this says "this model did better here", not "diffusion is smarter".
+- **DiffusionGemma is more accurate than Qwen on both tasks**: 89 % vs 83 % and 77 % vs 73.5 % against *Qwen: read*, with identical instructions. Caveat: these are different model families, so this says "this model did better here", not "diffusion is smarter".
 - **Better calibrated, but still over-confident.** Treat the confidence as a ranking ("this answer is surer than that one"), not a number that's accurate to three decimals. The losing options' probabilities wobble with low-level GPU settings ([§5.4](#54-not-fixed-probabilities-depend-on-the-kernel-path)).
 - **Many questions at once is where diffusion earns its keep**: 10 answers in 294 ms once the text has been read, against 94 ms for 1.
 - **Free-text writing is slow**: 14.6 tokens per second, about half the speed of a normal model of the same size. Don't use it as your chat model on 8 GB.
@@ -325,19 +379,22 @@ Both models got the same inputs and the same instructions, and the replies below
 
 These are the first six AG News articles where **Qwen: write** didn't reply `q1: <letter>`:
 
-| Article (start) | Dataset says | Qwen wrote | DiffusionGemma answered |
-|---|---|---|---|
-| *RealNetworks Gets in Content Business (AP) — RealNetworks Inc. survived the dot-com collapse…* | Sci/Tech | `D: D` | Business (0.9999) ✗ |
-| *Prototype copter-cam: Here, there, everywhere — It can only remain aloft for three minutes…* | Sci/Tech | `D: Sci/Tech` | **Sci/Tech (0.9989)** ✓ |
-| *Oil prices look set to dominate — The price of oil looks set to grab headlines…* | Business | `D: D` | **Business (0.9997)** ✓ |
-| *CSKA sponsor rejects criticism — Russian oil giant Sibneft today rejected any suggestion of a conflict of interest between Chelsea and CSKA…* | Sports | `A` | **Sports (0.954)**, Business 0.044 ✓ |
-| *Dollar Rises Vs Euro on Asset Flows Data — NEW YORK (Reuters) - The dollar extended gains…* | Business | `D: Sci/Tech` | **Business (0.9999)** ✓ |
-| *Real targets iPod with download price cut — RealNetworks has kicked off… the biggest online music sale…* | Sci/Tech | `D: D` | Business (0.990) ✗ |
+| Article (start) | Dataset says | Qwen wrote | DiffusionGemma answered | Jev answered |
+|---|---|---|---|---|
+| *RealNetworks Gets in Content Business (AP) — RealNetworks Inc. survived the dot-com collapse…* | Sci/Tech | `D: D` | Business (0.9999) ✗ | Business 0.82 / Sci/Tech 0.18 ✗ |
+| *Prototype copter-cam: Here, there, everywhere — It can only remain aloft for three minutes…* | Sci/Tech | `D: Sci/Tech` | **Sci/Tech (0.9989)** ✓ | **Sci/Tech (1.00)** ✓ |
+| *Oil prices look set to dominate — The price of oil looks set to grab headlines…* | Business | `D: D` | **Business (0.9997)** ✓ | **Business (1.00)** ✓ |
+| *CSKA sponsor rejects criticism — Russian oil giant Sibneft today rejected any suggestion of a conflict of interest between Chelsea and CSKA…* | Sports | `A` | **Sports (0.954)**, Business 0.044 ✓ | **Sports (0.98)** ✓ |
+| *Dollar Rises Vs Euro on Asset Flows Data — NEW YORK (Reuters) - The dollar extended gains…* | Business | `D: Sci/Tech` | **Business (0.9999)** ✓ | **Business (1.00)** ✓ |
+| *Real targets iPod with download price cut — RealNetworks has kicked off… the biggest online music sale…* | Sci/Tech | `D: D` | Business (0.990) ✗ | Business 0.55 / Sci/Tech 0.45 ✗ (confidence 0.39) |
+
+Jev took 308–429 ms per article, network included, and billed 332–373 input tokens (about $0.000015) each.
 
 Three lessons in one table:
 1. **Qwen's broken replies weren't just formatting.** `D: D` for an oil-price story means it picked Sci/Tech, which is wrong. The format error was hiding a wrong answer.
 2. **DiffusionGemma can be confidently wrong.** It said "Business" at 99.99 % for two RealNetworks stories the dataset files under Sci/Tech. That's the "zero hallucinations" claim failing in plain sight. In fairness, a company's business strategy and a price cut *are* arguably business news, so some "errors" are really the dataset's labels being fuzzy.
-3. **The one it found hard, it said so.** The football-sponsor story mentions an oil company. DiffusionGemma picked Sports but gave Business 4.4 %, and its confidence dropped to 0.86, the lowest in the table.
+3. **Jev knows what it doesn't know.** It got the same two RealNetworks stories "wrong", but it split them 0.82/0.18 and 0.55/0.45, which is honest for genuinely ambiguous articles. DiffusionGemma claimed 99 % on both.
+4. **The one DiffusionGemma found hard, it said so.** The football-sponsor story mentions an oil company. DiffusionGemma picked Sports but gave Business 4.4 %, and its confidence dropped to 0.86, the lowest in the table.
 
 ### Example 2: a support ticket, five questions at once
 
@@ -368,7 +425,99 @@ q5: 4: critical
 | Which team first? | billing | billing 0.978, engineering 0.021 → confidence 0.92 |
 | Urgency | critical (score 3.91 of 4) | critical 0.909, high 0.090 → confidence 0.81 |
 
-Asking the same five questions as **five separate requests** took 4,680 ms. Filling all five boxes in one pass is what saves the time. Note that Qwen was faster on this single request: typing 30 tokens is quick. Where diffusion wins is correctness of shape, the probabilities, and the growing gap as the number of questions goes up.
+**Jev** replied in **404 ms** over the internet (440 input tokens, 114 reported output tokens, $0.0000185):
+
+| Question | Answer | Probability / confidence |
+|---|---|---|
+| Billing issue? | yes | P(yes) = 0.99 |
+| Software bug? | **yes** | P(yes) = 0.94 |
+| Customer angry? | yes | P(yes) = 0.97 |
+| Which team first? | billing | billing 0.96, engineering 0.03 → confidence 0.94 |
+| Urgency | high → critical (score 3.27 of 4) | high 0.73, critical 0.27 → confidence 0.77 |
+
+DiffusionGemma and Jev agree on all five answers. Jev is less extreme, rating urgency "high" rather than "critical", which is arguably the better call for a double charge.
+
+Asking DiffusionGemma the same five questions as **five separate requests** took 4,680 ms. Filling all five boxes in one pass is what saves the time. Note that Qwen was faster on this single request: typing 30 tokens is quick. Where diffusion wins is correctness of shape, the probabilities, and the growing gap as the number of questions goes up.
+
+---
+
+## Every test, exactly
+
+These are all the inputs and settings behind the tables above. The raw outputs are in [`diffusiongemma/results.json`](diffusiongemma/results.json), [`speed_scaling.json`](diffusiongemma/speed_scaling.json), and [`examples.json`](diffusiongemma/examples.json).
+
+### Setup
+
+| | Jev 1.13 | DiffusionGemma 26B-A4B | Qwen 3 30B-A3B |
+|---|---|---|---|
+| Where | TypeSafe cloud via OpenRouter, `POST https://openrouter.ai/api/alpha/decisions`, model `typesafe/jev-1.13` (served as `jev-1.13-20260917`) | Laptop: RTX 5060 8 GB, Ryzen AI 9 365, 29 GB RAM | Same laptop |
+| Weights | Closed | `unsloth/diffusiongemma-26B-A4B-it-GGUF`, Q4_K_M, 16.8 GB | `Qwen3-30B-A3B-Q4_K_M.gguf`, 17.3 GB |
+| Server | — | llama.cpp PR #24423 + `dg-systemone-server` + OpenJev 0.3.0: `-ngl 99 --n-cpu-moe 20 -fa on -c 2048 -ub 512 --no-op-offload` | llama.cpp `b1-1719747` `llama-server`: `-ngl 99 -ncmoe 34 -fa on -c 4096 -np 1 --jinja` |
+| Decoding | — | No sampling: probabilities read at the answer slots | `temperature 0`, thinking off (`enable_thinking: false`) |
+| Latency includes | Internet round trip from Türkiye to OpenRouter | Local HTTP | Local HTTP |
+
+### Test 1 — 400 labelled decisions (accuracy, calibration, latency, tokens, cost)
+
+- **Data:** 200 reviews sampled from the SST-2 validation set and 200 articles from the AG News test set (`random.seed(0)`), stored in [`diffusiongemma/data/`](diffusiongemma/data/). Example items:
+  - `{"text": "dull , lifeless , and amateurishly assembled . ", "label": 0}` (0 = negative)
+  - `{"text": "E-commerce still booming Online retail sales continue to show significant growth, according to the latest figures released by the US Department of Commerce.", "label": 3}` (3 = Sci/Tech)
+- **One question per request**, sent as `state` = the text, plus:
+
+```json
+{"q": {"type": "noul", "instructions": "Is the sentiment of this movie review positive?"}}
+```
+
+```json
+{"q": {"type": "choice", "instructions": "What is the topic of this news article?",
+       "criteria": {"World": "", "Sports": "", "Business": "", "Sci/Tech": ""}}}
+```
+
+- **Jev** receives exactly that JSON. TypeSafe builds its own internal prompt, which is why it reports ~3× more input tokens.
+- **DiffusionGemma and Qwen** both get OpenJev's generated instructions as the system message, word for word. For the movie reviews:
+
+```text
+Answer a fixed set of questions about the state the user provides. Each question lists its allowed answers; reply with exactly one label per question.
+
+Question q1: Is the sentiment of this movie review positive?
+  yes
+  no
+
+Reply with one line per question, in this order, formatted as "id: label".
+```
+
+  For the news articles, the options are listed as `A: World`, `B: Sports`, `C: Business`, `D: Sci/Tech`.
+- **Scoring:** the prediction is the option with the highest probability (for yes/no, "positive" means P(yes) > 0.5). *Qwen: write* counts as correct only if the reply is exactly `q1: <label>`; the lenient score also accepts replies like `D: D` or `B: Sports`. *Qwen: read* pre-fills `q1:` and takes the next-token probabilities of the labels (`n_probs: 50`). Calibration is ECE over 10 bins, using the predicted option's probability.
+- **Commands:** `systemone_bench.py --reads …` (DiffusionGemma), `--ar-url …` (Qwen), `--jev` (Jev; reads `OPENROUTER_API_KEY`).
+
+### Test 2 — speed as the number of questions grows
+
+- **Text:** one AG News article: *"E-commerce still booming Online retail sales continue to show significant growth, according to the latest figures released by the US Department of Commerce."*
+- **Questions:** the first N of these 20 yes/no questions, each phrased *"Does the article mention …?"*: a country, a company, money, a sport, a person, a date, a technology, a government, a number, a city, a crime, an election, a product, science, a war, a stock market, a team, health, the internet, energy.
+- **N** = 1, 2, 5, 10, 20, median of 3 runs each.
+  - **New text:** a unique marker is appended to the text so nothing is cached. For Qwen, llama-server's prompt cache is also switched off (`cache_prompt: false`).
+  - **Text already loaded:** the identical request is repeated.
+- **Settings:**
+  - DiffusionGemma: one read per request (`OPENJEV_AUTO_MAX=1`), with `OPENJEV_CANVAS=128` so 20 answers fit one form.
+  - Qwen: `max_tokens` = 12 × N. It was run twice, with llama.cpp op-offload on and off; the TL;DR shows the faster run for each row.
+- **Command:** [`speed_scaling.py`](diffusiongemma/speed_scaling.py) `--qwen URL` / `--dg URL` / `--jev`.
+
+### Test 3 — real answers side by side
+
+- **Articles:** the first 6 AG News articles where Qwen broke the format in a fresh run (indices 8, 9, 12, 21, 25, 28 of the 200).
+- **Support ticket:** *"Hi, I was charged twice for my March invoice and the app keeps logging me out when I try to download the receipt. I need this fixed today, my accountant is waiting. This is the third time I'm writing!!"*, with these questions:
+
+```json
+{"is_billing": {"type": "noul",   "instructions": "Is this about billing or payments?"},
+ "is_bug":     {"type": "noul",   "instructions": "Does the customer report a software bug?"},
+ "angry":      {"type": "noul",   "instructions": "Is the customer angry or frustrated?"},
+ "team":       {"type": "choice", "instructions": "Which team should handle it first?",
+                "criteria": {"billing": "", "engineering": "", "sales": "", "account security": ""}},
+ "urgency":    {"type": "score",  "instructions": "How urgent is this ticket?",
+                "criteria": ["not urgent", "low", "medium", "high", "critical"]}}
+```
+
+- **Command:** [`side_by_side.py`](diffusiongemma/side_by_side.py) `--qwen URL` / `--dg URL` / `--jev`.
+
+**API differences worth knowing:** Jev rejects a `choice` or `score` question that has no `instructions` (HTTP 400), while OpenJev treats that field as optional. Jev also rounds probabilities to 2 decimals.
 
 ---
 
@@ -526,7 +675,7 @@ My server's chunked vs single-shot prefill shows the same kind of spread. Every 
 
 ## 6. Results
 
-Setup: Q4_K_M GGUF, `-ngl 99 --n-cpu-moe 20 -fa on -ub 512 --no-op-offload`, peak VRAM 7.6 GB. Tasks: 200 random SST-2 validation reviews (yes/no: *is it positive?*) and 200 random AG News test articles (4-way topic choice), seed 0. Prompts average 103 and 152 tokens. Every system gets the **same OpenJev-generated system prompt**.
+Setup: Q4_K_M GGUF, `-ngl 99 --n-cpu-moe 20 -fa on -ub 512 --no-op-offload`, peak VRAM 7.6 GB. Tasks: 200 random SST-2 validation reviews (yes/no: *is it positive?*) and 200 random AG News test articles (4-way topic choice), seed 0. Prompts average 103 and 152 tokens. DiffusionGemma and Qwen get the **same OpenJev-generated system prompt**. Jev gets the same `{state, questions}` JSON and builds its own prompt.
 
 Baselines: **Qwen 3 30B-A3B** Q4_K_M on stock llama.cpp `b1-1719747` (`-ncmoe 34`, llama-server), used two ways:
 - **generate**: it writes `q1: <label>` in up to 16 tokens, thinking disabled;
@@ -540,6 +689,7 @@ Baselines: **Qwen 3 30B-A3B** Q4_K_M on stock llama.cpp `b1-1719747` (`-ncmoe 34
 | Qwen 3 30B-A3B — read | 83.0 % | 73.5 % | 0 | 0.170 / 0.230 | 0.992 / 0.965 | 506 / 601 ms |
 | **DiffusionGemma — 1 read** | **89.0 %** | **77.0 %** | **0** | **0.077** / 0.167 | 0.967 / 0.937 | **534 / 700 ms** |
 | DiffusionGemma — OpenJev default (≤ 4 reads) | 90.5 % | 78.0 % | 0 | 0.087 / 0.163 | 0.968 / 0.937 | 816 / 991 ms |
+| **Jev 1.13** (TypeSafe, via OpenRouter; latency includes the network) | **94.0 %** | **85.0 %** | 0 | **0.070 / 0.109** | 0.870 / 0.951 | **334 / 336 ms** |
 
 *ECE = expected calibration error: the average gap between the confidence it states and how often it's right (10 bins; 0 is perfect). Brier scores are in `results.json`.*
 
@@ -614,13 +764,13 @@ On 8 GB, **diffusion generation is about 2× slower than autoregressive generati
 | Claim in the post | Verdict | Evidence |
 |---|---|---|
 | "A patch contributed to vLLM by Matt Mastracci" | ⚠️ **Partly true** | It's an **open, unmerged** PR (#57250, opened 2026-09-16). OpenJev's image builds a fork of it. |
-| "Evaluates choices in a single parallel pass (~0.2 s flat)" | ❌ **Not flat, and not here** | OpenJev's own figures: 94 ms p50 on an RTX PRO 6000 at concurrency 1, **760 ms at 64 concurrent**; 0.2–0.4 s on an M3 Ultra. On this 8 GB laptop: **534–700 ms** for a new state, 94 ms for a cached one. Latency grows with the number of questions (§6.2) and with prompt length. |
+| "Evaluates choices in a single parallel pass (~0.2 s flat)" | ❌ **Not flat for DiffusionGemma here**; ✅ roughly true for the real Jev | The real Jev measured 0.34–0.40 s flat from 1 to 20 questions, network included (TL;DR). For DiffusionGemma, OpenJev's own figures: 94 ms p50 on an RTX PRO 6000 at concurrency 1, **760 ms at 64 concurrent**; 0.2–0.4 s on an M3 Ultra. On this 8 GB laptop: **534–700 ms** for a new state, 94 ms for a cached one. Latency grows with the number of questions (§6.2) and with prompt length. |
 | "Denoises across an open canvas in a single step instead of sequential generation" | ✅ **For reads**, ⚠️ with caveats | One decoder pass per read, yes. But OpenJev's default re-reads **4×** whenever entropy > 0.1, which on this model is nearly every request (§5.3). Generation takes ~20–48 steps per 256-token block. |
 | "Full bidirectional attention… standard LLMs only look backward" | ⚠️ **Misleading** | Only the **canvas** is bidirectional. The prompt is encoded **causally**, exactly like an autoregressive model, and an autoregressive answer token also attends to the entire prompt. The real gain is that answer slots see each other. |
 | "Multimodal grounding (image classification, UI navigation)" | ⚠️ **Backend-dependent; untested here** | The model takes images, and OpenJev's vLLM and MLX backends support them. The llama.cpp PR and GGUF are text-only today. |
 | "Zero hallucinations: schema formatting errors are entirely eliminated" | ⚠️ **Format: yes. Hallucinations: no.** | 0 invalid replies in 400 (Qwen generating: 31/400). But **9.5–23 % of answers were still wrong** (some confidently; see [Example 1](#example-1-the-news-articles-where-qwen-broke-the-format)), and an autoregressive logit read *also* had 0 format errors. Grammar-constrained decoding would too. |
 | "Highly-calibrated decision engine" | ⚠️ **Better, not solved** | ECE 0.077 vs 0.170 on SST-2, compared with Qwen's *read* (Qwen's normal text replies have no confidence at all). But on AG News it says 94 % and is right 77 %, and losing-label probabilities shift by 1–3 nats with the kernel path (§5.4). |
-| "An open-source alternative to Jev" | ⚠️ **API-compatible alternative** | TypeSafe's SDKs work against OpenJev unchanged. But it's DiffusionGemma used zero-shot; Jev is a separately trained model with calibration-specific RL. I had no Jev access, so this comparison isn't measured here. |
+| "An open-source alternative to Jev" | ⚠️ **API-compatible, but not equal** | TypeSafe's SDKs work against OpenJev unchanged. Measured head to head on the same 400 questions, Jev 1.13 was **5–8 points more accurate** (94 % / 85 % vs 89 % / 77 %), **better calibrated** (ECE 0.070 / 0.109 vs 0.077 / 0.167), and **faster** (334 ms vs 534–700 ms per new decision) than DiffusionGemma on this laptop, for about $0.014 per 1,000 decisions. |
 | `docker run … -p 8000:8000 … razorback16/openjev:latest` | ❌ **Wrong port; wrong hardware for most readers** | The API is on **8080** (8000 is internal vLLM on 127.0.0.1). It needs **24 GB+** of VRAM. Use `docker compose up -d` from the repo on a big GPU, or §4 here on a small one. |
 
 **Bottom line:** the core idea is real and clever. Pin the answer template, leave single-token holes, and read the distribution out of one bidirectional pass. On this laptop it gave **more accurate, better-calibrated, never-malformed decisions** than a strong autoregressive MoE, and **multi-question requests at a fraction of the cost**. It's not "0.2 s flat" on consumer hardware, it doesn't abolish wrong answers, and it's the wrong tool for anything that needs text.
