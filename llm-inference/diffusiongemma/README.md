@@ -9,6 +9,7 @@ Code for [../DIFFUSIONGEMMA.md](../DIFFUSIONGEMMA.md). Read that first: it cover
 | `openjev_llamacpp.py` | Runs [OpenJev](https://github.com/razorback16/openjev)'s Jev-compatible `/v1/systemone` API with this server as its backend (text only) |
 | `systemone_bench.py` | Accuracy, calibration (ECE/Brier), and latency on 200 SST-2 + 200 AG News; autoregressive baselines through any llama-server |
 | `results.json` | Every measured run, with the exact server arguments |
+| `side_by_side.py` / `examples.json` | The same inputs sent to both models, with raw replies kept verbatim (the examples in DIFFUSIONGEMMA.md) |
 | `data/` | The fixed eval subsets (`random.seed(0)`) |
 
 Quick start on an 8 GB NVIDIA GPU:

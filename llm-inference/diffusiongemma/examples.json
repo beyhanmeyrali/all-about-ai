@@ -1,0 +1,197 @@
+{
+  "qwen_format_failures_idx": [
+    8,
+    9,
+    12,
+    21,
+    25,
+    28
+  ],
+  "qwen_format_failure_count": 42,
+  "qwen_agnews": [
+    {
+      "i": 8,
+      "gold": "Sci/Tech",
+      "raw_reply": "D: D"
+    },
+    {
+      "i": 9,
+      "gold": "Sci/Tech",
+      "raw_reply": "D: Sci/Tech"
+    },
+    {
+      "i": 12,
+      "gold": "Business",
+      "raw_reply": "D: D"
+    },
+    {
+      "i": 21,
+      "gold": "Sports",
+      "raw_reply": "A"
+    },
+    {
+      "i": 25,
+      "gold": "Business",
+      "raw_reply": "D: Sci/Tech"
+    },
+    {
+      "i": 28,
+      "gold": "Sci/Tech",
+      "raw_reply": "D: D"
+    }
+  ],
+  "qwen_agnews_system_prompt": "Answer a fixed set of questions about the state the user provides. Each question lists its allowed answers; reply with exactly one label per question.\n\nQuestion q1: What is the topic of this news article?\n  A: World\n  B: Sports\n  C: Business\n  D: Sci/Tech\n\nReply with one line per question, in this order, formatted as \"id: label\".",
+  "qwen_ticket": {
+    "raw_reply": "q1: yes\nq2: no\nq3: yes\nq4: A: billing\nq5: 4: critical",
+    "ms": 1358.9908090070821,
+    "completion_tokens": 30,
+    "system_prompt": "Answer a fixed set of questions about the state the user provides. Each question lists its allowed answers; reply with exactly one label per question.\n\nQuestion q1: Is this about billing or payments?\n  yes\n  no\n\nQuestion q2: Does the customer report a software bug?\n  yes\n  no\n\nQuestion q3: Is the customer angry or frustrated?\n  yes\n  no\n\nQuestion q4: Which team should handle it first?\n  A: billing\n  B: engineering\n  C: sales\n  D: account security\n\nQuestion q5: How urgent is this ticket?\n  0: not urgent\n  1: low\n  2: medium\n  3: high\n  4: critical\n\nReply with one line per question, in this order, formatted as \"id: label\"."
+  },
+  "dg_agnews": [
+    {
+      "i": 8,
+      "gold": "Sci/Tech",
+      "answer": {
+        "type": "choice",
+        "choice": "Business",
+        "probabilities": {
+          "World": 1.5860225047540272e-05,
+          "Sports": 6.464444908415775e-05,
+          "Business": 0.9998691715021164,
+          "Sci/Tech": 5.032382375183441e-05
+        },
+        "confidence": 0.9989700899463644
+      },
+      "ms": 929.1526199958753
+    },
+    {
+      "i": 9,
+      "gold": "Sci/Tech",
+      "answer": {
+        "type": "choice",
+        "choice": "Sci/Tech",
+        "probabilities": {
+          "World": 6.107796929535498e-05,
+          "Sports": 0.0006720399533684906,
+          "Business": 0.0003347436833614412,
+          "Sci/Tech": 0.9989321383939747
+        },
+        "confidence": 0.9933289768562066
+      },
+      "ms": 920.3658440092113
+    },
+    {
+      "i": 12,
+      "gold": "Business",
+      "answer": {
+        "type": "choice",
+        "choice": "Business",
+        "probabilities": {
+          "World": 3.7164494855543816e-05,
+          "Sports": 0.00018032097132099486,
+          "Business": 0.9997040101809176,
+          "Sci/Tech": 7.85043529059597e-05
+        },
+        "confidence": 0.9978564532211891
+      },
+      "ms": 902.7546390134376
+    },
+    {
+      "i": 21,
+      "gold": "Sports",
+      "answer": {
+        "type": "choice",
+        "choice": "Sports",
+        "probabilities": {
+          "World": 0.0004120907507845402,
+          "Sports": 0.9539728601862686,
+          "Business": 0.04449046432845267,
+          "Sci/Tech": 0.001124584734494255
+        },
+        "confidence": 0.8598600570328657
+      },
+      "ms": 928.057857992826
+    },
+    {
+      "i": 25,
+      "gold": "Business",
+      "answer": {
+        "type": "choice",
+        "choice": "Business",
+        "probabilities": {
+          "World": 8.770591342352475e-06,
+          "Sports": 5.385538937010386e-05,
+          "Business": 0.9998982665015503,
+          "Sci/Tech": 3.910751773720897e-05
+        },
+        "confidence": 0.9991847909521735
+      },
+      "ms": 981.3958979793824
+    },
+    {
+      "i": 28,
+      "gold": "Sci/Tech",
+      "answer": {
+        "type": "choice",
+        "choice": "Business",
+        "probabilities": {
+          "World": 0.00025026449639637544,
+          "Sports": 0.0047285276014678804,
+          "Business": 0.9900323280181531,
+          "Sci/Tech": 0.004988879883982649
+        },
+        "confidence": 0.9540110280369792
+      },
+      "ms": 1004.0815989777911
+    }
+  ],
+  "dg_ticket": {
+    "answer": {
+      "is_billing": {
+        "type": "noul",
+        "noul": 0.9999987928943367
+      },
+      "is_bug": {
+        "type": "noul",
+        "noul": 0.9998595192618158
+      },
+      "angry": {
+        "type": "noul",
+        "noul": 0.9999983138953877
+      },
+      "team": {
+        "type": "choice",
+        "choice": "billing",
+        "probabilities": {
+          "billing": 0.9784856633309051,
+          "engineering": 0.020969157340681274,
+          "sales": 1.95293599260801e-05,
+          "account security": 0.0005256499684875271
+        },
+        "confidence": 0.9231752855460802
+      },
+      "urgency": {
+        "type": "score",
+        "score": 3.907674862743574,
+        "legend": {
+          "0": "not urgent",
+          "1": "low",
+          "2": "medium",
+          "3": "high",
+          "4": "critical"
+        },
+        "probabilities": {
+          "0": 0.00024225697884747464,
+          "1": 0.00012200362319527813,
+          "2": 0.0005853439424544481,
+          "3": 0.08981941058654141,
+          "4": 0.9092309848689614
+        },
+        "confidence": 0.8071048382328014
+      }
+    },
+    "ms_cold": 1631.3747680105735,
+    "ms_warm_same_request": 650.462917983532
+  },
+  "dg_ticket_one_at_a_time_ms": 4680.457133043092
+}
