@@ -37,12 +37,28 @@ Method: `llama-bench -p 512 -n 128`. Two metrics:
 | Qwen3.6-27B (dense, hybrid attn) | Q3_K_M | 12.64 GiB | 28 | 356.2 | 7.1 | Tighter. |
 | Qwen3.6-27B (dense, hybrid attn) | Q3_K_M | 12.64 GiB | 32 | 352.5 | 7.6 | Tighter still. |
 | Qwen3.6-27B (dense, hybrid attn) | Q3_K_M | 12.64 GiB | **33** | 343.2 | **7.8** | **Sweet spot.** ngl=34 OOMs. *Dense penalty is real.* |
+| Ornith-1.5-35B-A3B (MoE, qwen35moe hybrid SSM) | Q4_K_M | 20.35 GiB | 99 + ncmoe=37 | 98.5 | 44.9 | All-but-4 expert layers on CPU. *Build `b1-1719747`; weights on local NVMe. pp512 noisy (VM+swap active).* |
+| Ornith-1.5-35B-A3B (MoE, qwen35moe hybrid SSM) | Q4_K_M | 20.35 GiB | 99 + ncmoe=35 | 164.4 | 53.1 | Tighter. |
+| Ornith-1.5-35B-A3B (MoE, qwen35moe hybrid SSM) | Q4_K_M | 20.35 GiB | **99 + ncmoe=34** | 212.6 | **56.2** | **Sweet spot** (tied w/ 32, most VRAM headroom for KV). 41 layers, 256 experts, 8 active. *Single-run; 3-rep confirm = 52.9, see clean block below.* |
+| Ornith-1.5-35B-A3B (MoE, qwen35moe hybrid SSM) | Q4_K_M | 20.35 GiB | 99 + ncmoe=33 | 177.5 | 55.3 | Within noise of 34. |
+| Ornith-1.5-35B-A3B (MoE, qwen35moe hybrid SSM) | Q4_K_M | 20.35 GiB | 99 + ncmoe=32 | 267.5 | 56.5 | Fastest tg, no OOM (VM still holding ~8 GB RAM — more headroom than the Qwen3.6-35B run). |
+
+### Clean apples-to-apples — same build `b1-1719747`, same session, 3 reps each, VM resident (~8 GB RAM held)
+
+Both 35B/A3B/256-expert MoEs at the same `-ngl 99 -ncmoe 34`, back-to-back, so build/version and machine state are held constant. This supersedes the cross-build 56.2-vs-37.8 comparison.
+
+| Model | Quant | Size | n_gpu_layers | pp512 (t/s) | tg128 (t/s) | Notes |
+|---|---|---:|---:|---:|---:|---|
+| Qwen3.6-35B-A3B (MoE, hybrid attn) | UD-Q4_K_M | 20.60 GiB | 99 + ncmoe=34 | 169.7 ± 21.3 | **47.5 ± 0.6** | New build lifts tg ~26 % vs the old-build 37.8 (row above). |
+| Qwen3.6-35B-A3B **abliterated** (Huihui) | Q4_K_M | 19.70 GiB | 99 + ncmoe=34 | 181.2 ± 46.0 | **50.2 ± 3.5** | Uncensored finetune, same arch. ~+6 % over base — but it's plain Q4_K_M (0.9 GiB smaller) vs the base's UD-Q4_K_M, so most of the edge is quant, not abliteration. ±3.5 partly overlaps base. |
+| Ornith-1.5-35B-A3B (MoE, qwen35moe hybrid SSM) | Q4_K_M | 20.35 GiB | 99 + ncmoe=34 | 193.6 ± 42.6 | **52.9 ± 1.9** | **~11 % faster tg** than base Qwen3.6. pp512 within noise. Fastest of the three. |
 
 ## Observations
 
 - **Qwen 3 8B** at 63.7 t/s: a 100-token reply in ~1.5 s. Feels instant.
 - **Qwen 3 30B-A3B at 53.8 t/s**: 30B-class model, MoE with 3B active per token, runs on an 8 GB laptop at near-chat speed. The MoE thesis (§4 of LESSONS_LEARNED.md) is fully validated — and *better* than the 15-25 t/s prediction.
-- **Qwen3.6-35B-A3B at 37.8 t/s**: the newer 35B/A3B MoE — same active count, but bigger total weights, more experts (256 vs 128), and a hybrid Gated-DeltaNet+Gated-Attention stack. Still chat-speed on 8 GB VRAM, but **~30 % slower than Qwen 3 30B-A3B**. The penalty is real and traces to (a) bigger model = more weights to push when experts hit, and (b) hybrid attention pulls more memory bandwidth than pure attention.
+- **Qwen3.6-35B-A3B — 37.8 t/s on the old build, 47.5 t/s on the new one**: the newer 35B/A3B MoE — same active count, but bigger total weights, more experts (256 vs 128), and a hybrid Gated-DeltaNet+Gated-Attention stack. On the old build (`b1-50494a2`) it did 37.8 t/s (**~30 % slower than Qwen 3 30B-A3B**); a clean re-run on `b1-1719747` with weights on NVMe lifts it to **47.5 ± 0.6 t/s** (~+26 %). The size penalty is still real — bigger model = more weights to push when experts hit, and hybrid attention pulls more memory bandwidth — but a big chunk of the original gap was just an older build.
+- **Ornith-1.5-35B-A3B is ~11 % faster than Qwen3.6-35B-A3B, not 50 %**: on the same build (`b1-1719747`), same session, 3 reps each at `ncmoe=34`, Ornith does **52.9 ± 1.9 t/s** vs Qwen3.6's **47.5 ± 0.6**. The earlier "~50 % faster" reading was a **cross-build artifact** — it compared Ornith on the new build against Qwen3.6's *old-build* 37.8. Once both run on the same build the real gap is modest (~11 %), and Ornith's own headline 56.2 was a lucky single sample; the 3-rep average is 52.9. Ornith still never OOMs across the ncmoe 32–37 sweep (curve plateaus ~53–56 t/s), and this whole comparison was made with ~8 GB RAM held by a VM, so both numbers are conservative floors.
 - **Gemma 4 26B-A4B at 28.7 t/s**: a third MoE, and the most instructive contrast. It's the *smallest* of the three MoEs on disk (15.8 GiB) yet the *second-slowest* — and it can only push **2 of 30 expert layers onto the GPU** before OOM, vs the 17 that Qwen 3 30B-A3B managed. Two causes: (a) Gemma's **262K-token vocabulary** makes the embedding + output tensors enormous (~1 GB+ each at Q4) and those sit on the GPU, eating the VRAM that would otherwise hold experts; (b) **4B active params** (vs 3B for the Qwen MoEs) is 33 % more compute per token. The MoE trick still works — 28.7 t/s is very usable — but vocabulary size and active-param count both bend the result. *Total parameter count tells you almost nothing about speed.* **For the full bandwidth-arithmetic walkthrough of why these three MoEs run at three different speeds, see [LESSONS_LEARNED.md §5.7](LESSONS_LEARNED.md).**
 - **Phi-4-reasoning 14B at 23.8 t/s**: smartest *dense* model that still feels usable. Best per-byte reasoning quality.
 - **Qwen3.6-27B dense at 7.8 t/s**: the dense penalty is dramatic. A 27B *dense* model is **~7× slower** than a 30B *MoE* on the same hardware. This is the most important contrast in the table — it makes the case for MoE on small VRAM concrete.
@@ -161,8 +177,9 @@ Full install + methodology + scripts: [NPU.md](NPU.md).
                 0    10   20   30   40   50   60   70
                 ┝━━━━┷━━━━┷━━━━┷━━━━┷━━━━┷━━━━┷━━━━┥
 Qwen 3 8B       ████████████████████████████████ 63.7  ← fits VRAM, full GPU
-30B-A3B MoE     █████████████████████████████ 53.8     ← MoE magic: 30B via expert offload
-3.6 35B-A3B MoE ███████████████████ 37.8                ← bigger MoE, hybrid attn — pays for the size
+Ornith 35B-A3B  ██████████████████████████ 52.9         ← qwen35moe, new build (b1-1719747)
+30B-A3B MoE     █████████████████████████ 53.8          ← MoE magic: 30B via expert offload
+3.6 35B-A3B MoE ████████████████████████ 47.5           ← same-build re-run (was 37.8 on old build)
 Gemma4 26B-A4B  ██████████████ 28.7                      ← MoE, but 262K vocab + 4B active limit offload
 Phi-4 14B       ████████████ 23.8                       ← dense, tight fit
 Qwen3.6-27B     ████ 7.8                                 ← dense penalty: 27B busts VRAM
