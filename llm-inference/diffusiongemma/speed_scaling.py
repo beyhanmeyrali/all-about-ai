@@ -43,7 +43,7 @@ def load():
     return json.loads(OUT.read_text()) if OUT.exists() else {}
 
 
-def run_qwen(url):
+def run_qwen(url, key="qwen_write"):
     from openjev.config import Settings
     from openjev.engine import Engine
     eng = Engine.__new__(Engine)
@@ -75,9 +75,9 @@ def run_qwen(url):
                      "prompt_tokens": cold[0][1]["usage"]["prompt_tokens"],
                      "output_tokens": cold[0][1]["usage"]["completion_tokens"],
                      "well_formed": well_formed, "reply": text})
-        print("qwen", json.dumps({k: v for k, v in rows[-1].items() if k != "reply"}), flush=True)
+        print(key, json.dumps({k: v for k, v in rows[-1].items() if k != "reply"}), flush=True)
     res = load()
-    res["qwen_write"] = rows
+    res[key] = rows
     OUT.write_text(json.dumps(res, indent=2))
 
 
@@ -123,12 +123,13 @@ def run_jev(model):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--qwen")
+    ap.add_argument("--name", default="qwen_write", help="results key for a --qwen (llama-server) run")
     ap.add_argument("--dg")
     ap.add_argument("--jev", nargs="?", const="typesafe/jev-1.13")
     a = ap.parse_args()
     if a.jev:
         run_jev(a.jev)
     if a.qwen:
-        run_qwen(a.qwen)
+        run_qwen(a.qwen, a.name)
     if a.dg:
         run_dg(a.dg)

@@ -267,6 +267,7 @@ def main():
     ap.add_argument("--player", required=True, choices=["heuristic", "random", "jev", "dg", "qwen"])
     ap.add_argument("--url")
     ap.add_argument("--jev-model", default="typesafe/jev-1.13")
+    ap.add_argument("--name", help="results key (default: the player name)")
     a = ap.parse_args()
     import sys
     sys.path.insert(0, str(HERE))
@@ -279,9 +280,10 @@ def main():
         games.append(g)
         print(a.player, "seed", seed, {k: v for k, v in g.items() if k not in ("moves", "final_board")}, flush=True)
     res = json.loads(OUT.read_text()) if OUT.exists() else {}
-    res[a.player] = {"summary": summarize(games), "games": games}
+    key = a.name or a.player
+    res[key] = {"summary": summarize(games), "games": games}
     OUT.write_text(json.dumps(res, indent=1))
-    print(a.player, json.dumps(res[a.player]["summary"]))
+    print(key, json.dumps(res[key]["summary"]))
 
 
 if __name__ == "__main__":

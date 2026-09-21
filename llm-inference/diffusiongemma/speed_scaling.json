@@ -196,5 +196,52 @@
         "cost": 2.3856e-05
       }
     }
+  ],
+  "bonsai_write": [
+    {
+      "questions": 1,
+      "cold_ms": 797.2527900128625,
+      "warm_ms": 268.61695499974303,
+      "prompt_tokens": 113,
+      "output_tokens": 5,
+      "well_formed": true,
+      "reply": "q1: yes"
+    },
+    {
+      "questions": 2,
+      "cold_ms": 964.8494639841374,
+      "warm_ms": 426.20445499778725,
+      "prompt_tokens": 131,
+      "output_tokens": 10,
+      "well_formed": true,
+      "reply": "q1: yes\nq2: no"
+    },
+    {
+      "questions": 5,
+      "cold_ms": 1678.3121369953733,
+      "warm_ms": 896.2897600140423,
+      "prompt_tokens": 184,
+      "output_tokens": 25,
+      "well_formed": true,
+      "reply": "q1: yes\nq2: no\nq3: no\nq4: no\nq5: no"
+    },
+    {
+      "questions": 10,
+      "cold_ms": 2687.498366984073,
+      "warm_ms": 1736.678943008883,
+      "prompt_tokens": 276,
+      "output_tokens": 51,
+      "well_formed": true,
+      "reply": "q1: yes\nq2: no\nq3: no\nq4: no\nq5: no\nq6: no\nq7: no\nq8: yes\nq9: yes\nq10: no"
+    },
+    {
+      "questions": 20,
+      "cold_ms": 4011.8695849960204,
+      "warm_ms": 2417.6248839939944,
+      "prompt_tokens": 466,
+      "output_tokens": 72,
+      "well_formed": false,
+      "reply": "q1 yes q2 no q3 yes q4 no q5 no q6 no q7 yes q8 yes q9 yes q10 no q11 no q12 no q13 no q14 no q15 no q16 no q17 no q18 no q19 yes q20 no"
+    }
   ]
 }

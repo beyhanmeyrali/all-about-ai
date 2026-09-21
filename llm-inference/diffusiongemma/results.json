@@ -408,5 +408,53 @@
         "cost": 1.4532e-05
       }
     }
+  },
+  "bonsai-27b-ternary": {
+    "sst2": {
+      "n": 200,
+      "accuracy": 0.925,
+      "p50_ms": 470.011407014681,
+      "p95_ms": 488.8597190147266,
+      "mean_ms": 473.12260023129056,
+      "format_errors": 0,
+      "accuracy_lenient": 0.925,
+      "mean_completion_tokens": 5,
+      "model": "bonsai-27b-ternary"
+    },
+    "agnews": {
+      "n": 200,
+      "accuracy": 0.865,
+      "p50_ms": 507.5970620091539,
+      "p95_ms": 699.6694080007728,
+      "mean_ms": 575.2482407097705,
+      "format_errors": 0,
+      "accuracy_lenient": 0.865,
+      "mean_completion_tokens": 5,
+      "model": "bonsai-27b-ternary"
+    }
+  },
+  "bonsai-27b-ternary-read": {
+    "sst2": {
+      "n": 200,
+      "accuracy": 0.925,
+      "p50_ms": 516.1318689933978,
+      "p95_ms": 523.5801670060027,
+      "mean_ms": 513.8429123895185,
+      "mean_confidence": 0.9763493063629566,
+      "ece": 0.06319806183679791,
+      "brier": 0.1377874242253103,
+      "model": "bonsai-27b-ternary"
+    },
+    "agnews": {
+      "n": 200,
+      "accuracy": 0.86,
+      "p50_ms": 516.6299230186269,
+      "p95_ms": 568.5163869929966,
+      "mean_ms": 460.9027556447836,
+      "mean_confidence": 0.9090473258297849,
+      "ece": 0.07800584369686274,
+      "brier": 0.2388712326938923,
+      "model": "bonsai-27b-ternary"
+    }
   }
 }
