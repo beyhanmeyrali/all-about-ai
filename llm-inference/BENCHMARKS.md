@@ -186,6 +186,8 @@ DiffusionGemma is Google's open text-*diffusion* MoE (Gemma 4 backbone, 128 expe
 
 Questions per request (same article, one read each): **1 → 93 ms, 20 → 363 ms** when the text is already read; 563 ms → 2.09 s for a new text. Qwen typing its answers: 97 ms → 1.67 s. Jev in the cloud: flat 0.34–0.40 s. Full speed/token/cost comparison: [DIFFUSIONGEMMA.md TL;DR](DIFFUSIONGEMMA.md#tldr--speed-and-tokens-first).
 
+**Tetris** (every move is one typed choice among ~21 legal placements; 3 seeded games × 80 pieces): Jev survived 3/3 with 78 lines at 312 ms per move ($0.012 in total). DiffusionGemma survived 2/3 with 52 lines at 3.2 s per move and 0 output tokens. Qwen typing its choice survived 0/3 with 37 lines at 1.6 s per move. For reference, a hand-tuned heuristic gets 3/3 and 86 lines, and random gets 0/3 and 0 lines. Details: [DIFFUSIONGEMMA.md](DIFFUSIONGEMMA.md#-tetris-can-they-actually-play).
+
 ### Offload sweep and generation
 
 | Mode | n_gpu_layers | Peak VRAM | Result | Notes |

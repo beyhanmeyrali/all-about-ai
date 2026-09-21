@@ -28,6 +28,11 @@ model (Qwen 3 30B) as the baseline.
 • Jev: $0.013–0.015 (all 400 test decisions cost me $0.0056).
 • Local models: $0 (my electricity is cheap).
 
+🎮 TETRIS — each model picks every move (3 games, 80 pieces each)
+• Jev: survived 3 of 3, 78 lines, 0.31 s per move.
+• DiffusionGemma: survived 2 of 3, 52 lines, 3.2 s per move on the laptop.
+• Qwen: topped out in all 3, 37 lines, 1.6 s per move.
+
 🎯 QUALITY (movie-review sentiment / news topic)
 • Jev: 94% / 85%, and the best calibrated.
 • DiffusionGemma: 89% / 77%, zero broken replies.
@@ -100,6 +105,23 @@ Full numbers, code, and every test case are in the write-up. #AI #LLM #Jev #Diff
 | Median time per decision | **334 / 336 ms** | 534 / 700 ms | 816 / 991 ms | 506 / 601 ms | 549 / 652 ms |
 
 *Calibration asks whether a stated "95 % sure" is right 95 % of the time. Lower ECE is better; [Step 4](#step-4-what-calibrated-means) explains it.*
+
+### 🎮 Tetris: can they actually play?
+
+Every move is one decision. The model sees the board as text, the current and next piece, and every legal placement with its consequences (for example "clears 1 line, +0 holes, max height 5, bumpiness 4"). It picks one placement. All players got the same seeded pieces, over 3 games capped at 80 pieces each.
+
+| Player | Games survived (of 3) | Pieces placed | Lines cleared | Same move as an expert heuristic | Time per move | Tokens per move (in / out) | Cost, all 3 games |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Hand-tuned heuristic (reference) | 3 | 240 | 86 | 100 % | 0 ms | — | $0 |
+| **Jev** (cloud) | **3** | **240** | **78** | **88 %** | **312 ms** | 1,200 / 252 (output free) | $0.012 |
+| **DiffusionGemma** (laptop) | 2 | 237 | 52 | 57 % | 3,186 ms | 884 / **0** | $0 |
+| **Qwen**, typing its choice (laptop) | 0 | 209 | 37 | 56 % | 1,574 ms | 782 / 5 | $0 |
+| Random (reference) | 0 | 76 | 0 | 17 % | 0 ms | — | $0 |
+
+- **Jev plays almost like the hand-tuned expert**: it survived every game and matched the expert's move 88 % of the time, at 0.3 s per move.
+- **DiffusionGemma kept 2 of 3 games alive**, but at 3.2 s per move. Tetris prompts are long (~900 tokens, with ~21 options), and reading them is exactly the slow part on a laptop.
+- **Qwen typed a valid answer every time** (0 broken replies), but it chose worse moves and topped out in all 3 games.
+- Test details are in [Test 4](#test-4--tetris), and the code is [`tetris_bench.py`](diffusiongemma/tetris_bench.py).
 
 ### When to use which
 
@@ -516,6 +538,39 @@ Reply with one line per question, in this order, formatted as "id: label".
 ```
 
 - **Command:** [`side_by_side.py`](diffusiongemma/side_by_side.py) `--qwen URL` / `--dg URL` / `--jev`.
+
+### Test 4 — Tetris
+
+- **Game:** a 10×20 board, the 7 standard pieces from a seeded "7-bag" (seeds 1, 2, 3; the same sequence for every player), hard drops only, and a cap of 80 pieces per game. A game ends early if no placement fits.
+- **Each move** is one `choice` question. The `state` is the board as text:
+
+```text
+Current piece: T   Next piece: O
+Board (10 wide, 20 tall, # = filled):
+|..........|
+   … 15 more empty rows …
+|.#........|
+|.#...#....|
+|.######...|
+|###.######|
++----------+
+```
+
+  That's a real position: seed 1 after 12 moves. The question is:
+
+```json
+{"move": {"type": "choice",
+          "instructions": "You are playing Tetris and want to survive as long as possible and clear lines. Pick the placement for the current piece: prefer clearing lines, avoid creating holes, and keep the stack low and flat.",
+          "criteria": {"rot2-col2": "clears 0 lines, +0 holes, max height 4, bumpiness 8",
+                       "rot2-col7": "clears 0 lines, +0 holes, max height 4, bumpiness 9",
+                       "rot0-col0": "clears 0 lines, +7 holes, max height 6, bumpiness 7",
+                       "...": "34 distinct legal placements in this position (about 21 on average)"}}}
+```
+
+- **Players:**
+  - Jev and DiffusionGemma get that JSON, with DiffusionGemma doing one read per move. It ran at `--n-cpu-moe 22` here, because the ~900-token prompts need an extra ~160 MB of VRAM for the prompt store, and at 20 it runs out of memory.
+  - Qwen gets OpenJev's generated instructions and must type `q1: <letter>`. A broken reply would play the first option; it produced none.
+- **Metrics:** pieces placed, lines cleared, games survived, and how often the move matched an expert heuristic (Yiyuan Lee's hand-tuned weights). Per-move time, tokens and cost are all in [`tetris_results.json`](diffusiongemma/tetris_results.json), which records every move of every game.
 
 **API differences worth knowing:** Jev rejects a `choice` or `score` question that has no `instructions` (HTTP 400), while OpenJev treats that field as optional. Jev also rounds probabilities to 2 decimals.
 
