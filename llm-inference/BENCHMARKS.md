@@ -170,6 +170,36 @@ Full install + methodology + scripts: [NPU.md](NPU.md).
 
 ---
 
+## Text diffusion — DiffusionGemma 26B-A4B (Jev-style "System One" decisions)
+
+DiffusionGemma is Google's open text-*diffusion* MoE (Gemma 4 backbone, 128 experts / 8 active). It's measured two ways here: as a **decision engine**, where one bidirectional pass over a pre-filled answer template reads out option probabilities (OpenJev), and as an ordinary **text generator**. Build: llama.cpp PR #24423 (`12e0a96`, unmerged) plus our `dg-systemone-server`. Weights: `unsloth/diffusiongemma-26B-A4B-it-GGUF` Q4_K_M, 15.6 GiB. Full write-up, method, and claims audit: [DIFFUSIONGEMMA.md](DIFFUSIONGEMMA.md).
+
+### Decisions — 200 SST-2 (yes/no) + 200 AG News (4-way), same prompt for every system
+
+| System | SST-2 acc | AG News acc | Invalid replies | ECE (SST-2 / AG) | p50 latency (SST-2 / AG) |
+|---|---:|---:|---:|---|---|
+| Qwen 3 30B-A3B — generates `q1: <label>` (`-ncmoe 34`) | 83.0 % | 65.5 % | 31 / 400 | — | 549 / 652 ms |
+| Qwen 3 30B-A3B — next-token label probabilities | 83.0 % | 73.5 % | 0 | 0.170 / 0.230 | 506 / 601 ms |
+| **DiffusionGemma — 1 read** (`-ncmoe 20 --no-op-offload`) | **89.0 %** | **77.0 %** | **0** | **0.077** / 0.167 | **534 / 700 ms** |
+| DiffusionGemma — OpenJev default (≤ 4 reads) | 90.5 % | 78.0 % | 0 | 0.087 / 0.163 | 816 / 991 ms |
+
+Questions per request (same article, one read each): **1 → 94 ms, 10 → 294 ms** when the state is already prefilled; 556 ms → 1.33 s for a new state.
+
+### Offload sweep and generation
+
+| Mode | n_gpu_layers | Peak VRAM | Result | Notes |
+|---|---:|---:|---:|---|
+| Decisions, `-ub 4096` (default-sized) | 99 + ncmoe=26 | — | **OOM** | 4.2 GiB full-vocab logits buffer (4096 rows × 262 K vocab × 4 B), not the experts. |
+| Decisions, `-ub 512` | 99 + ncmoe=28 | 3.7 GiB | 1,277 ms / decision | |
+| Decisions, `-ub 512` | 99 + ncmoe=20 | 7.6 GiB | 1,000 ms | ncmoe=18 OOMs. |
+| Decisions, `-ub 512 --no-op-offload` | **99 + ncmoe=20** | 7.6 GiB | **801 ms** | Prefill 624 → 423 ms: stops streaming CPU experts over PCIe on every prompt. |
+| Text generation, `llama-diffusion-cli -n 256` | 99 + ncmoe=28 | — | **14.6 tok/s** | 20 denoising steps × ~875 ms per 256-token block. ncmoe=26 OOMs (+1.4 GiB self-conditioning embedding). |
+| *Gemma 4 26B-A4B, autoregressive (same backbone, from above)* | 99 + ncmoe=28 | — | *28.7 tok/s* | Diffusion generation is ~2× slower on 8 GB: every step is a 256-token batch that touches nearly every CPU-resident expert. |
+
+**What to remember:** as a decision engine it beat a strong autoregressive MoE on accuracy (+3.5–6 points), calibration (ECE 0.077 vs 0.170), and format errors (0 vs 31), and it answers 10 questions for 3× the cost of one. As a chat model on small VRAM it's half the speed of its autoregressive twin. The "~0.2 s flat" and "zero hallucinations" claims don't hold here: see the [claims audit](DIFFUSIONGEMMA.md#8-a-claims-audit).
+
+---
+
 ## The headline chart
 
 ```
@@ -182,6 +212,7 @@ Ornith 35B-A3B  █████████████████████�
 3.6 35B-A3B MoE ████████████████████████ 47.5           ← same-build re-run (was 37.8 on old build)
 Gemma4 26B-A4B  ██████████████ 28.7                      ← MoE, but 262K vocab + 4B active limit offload
 Phi-4 14B       ████████████ 23.8                       ← dense, tight fit
+DiffusionGemma  ███████ 14.6                             ← same backbone as Gemma4, but text *diffusion*: 256-tok blocks
 Qwen3.6-27B     ████ 7.8                                 ← dense penalty: 27B busts VRAM
 ```
 

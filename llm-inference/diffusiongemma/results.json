@@ -1,0 +1,370 @@
+{
+  "qwen3-30b-a3b-ar": {
+    "sst2": {
+      "n": 200,
+      "accuracy": 0.83,
+      "p50_ms": 549.0807709866203,
+      "p95_ms": 614.7737330175005,
+      "mean_ms": 428.36158477613935,
+      "format_errors": 0,
+      "accuracy_lenient": 0.83,
+      "mean_completion_tokens": 5,
+      "model": "qwen3-30b-a3b-ar"
+    },
+    "agnews": {
+      "n": 200,
+      "accuracy": 0.655,
+      "p50_ms": 652.429171022959,
+      "p95_ms": 721.834163996391,
+      "mean_ms": 647.3090513050556,
+      "format_errors": 31,
+      "accuracy_lenient": 0.75,
+      "mean_completion_tokens": 4.905,
+      "model": "qwen3-30b-a3b-ar"
+    }
+  },
+  "qwen3-30b-a3b-ar-read": {
+    "sst2": {
+      "n": 200,
+      "accuracy": 0.83,
+      "p50_ms": 505.95751899527386,
+      "p95_ms": 564.5653160172515,
+      "mean_ms": 404.89243771356996,
+      "mean_confidence": 0.9924150500588298,
+      "ece": 0.17042729825674455,
+      "brier": 0.33104773056137843,
+      "model": "qwen3-30b-a3b-ar"
+    },
+    "agnews": {
+      "n": 200,
+      "accuracy": 0.735,
+      "p50_ms": 601.4533949783072,
+      "p95_ms": 668.5551090049557,
+      "mean_ms": 601.5177506202599,
+      "mean_confidence": 0.9646339181113192,
+      "ece": 0.22963391811131914,
+      "brier": 0.4676147105844622,
+      "model": "qwen3-30b-a3b-ar"
+    }
+  },
+  "sweep-ncmoe30": {
+    "server_args": [
+      "-m",
+      "/home/ubuntu/workspace/models/diffusiongemma-26b-a4b/diffusiongemma-26B-A4B-it-Q4_K_M.gguf",
+      "-ngl",
+      "99",
+      "--n-cpu-moe",
+      "30",
+      "-fa",
+      "on",
+      "-c",
+      "4096"
+    ],
+    "sst2": {
+      "n": 30,
+      "accuracy": 1.0,
+      "p50_ms": 1355.6381840026006,
+      "p95_ms": 1395.7003929826897,
+      "mean_ms": 1358.4687542994895,
+      "mean_confidence": 0.9894234838136821,
+      "ece": 0.01057651618631783,
+      "brier": 0.0014060430374677716,
+      "reads_per_decision": 4.0,
+      "prefill_ms_p50": 878.938155,
+      "decode_ms_p50": 118.107691
+    }
+  },
+  "sweep-ncmoe28": {
+    "server_args": [
+      "-m",
+      "/home/ubuntu/workspace/models/diffusiongemma-26b-a4b/diffusiongemma-26B-A4B-it-Q4_K_M.gguf",
+      "-ngl",
+      "99",
+      "--n-cpu-moe",
+      "28",
+      "-fa",
+      "on",
+      "-c",
+      "2048",
+      "-ub",
+      "512"
+    ],
+    "sst2": {
+      "n": 30,
+      "accuracy": 1.0,
+      "p50_ms": 1276.9540250010323,
+      "p95_ms": 1313.556195993442,
+      "mean_ms": 1276.4432183282527,
+      "mean_confidence": 0.9893773437820969,
+      "ece": 0.010622656217903037,
+      "brier": 0.0014113652608700633,
+      "reads_per_decision": 4.0,
+      "prefill_ms_p50": 820.2179,
+      "decode_ms_p50": 112.14468
+    }
+  },
+  "sweep-ncmoe26": {
+    "server_args": [
+      "-m",
+      "/home/ubuntu/workspace/models/diffusiongemma-26b-a4b/diffusiongemma-26B-A4B-it-Q4_K_M.gguf",
+      "-ngl",
+      "99",
+      "--n-cpu-moe",
+      "26",
+      "-fa",
+      "on",
+      "-c",
+      "2048",
+      "-ub",
+      "512"
+    ],
+    "sst2": {
+      "n": 30,
+      "accuracy": 1.0,
+      "p50_ms": 1204.8495740164071,
+      "p95_ms": 1251.488836016506,
+      "mean_ms": 1205.9618373973838,
+      "mean_confidence": 0.9889945920555686,
+      "ece": 0.011005407944431278,
+      "brier": 0.0014699471974653285,
+      "reads_per_decision": 4.0,
+      "prefill_ms_p50": 765.37181,
+      "decode_ms_p50": 107.597754
+    }
+  },
+  "sweep-ncmoe24": {
+    "server_args": [
+      "-m",
+      "/home/ubuntu/workspace/models/diffusiongemma-26b-a4b/diffusiongemma-26B-A4B-it-Q4_K_M.gguf",
+      "-ngl",
+      "99",
+      "--n-cpu-moe",
+      "24",
+      "-fa",
+      "on",
+      "-c",
+      "2048",
+      "-ub",
+      "512"
+    ],
+    "sst2": {
+      "n": 30,
+      "accuracy": 1.0,
+      "p50_ms": 1136.0074889962561,
+      "p95_ms": 1177.9033970087767,
+      "mean_ms": 1137.8922054369468,
+      "mean_confidence": 0.9888005153439127,
+      "ece": 0.011199484656087284,
+      "brier": 0.001630186654622474,
+      "reads_per_decision": 4.0,
+      "prefill_ms_p50": 720.267215,
+      "decode_ms_p50": 102.422951
+    }
+  },
+  "sweep-ncmoe22": {
+    "server_args": [
+      "-m",
+      "/home/ubuntu/workspace/models/diffusiongemma-26b-a4b/diffusiongemma-26B-A4B-it-Q4_K_M.gguf",
+      "-ngl",
+      "99",
+      "--n-cpu-moe",
+      "22",
+      "-fa",
+      "on",
+      "-c",
+      "2048",
+      "-ub",
+      "512"
+    ],
+    "sst2": {
+      "n": 30,
+      "accuracy": 1.0,
+      "p50_ms": 1062.2518919990398,
+      "p95_ms": 1103.518009011168,
+      "mean_ms": 1066.5676085705247,
+      "mean_confidence": 0.988357153575967,
+      "ece": 0.011642846424033005,
+      "brier": 0.0017100209275632706,
+      "reads_per_decision": 4.0,
+      "prefill_ms_p50": 669.507447,
+      "decode_ms_p50": 96.044721
+    }
+  },
+  "sweep-ncmoe20": {
+    "server_args": [
+      "-m",
+      "/home/ubuntu/workspace/models/diffusiongemma-26b-a4b/diffusiongemma-26B-A4B-it-Q4_K_M.gguf",
+      "-ngl",
+      "99",
+      "--n-cpu-moe",
+      "20",
+      "-fa",
+      "on",
+      "-c",
+      "2048",
+      "-ub",
+      "512"
+    ],
+    "sst2": {
+      "n": 30,
+      "accuracy": 1.0,
+      "p50_ms": 999.5875319873448,
+      "p95_ms": 1044.0062810084783,
+      "mean_ms": 999.1279695997946,
+      "mean_confidence": 0.9888965353779078,
+      "ece": 0.011103464622092218,
+      "brier": 0.0015897331626773836,
+      "reads_per_decision": 4.0,
+      "prefill_ms_p50": 624.044681,
+      "decode_ms_p50": 90.181868
+    }
+  },
+  "sweep-ncmoe20-noopoffload": {
+    "server_args": [
+      "-m",
+      "/home/ubuntu/workspace/models/diffusiongemma-26b-a4b/diffusiongemma-26B-A4B-it-Q4_K_M.gguf",
+      "-ngl",
+      "99",
+      "--n-cpu-moe",
+      "20",
+      "-fa",
+      "on",
+      "-c",
+      "2048",
+      "-ub",
+      "512",
+      "--no-op-offload"
+    ],
+    "sst2": {
+      "n": 30,
+      "accuracy": 1.0,
+      "p50_ms": 800.7233369862661,
+      "p95_ms": 852.3419949924573,
+      "mean_ms": 801.1167893360835,
+      "mean_confidence": 0.983054336752672,
+      "ece": 0.016945663247328047,
+      "brier": 0.005069206433623169,
+      "reads_per_decision": 4.0,
+      "prefill_ms_p50": 422.760869,
+      "decode_ms_p50": 91.136238
+    }
+  },
+  "diffusiongemma-openjev-default": {
+    "server_args": [
+      "-m",
+      "/home/ubuntu/workspace/models/diffusiongemma-26b-a4b/diffusiongemma-26B-A4B-it-Q4_K_M.gguf",
+      "-ngl",
+      "99",
+      "--n-cpu-moe",
+      "20",
+      "-fa",
+      "on",
+      "-c",
+      "2048",
+      "-ub",
+      "512",
+      "--no-op-offload"
+    ],
+    "sst2": {
+      "n": 200,
+      "accuracy": 0.905,
+      "p50_ms": 815.9500479814596,
+      "p95_ms": 889.619974012021,
+      "mean_ms": 817.6644731048145,
+      "mean_confidence": 0.9682508799838728,
+      "ece": 0.08692393483975902,
+      "brier": 0.18039650003103866,
+      "reads_per_decision": 4.0,
+      "prefill_ms_p50": 434.952008,
+      "decode_ms_p50": 92.478875
+    },
+    "agnews": {
+      "n": 200,
+      "accuracy": 0.78,
+      "p50_ms": 991.3860659871716,
+      "p95_ms": 1106.5615859988611,
+      "mean_ms": 996.633972949785,
+      "mean_confidence": 0.9370800593514047,
+      "ece": 0.1631940969308233,
+      "brier": 0.38242427175546295,
+      "reads_per_decision": 3.97,
+      "prefill_ms_p50": 606.28403,
+      "decode_ms_p50": 94.175211
+    },
+    "sweep": [
+      {
+        "questions": 1,
+        "warm_p50_ms": 93.93969899974763,
+        "decode_p50_ms": 91.230138,
+        "cold_p50_ms": 555.8782519947272
+      },
+      {
+        "questions": 2,
+        "warm_p50_ms": 98.75913598807529,
+        "decode_p50_ms": 95.253262,
+        "cold_p50_ms": 625.3949549864046
+      },
+      {
+        "questions": 5,
+        "warm_p50_ms": 163.43515200424008,
+        "decode_p50_ms": 154.596288,
+        "cold_p50_ms": 875.0229100114666
+      },
+      {
+        "questions": 10,
+        "warm_p50_ms": 293.7675619905349,
+        "decode_p50_ms": 282.17831,
+        "cold_p50_ms": 1330.766016006237
+      },
+      {
+        "questions": 20,
+        "warm_p50_ms": 2685.7851200038567,
+        "decode_p50_ms": 150.865533,
+        "cold_p50_ms": 2720.371964998776
+      }
+    ]
+  },
+  "diffusiongemma-single-read": {
+    "server_args": [
+      "-m",
+      "/home/ubuntu/workspace/models/diffusiongemma-26b-a4b/diffusiongemma-26B-A4B-it-Q4_K_M.gguf",
+      "-ngl",
+      "99",
+      "--n-cpu-moe",
+      "20",
+      "-fa",
+      "on",
+      "-c",
+      "2048",
+      "-ub",
+      "512",
+      "--no-op-offload"
+    ],
+    "sst2": {
+      "n": 200,
+      "accuracy": 0.89,
+      "p50_ms": 533.7956849834882,
+      "p95_ms": 593.687158980174,
+      "mean_ms": 535.0753424491268,
+      "mean_confidence": 0.9666458637039566,
+      "ece": 0.07664586370395665,
+      "brier": 0.1797811859082108,
+      "reads_per_decision": 1.0,
+      "prefill_ms_p50": 437.865323,
+      "decode_ms_p50": 94.077207
+    },
+    "agnews": {
+      "n": 200,
+      "accuracy": 0.77,
+      "p50_ms": 700.0182630144991,
+      "p95_ms": 828.6003819957841,
+      "mean_ms": 708.5380848309433,
+      "mean_confidence": 0.9370637782546392,
+      "ece": 0.16722393358646917,
+      "brier": 0.38292565610535195,
+      "reads_per_decision": 1.0,
+      "prefill_ms_p50": 601.043404,
+      "decode_ms_p50": 94.509548
+    }
+  }
+}
