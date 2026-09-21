@@ -2,6 +2,47 @@
 
 > **In one sentence:** TypeSafe's Jev answers typed questions in a flat ~0.34 s, and a viral post claims Google's open DiffusionGemma is a free Jev. I measured both, plus two normal local models (Qwen 3 30B and a 5.9 GB ternary Bonsai 27B), on the same 400 questions, a 1–20 question speed test, and Tetris, on an 8 GB laptop GPU.
 
+## At a glance
+
+**The contenders**, all given the same 400 questions (200 movie reviews: *positive?*, and 200 news articles: *which of 4 topics?*), a 1–20 question speed test, and 3 games of Tetris:
+- **Jev 1.13**, TypeSafe's commercial "System One" model, called in the cloud through OpenRouter.
+- **DiffusionGemma 26B-A4B**, Google's open text-diffusion model, run as an open Jev clone on an 8 GB laptop GPU.
+- **Qwen 3 30B-A3B**, a normal chat model, as the baseline.
+- **Ternary Bonsai 27B**, PrismML's 27B model compressed to 1.75 bits per weight: a 5.9 GB file that fits entirely on the laptop GPU.
+
+**⚡ Speed**: time to answer N yes/no questions about one text:
+- **Jev** (cloud, network included): 0.40 s for 1 question and 0.34 s for 20. **Flat.**
+- **DiffusionGemma**: 0.09 s for 1 and 0.36 s for 20 once the text is loaded; 0.56 → 2.1 s for a new text.
+- **Qwen, typing its answers**: 0.10 s → 1.7 s, growing with every question. At 20 questions it broke its own output format.
+- **Bonsai, typing its answers**: 0.27 s → 2.4 s. Same problem, slower typist.
+
+**🔢 Tokens**
+- **Qwen and Bonsai** have to *write* their answers: 5 output tokens per question, 72–92 for 20 questions.
+- **DiffusionGemma** writes nothing: **0 output tokens**. It reads each answer straight out of one pass over a pre-printed form.
+- **Jev** bills only input tokens ($0.042 per million); output is free.
+
+**💰 Cost per 1,000 decisions**
+- **Jev**: $0.013–0.015. All 400 test decisions cost $0.0056.
+- **Local models**: $0.
+
+**🎯 Quality** (movie reviews / news topics):
+- **Jev**: 94 % / 85 %.
+- **Bonsai**: 92.5 % / 86.5 %, 0 malformed replies, and the best calibrated of all four. It beats Jev on news topics.
+- **DiffusionGemma**: 89 % / 77 %, 0 malformed replies.
+- **Qwen, writing its answers**: 83 % / 65.5 %, with 31 malformed replies out of 400.
+
+**🎮 Tetris** (the model picks every move; 3 games, 80 pieces each):
+- **Jev**: survived 3 of 3, 78 lines, 0.31 s per move.
+- **Bonsai**: survived 2 of 3, 64 lines, 3.0 s per move.
+- **DiffusionGemma**: survived 2 of 3, 52 lines, 3.2 s per move.
+- **Qwen**: topped out in all 3, 37 lines, 1.6 s per move.
+
+**Takeaways**
+1. **Jev's speed claim is real**: a flat 0.34–0.40 s whether you ask 1 question or 20.
+2. **"DiffusionGemma is a free Jev" is half true.** It really does answer many questions in one pass with zero output tokens. On an 8 GB GPU, though, it isn't flat, and it's 5–8 points less accurate than Jev.
+3. **For decisions, stop making models type.** Reading probabilities instead of parsing text removed every format error, for every model.
+4. **The dark horse is Ternary Bonsai 27B.** A 5.9 GB model on an 8 GB laptop is about as accurate as Jev on these tasks. It's just slow when it has to type many answers.
+
 **Every number on this page was measured by me unless marked otherwise.** Local runs used an RTX 5060 Laptop (8 GB) with a Ryzen AI 9 365 and 29 GB RAM. Jev was called over the internet through OpenRouter, so its times include the network round trip. [Every test case and exact query](#every-test-exactly) is listed below. The page has two parts:
 - **Part 1** (this top part): the TL;DR, the idea explained from zero, code you can copy, and real side-by-side answers.
 - **[Part 2](#part-2--the-detailed-version)**: the engineering and a claims audit of the viral post.
