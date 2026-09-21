@@ -53,7 +53,60 @@ My take:
 4. The dark horse: Ternary Bonsai 27B. A 5.9 GB model on an 8 GB laptop is about
    as accurate as Jev on these tasks. It's just slow when it has to type many answers.
 
-Full numbers, code, and every test case are in the write-up. #AI #LLM #Jev #DiffusionGemma #OpenSource
+Full numbers, code, and every test case (open source):
+https://github.com/beyhanmeyrali/all-about-ai/blob/main/llm-inference/DIFFUSIONGEMMA.md
+
+#AI #LLM #Jev #DiffusionGemma #OpenSource #LocalLLM
+```
+
+> **The same story as an X thread** (6 posts, each under 280 characters):
+
+```text
+I benchmarked TypeSafe's Jev (the "System One" decision model) against 3 models on my 8 GB laptop: DiffusionGemma, Qwen 3 30B, and a 5.9 GB ternary Bonsai 27B.
+
+400 labelled questions, a speed sweep, and Tetris. All numbers measured. 🧵
+```
+
+```text
+⚡ Speed: time to answer 1 → 20 questions about one text
+
+Jev (cloud, network included): 0.40 s → 0.34 s. Flat.
+DiffusionGemma: 0.09 → 0.36 s, 0 output tokens
+Qwen, typing its answers: 0.10 → 1.7 s, and its format broke at 20
+Bonsai, typing: 0.27 → 2.4 s
+```
+
+```text
+🎯 Accuracy (movie reviews / news topics):
+
+Jev: 94% / 85%
+Bonsai 27B, 5.9 GB: 92.5% / 86.5%
+DiffusionGemma: 89% / 77%
+Qwen 3 30B: 83% / 65.5%, with 31 broken replies
+
+A 5.9 GB model on a laptop, about as accurate as Jev.
+```
+
+```text
+💰 Cost per 1,000 decisions
+
+Jev: $0.013–0.015. The whole 400-question test cost me $0.0056.
+Local models: $0.
+
+🎮 Tetris (3 games): Jev survived 3/3 at 0.3 s per move. Bonsai 2/3, DiffusionGemma 2/3, Qwen 0/3.
+```
+
+```text
+Takeaways:
+1. Jev's speed claim is real: flat ~0.34 s.
+2. "DiffusionGemma = free Jev" is half true: one pass and 0 output tokens, but not flat on 8 GB, and 5–8 points behind.
+3. For decisions, read the model's probabilities instead of parsing its text. Format errors drop to 0.
+```
+
+```text
+Everything is open: code, raw results, every test case, and a beginner-friendly explainer.
+
+https://github.com/beyhanmeyrali/all-about-ai/blob/main/llm-inference/DIFFUSIONGEMMA.md
 ```
 
 **Every number on this page was measured by me unless marked otherwise.** Local runs used an RTX 5060 Laptop (8 GB) with a Ryzen AI 9 365 and 29 GB RAM. Jev was called over the internet through OpenRouter, so its times include the network round trip. [Every test case and exact query](#every-test-exactly) is listed below. The page has two parts:
