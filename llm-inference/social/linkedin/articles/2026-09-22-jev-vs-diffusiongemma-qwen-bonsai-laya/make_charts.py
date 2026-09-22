@@ -109,7 +109,7 @@ plt.close(fig)
 
 # ---------------------------------------------------------------- 3. Tetris
 t = json.loads((D / "tetris_results.json").read_text())
-rows = [("Hand-tuned expert", "heuristic"), ("Jev", "jev"), ("Bonsai 27B", "bonsai"), ("DiffusionGemma", "dg"),
+rows = [("Classic heuristic", "heuristic"), ("Jev", "jev"), ("Bonsai 27B", "bonsai"), ("DiffusionGemma", "dg"),
         ("Qwen 3 30B", "qwen"), ("Laya", "laya"), ("Random", "random")]
 fig, ax = plt.subplots(figsize=(12, 7.2), dpi=150)
 fig.subplots_adjust(left=0.2, right=0.95, top=0.8, bottom=0.14)

@@ -132,9 +132,9 @@ I took **200 random items from each** (a fixed random seed, so all models got ex
 
 Every move is one decision. The model sees the board as text, the current and next piece, and every legal placement with its consequences (for example "clears 1 line, +0 holes, max height 5, bumpiness 4"). It picks one placement. All players got the same seeded pieces, over 3 games capped at 80 pieces each.
 
-| Player | Games survived (of 3) | Pieces placed | Lines cleared | Same move as an expert heuristic | Time per move | Tokens per move (in / out) | Cost, all 3 games |
+| Player | Games survived (of 3) | Pieces placed | Lines cleared | Same move as the classic heuristic | Time per move | Tokens per move (in / out) | Cost, all 3 games |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Hand-tuned heuristic (reference) | 3 | 240 | 86 | 100 % | 0 ms | — | $0 |
+| Classic heuristic (reference) | 3 | 240 | 86 | 100 % | 0 ms | — | $0 |
 | **Jev** (cloud) | **3** | **240** | **78** | **88 %** | **312 ms** | 1,200 / 252 (output free) | $0.012 |
 | **DiffusionGemma** (laptop) | 2 | 237 | 52 | 57 % | 3,186 ms | 884 / **0** | $0 |
 | **Bonsai**, typing its choice (laptop, all on the GPU) | 2 | 236 | 64 | 71 % | 3,043 ms | 890 / 5 | $0 |
@@ -142,11 +142,22 @@ Every move is one decision. The model sees the board as text, the current and ne
 | **Laya** (laptop GPU) | 0 | 88 | 0 | 30 % | **28 ms** | 422 / 0 | $0 |
 | Random (reference) | 0 | 76 | 0 | 17 % | 0 ms | — | $0 |
 
-- **Jev plays almost like the hand-tuned expert**: it survived every game and matched the expert's move 88 % of the time, at 0.3 s per move.
+**What's the "classic heuristic"?** It's a reference player, not an AI model: a well-known Tetris formula from [Yiyuan Lee's 2013 Tetris bot](https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/). For every legal placement it scores the board that would result and picks the best:
+
+```text
+score = −0.51 × aggregate height   (sum of all column heights)
+        +0.76 × lines cleared
+        −0.36 × holes              (empty cells buried under blocks)
+        −0.18 × bumpiness          (how jagged the surface is)
+```
+
+Lee chose the four features by hand and found the weights with a genetic algorithm, which plays many games and keeps the best-scoring weights. It's `heuristic_score()` in [`tetris_bench.py`](diffusiongemma/tetris_bench.py). The models see almost the same information in each option's description (lines, new holes, max height, bumpiness); the formula just knows exactly how to weigh it. "Same move as the classic heuristic" measures how often a model made the move this proven strategy would.
+
+- **Jev plays almost like the classic heuristic**: it survived every game and picked the same move 88 % of the time, at 0.3 s per move.
 - **DiffusionGemma kept 2 of 3 games alive**, but at 3.2 s per move. Tetris prompts are long (~900 tokens, with ~21 options), and reading them is exactly the slow part on a laptop.
-- **Bonsai is the best local player**: it survived 2 of 3 games, cleared 64 lines, and matched the expert 71 % of the time. It's also the slowest, at 3.0 s per move, because it reads a ~890-token board with every weight of a dense 27B model. It produced 5 malformed replies in 236 moves.
+- **Bonsai is the best local player**: it survived 2 of 3 games, cleared 64 lines, and matched the heuristic 71 % of the time. It's also the slowest, at 3.0 s per move, because it reads a ~890-token board with every weight of a dense 27B model. It produced 5 malformed replies in 236 moves.
 - **Qwen typed a valid answer every time** (0 broken replies), but it chose worse moves and topped out in all 3 games.
-- **Laya played barely better than random**: 0 lines in all 3 games, and it matched the expert only 30 % of the time (random: 17 %), though each move took just 28 ms. Weighing options like "+2 holes, max height 6" against each other is reasoning, and a 421M classifier doesn't do it. (Its option budget was raised from 192 to 512 tokens so that every placement fit; see Test 4.)
+- **Laya played barely better than random**: 0 lines in all 3 games, and it matched the heuristic only 30 % of the time (random: 17 %), though each move took just 28 ms. Weighing options like "+2 holes, max height 6" against each other is reasoning, and a 421M classifier doesn't do it. (Its option budget was raised from 192 to 512 tokens so that every placement fit; see Test 4.)
 - Test details are in [Test 4](#test-4--tetris), and the code is [`tetris_bench.py`](diffusiongemma/tetris_bench.py).
 
 ### When to use which
@@ -624,7 +635,7 @@ Board (10 wide, 20 tall, # = filled):
   - Jev and DiffusionGemma get that JSON, with DiffusionGemma doing one read per move. It ran at `--n-cpu-moe 22` here, because the ~900-token prompts need an extra ~160 MB of VRAM for the prompt store, and at 20 it runs out of memory.
   - Laya gets the same JSON as Jev, with its option budget (`head_max_len`) raised from 192 to 512 tokens. With the default, 20–34 placements don't fit and it refuses the question. With 512, every move fit (0 refusals).
   - Qwen and Bonsai get OpenJev's generated instructions and must type `q1: <letter>`. A broken reply plays the first option. Qwen produced none; Bonsai produced 5 in 236 moves.
-- **Metrics:** pieces placed, lines cleared, games survived, and how often the move matched an expert heuristic (Yiyuan Lee's hand-tuned weights). Per-move time, tokens and cost are all in [`tetris_results.json`](diffusiongemma/tetris_results.json), which records every move of every game.
+- **Metrics:** pieces placed, lines cleared, games survived, and how often the move matched the classic heuristic (explained in the Tetris section above). Per-move time, tokens and cost are all in [`tetris_results.json`](diffusiongemma/tetris_results.json), which records every move of every game.
 
 **API differences worth knowing:** Jev rejects a `choice` or `score` question that has no `instructions` (HTTP 400), while OpenJev treats that field as optional. Jev also rounds probabilities to 2 decimals.
 

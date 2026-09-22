@@ -83,13 +83,20 @@ One lesson stood out above all the others: **every model stopped producing broke
 
 ## Tetris: can they actually play?
 
-![Bar chart of Tetris lines cleared over 3 games. Hand-tuned expert 86, Jev 78 (survived 3 of 3, 312 ms per move), Bonsai 27B 64 (2 of 3, 3.0 s), DiffusionGemma 52 (2 of 3, 3.2 s), Qwen 3 30B 37 (0 of 3, 1.6 s), Laya 0 (0 of 3, 28 ms), Random 0.](images/tetris-results.png)
+![Bar chart of Tetris lines cleared over 3 games. Classic heuristic (reference) 86, Jev 78 (survived 3 of 3, 312 ms per move), Bonsai 27B 64 (2 of 3, 3.0 s), DiffusionGemma 52 (2 of 3, 3.2 s), Qwen 3 30B 37 (0 of 3, 1.6 s), Laya 0 (0 of 3, 28 ms), Random 0.](images/tetris-results.png)
 
-> 📎 **Upload:** `images/tetris-results.png` · **Alt text:** Bar chart of Tetris lines cleared over 3 games. Hand-tuned expert 86, Jev 78 (survived 3 of 3, 312 ms per move), Bonsai 27B 64 (2 of 3, 3.0 s), DiffusionGemma 52 (2 of 3, 3.2 s), Qwen 3 30B 37 (0 of 3, 1.6 s), Laya 0 (0 of 3, 28 ms), Random 0. · **Caption:** Tetris, where every move is one decision. Same pieces for every player; 3 games of 80 pieces each.
+> 📎 **Upload:** `images/tetris-results.png` · **Alt text:** Bar chart of Tetris lines cleared over 3 games. Classic heuristic (reference) 86, Jev 78 (survived 3 of 3, 312 ms per move), Bonsai 27B 64 (2 of 3, 3.0 s), DiffusionGemma 52 (2 of 3, 3.2 s), Qwen 3 30B 37 (0 of 3, 1.6 s), Laya 0 (0 of 3, 28 ms), Random 0. · **Caption:** Tetris, where every move is one decision. Same pieces for every player; 3 games of 80 pieces each.
 
 A decision benchmark with consequences: a bad move makes the next one harder.
 
-- **Jev survived all three games, cleared 78 lines, and matched a hand-tuned expert's move 88 % of the time**, at 0.3 s per move. For comparison, the expert cleared 86.
+**What's the "classic heuristic"?** It isn't an AI model. It's a well-known Tetris formula from Yiyuan Lee's 2013 Tetris bot, used here as the yardstick for good play. For every possible placement it looks at the board that would result, scores it, and picks the highest score:
+
+- **Lines cleared** count in its favour.
+- **Total stack height**, **holes** (empty cells buried under blocks) and **bumpiness** (how jagged the surface is) count against it.
+
+Lee chose those four features by hand and found the best weights for them with a genetic algorithm, an automatic search that plays thousands of games and keeps the best-scoring weights. The models see almost the same information in each option's description; the formula just knows exactly how to weigh it. So "matched the heuristic" means "made the move a proven Tetris strategy would make". ([Lee's write-up](https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/))
+
+- **Jev survived all three games, cleared 78 lines, and picked the same move as the classic heuristic 88 % of the time**, at 0.3 s per move. The heuristic itself cleared 86.
 - **Bonsai** survived 2 of 3 (64 lines) and **DiffusionGemma** 2 of 3 (52 lines), at about 3 s per move on the laptop.
 - **Qwen** never broke format, but chose worse moves and topped out in all three games.
 - **Laya** cleared zero lines — barely better than random — though each move took just 28 ms. Weighing "+2 holes, max height 6" against the alternatives is reasoning, and a small classifier doesn't do it.

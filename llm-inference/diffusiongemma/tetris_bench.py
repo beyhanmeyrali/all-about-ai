@@ -118,7 +118,8 @@ def render(board, piece, nxt):
 
 
 def heuristic_score(o):
-    # Yiyuan Lee's tuned weights (a well-known hand-made Tetris AI)
+    # Yiyuan Lee's classic Tetris heuristic (2013): hand-picked features, weights found by a genetic algorithm
+    # https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/
     return -0.510066 * o["agg_height"] + 0.760666 * o["lines"] - 0.35663 * o["holes"] - 0.184483 * o["bumpiness"]
 
 
