@@ -32,6 +32,33 @@ I wanted numbers, not vibes. So I put five models through the same tests:
 
 Everything local ran on one laptop: an RTX 5060 with 8 GB of VRAM.
 
+## System One and System Two
+
+The names come from psychology. In *Thinking, Fast and Slow*, Daniel Kahneman describes two ways we think:
+
+- **System 1** is fast, automatic and intuitive: recognising a face, hearing that someone is angry, answering "2 + 2". It's instant, effortless and usually right.
+- **System 2** is slow, deliberate and effortful: working out 17 × 24, planning a trip, weighing a hard decision. It costs time and energy, but it solves what System 1 can't.
+
+Your brain runs on System 1 almost all the time, and only wakes System 2 when something is hard or surprising.
+
+AI borrows the same split.
+
+**A System One model** picks from a fixed list of options:
+- **How:** one pass through the model, then a probability for each option ("billing, 0.98").
+- **Speed and cost:** milliseconds to about 0.4 s, nearly free.
+- **Good at:** routing, classifying, yes/no checks, scoring.
+- **Bad at:** reasoning. Laya cleared zero lines at Tetris.
+- **In this test:** Jev (0.34 s), Laya (10 ms), and DiffusionGemma reading its answers.
+
+**A System Two model** writes and reasons:
+- **How:** generates text word by word, often "thinking" step by step first.
+- **Speed and cost:** seconds to minutes, and you pay for every word.
+- **Good at:** anything open-ended: writing, explaining, planning, code.
+- **Bad at:** simple decisions at speed. Qwen needed 1.7 s to type 20 yes/no answers.
+- **In this test:** Qwen and Bonsai when they type their answers; frontier chat models belong here too.
+
+"System One model" is TypeSafe's own name for what Jev is; there's no official technical definition behind it. The idea behind it is the useful part: **let the fast system handle the easy majority, and wake the slow one only when it's needed.** That's exactly what the combined setup at the end of this article does.
+
 ## First, the idea in 60 seconds
 
 A normal language model answers a question the way you'd fill in a form with a typewriter: it types "q1: yes" one character at a time, and then your code has to read what it typed. Sometimes it types "yes: yes" instead, and your code breaks.
