@@ -30,7 +30,7 @@
 
 **🎯 Quality** (movie reviews / news topics):
 - **Jev**: 94 % / 85 %.
-- **Bonsai**: 92.5 % / 86.5 %, 0 malformed replies, and the best calibrated of all four. It beats Jev on news topics.
+- **Bonsai**: 92.5 % / 86.5 %, 0 malformed replies, and the best calibrated of the language models. It beats Jev on news topics.
 - **DiffusionGemma**: 89 % / 77 %, 0 malformed replies.
 - **Qwen, writing its answers**: 83 % / 65.5 %, with 31 malformed replies out of 400.
 - **Laya**: **46 %** / 94 % as asked, and 92 % on the reviews when the yes/no question is asked as a two-option choice instead. Its yes/no head answered "no" to every review. Its 94 % on news is from data it was **trained on**, so that score isn't comparable.
@@ -168,7 +168,7 @@ Lee chose the four features by hand and found the weights with a genetic algorit
 | Decisions at scale, fastest and most accurate, and a cloud API is fine | **Jev**: ~0.34 s flat, 94 % / 85 %, ~$0.014 per 1,000 decisions |
 | Decisions that must stay on your own hardware (privacy, offline, no API bill) | **DiffusionGemma** as a local Jev: 0 output tokens, 0 broken replies, many questions per pass |
 | Very high volume, millisecond budgets, and task types it was trained on (routing, triage, topic, moderation) | **Laya**: 10–60 ms, 0.84 GB, excellent calibration *on familiar tasks*. Validate it on your own questions first: its yes/no answers collapsed on sentiment, and it can't reason through Tetris. |
-| The most accurate *local* decisions, from one small file | **Ternary Bonsai 27B**: 5.9 GB, fits an 8 GB GPU, 92.5 % / 86.5 %, the best calibration here if you read its probabilities. Slow if it must type many answers. |
+| The most accurate *local* decisions, from one small file | **Ternary Bonsai 27B**: 5.9 GB, fits an 8 GB GPU, 92.5 % / 86.5 %, the best-calibrated language model here if you read its probabilities. Slow if it must type many answers. |
 | One quick local decision and you already run a chat model | **Reading probabilities** from it ([code below](#the-read-trick-on-a-normal-model)): same speed, no format errors |
 | Chat, writing, code, summaries | A normal model. Neither Jev nor a System One read writes text. |
 
@@ -176,7 +176,7 @@ Lee chose the four features by hand and found the weights with a genetic algorit
 - **Jev's speed claim holds:** flat 0.34–0.40 s from 1 to 20 questions.
 - **The "free open-source Jev" claim is half true.** DiffusionGemma really does answer many questions in one pass with zero output tokens. On an 8 GB laptop it isn't flat for new text, and it's 5–8 points less accurate than Jev.
 - **Every model stopped producing broken replies** once we read probabilities instead of parsing typed text. If you take one lesson from this page, take that one.
-- **The best local decision-maker isn't the diffusion model; it's Ternary Bonsai.** It's a normal (autoregressive) dense 27B compressed to 5.9 GB, and it roughly matched Jev's accuracy (92.5 % / 86.5 % vs 94 % / 85 %) with the best calibration of all. DiffusionGemma keeps the edge in *speed* whenever many answers are needed at once.
+- **The best local decision-maker isn't the diffusion model; it's Ternary Bonsai.** It's a normal (autoregressive) dense 27B compressed to 5.9 GB, and it roughly matched Jev's accuracy (92.5 % / 86.5 % vs 94 % / 85 %) with the best calibration of any language model tested. DiffusionGemma keeps the edge in *speed* whenever many answers are needed at once.
 - **Laya is ~35× faster than Jev but much narrower.** On the task types it was trained on it's accurate and well calibrated. Outside them it can fail silently: "no" to every review, and random-level Tetris.
 
 ---
@@ -239,6 +239,77 @@ An agent makes many small decisions: *which tool next? is the task done? should 
 ### Pattern 5: filter the context before it reaches the LLM
 
 In retrieval (RAG), score every retrieved chunk with a `score` question (*"How relevant is this passage to the question?"*) and send only the top few to the big model. Fewer input tokens means a faster, cheaper, and often better answer.
+
+### Where this is going: a fine-tuned Laya as the System One layer
+
+Everything on this page tests Laya **zero-shot**, and its authors say that isn't the intended use: the base checkpoints are "a fast base to specialise, not a zero-shot decision engine". Their own example is a checkpoint fine-tuned on one benchmark's training split, which went from 0.362 to 0.766 on that benchmark. The options are defined at request time, so adding an option needs no retraining; getting good at a new *question* does. **I haven't fine-tuned it myself:** the architecture below is a proposal, and only the cascade numbers are measured.
+
+**The architecture: System One in front of System Two.** A fine-tuned Laya answers the easy majority of decisions in ~10 ms, on your own hardware, for $0. It escalates the rest using two signals it already produces: the probability for each option, and a separate *act / escalate* head trained with the same honest-probability rules.
+
+```text
+request: state + typed questions
+            │
+            ▼
+   fine-tuned Laya  (~10 ms, $0, 0 output tokens)
+   p(option) + act / escalate
+            │
+   confident & "act"  ──▶ act now; store p in the audit log
+            │
+   unsure or "escalate" ──▶ Bonsai 27B, local (~0.5 s) · Jev, cloud (~0.35 s) · frontier LLM · human
+                                              │
+                          every escalated answer ──▶ a labelled hard example ──▶ the next fine-tune
+```
+
+The support ticket in [Example 2](#example-2-a-support-ticket-five-questions-at-once) shows why two signals help: Laya routed it to billing at 0.98, but was unsure whether the customer was angry (0.52) and gave urgency a confidence of 0.24. A cascade would act on the routing and escalate the other two.
+
+**Where a fine-tuned Laya fits, and where it doesn't**
+
+| Fits: a fixed list, high volume, labels you already have | Doesn't fit, and fine-tuning won't fix it |
+|---|---|
+| Ticket, email, alert and document routing, up to ~20 queues | Reasoning over options: Tetris was 0 lines, 30 % agreement with the heuristic |
+| Gates inside agents: which tool, is the task done, does this need the big model? | Open-ended answers: extraction, summaries, rewrites |
+| Many yes/no attributes of one text (20 in 57 ms, measured) | More than ~20–50 options: the option budget is fixed (192 tokens by default; Tetris needed 512) |
+| Guards in the request path: prompt injection, personal data, compliance flags | Ordinal scores: the ticket's urgency came back "medium" at confidence 0.24. Ask a named choice instead. |
+| On-device and regulated data: 0.84 GB, 1.8 GB VRAM, ~150 ms per question even on the laptop CPU | Text over 512 tokens (1,024 for the multilingual variant): it's cut off silently |
+| One model for 100+ languages (the multilingual variant; not measured here) | Adversarial inputs, unless you retrain regularly |
+
+**Why calibration is what makes a cascade safe.** A cascade is a threshold rule, "act above 0.95, escalate the rest", and it only works if 0.95 means roughly 95 %. The same model on the same 200 reviews showed both outcomes:
+
+| Laya, same reviews | Average confidence | Accuracy | ECE | What a cascade would do |
+|---|---:|---:|---:|---|
+| Asked as a 2-option choice | 0.921 | 92.0 % | 0.022 | Work: when it said ≥0.95 it was right 98.4 % of the time ([Pattern 1](#pattern-1-the-confidence-cascade-measured)) |
+| Asked as yes/no | 1.000 | 46.0 % | 0.540 | Act on every wrong answer with total confidence, and escalate nothing |
+
+Accuracy says how often a model is right. Calibration says whether it admits when it isn't, and a cascade needs the second more than the first. It must be re-measured after every fine-tune. The number to report is **coverage at a target accuracy**: the share of traffic the small model handles alone while staying above your target. Zero-shot, on reviews, that was **62 % of traffic at 98.4 % accuracy** (Pattern 1).
+
+**A fine-tuning recipe** (a plan built from what went wrong here, not something I've run)
+
+1. **Labels.** In order of preference:
+   - labels you already have, such as the queue a ticket finally landed in, a CRM outcome, or a moderation decision;
+   - labels from a big model on *your own* traffic, using the *exact* questions you'll serve, keeping only confident answers. By my arithmetic from the measured rate, 100,000 Jev decisions cost about $1.50; Bonsai locally costs electricity;
+   - human-reviewed escalations once the cascade runs;
+   - human labels wherever Laya and the big model disagree.
+2. **Amount.** The authors' 0.362 → 0.766 came from one benchmark's training split, so expect a few thousand examples per question to matter. That's an estimate: start at 1,000–5,000 per question, with a few hundred for each rare option, and grow from the escalations.
+3. **Keep questions and option names identical** between training and use. Each option is scored where its name appears, so renaming "billing" to "payments" later changes the input.
+4. **Validate on a split by time**, not a random one, so you see how next month will look. Check:
+   - accuracy per question and option;
+   - calibration (ECE, and a reliability diagram);
+   - the coverage-at-accuracy curve;
+   - how often each question gets its most common answer, which catches a collapsed yes/no head like the one above;
+   - the big model's accuracy, cost and latency on the same set.
+   Re-fit the temperature after fine-tuning.
+5. **Avoid the traps this page hit.**
+   - Test the exact question *type* you'll use: the yes/no head collapsed.
+   - Hold out properly: the 94 % on AG News was memory.
+   - Keep option names short and lists under ~20.
+   - Put the text that decides the answer first.
+   - Check it's really on the GPU: running out of GPU memory silently drops it to the CPU.
+
+**Where this goes (a hedged view).** If this holds beyond two datasets and one ticket, the big model stops being what every request passes through. It becomes what *trains, and backs up*, a fleet of small ones: one fine-tuned System One model per question, per app, refreshed from its own escalations. LLM calls become the exception.
+
+On the cases the small model handles, a decision takes ~35× less time (10 ms vs 350 ms) at no API cost. Both figures are measured, zero-shot. The bigger change is that every decision becomes a stored probability you can threshold, audit and compare month to month: "it said 0.97, and at that level it's right 96 % of the time" is a sentence you can put in a compliance report.
+
+The next experiment is the obvious one: label a few thousand real tickets with Bonsai or Jev, fine-tune Laya on them, and plot coverage against accuracy.
 
 ## The idea, one step at a time
 
@@ -309,7 +380,7 @@ Two more things had to be fixed before it fit: a 4 GB scratch buffer that wasn't
 
 ### Step 8: What the measurements showed
 
-- **The real Jev wins on every quality and speed number**: 94 % / 85 % correct, the best calibration, and 0.34–0.40 s flat whether you ask 1 question or 20, for about $0.014 per 1,000 decisions.
+- **The real Jev leads on accuracy and flat speed**: 94 % / 85 % correct, good calibration, and 0.34–0.40 s flat whether you ask 1 question or 20, for about $0.014 per 1,000 decisions.
 - **Zero broken replies** out of 400, against 31 when Qwen types its answer. But the *Qwen: read* trick also gets zero, so this is a win for "read the probabilities" in general, not for diffusion in particular.
 - **DiffusionGemma is more accurate than Qwen on both tasks**: 89 % vs 83 % and 77 % vs 73.5 % against *Qwen: read*, with identical instructions. Caveat: these are different model families, so this says "this model did better here", not "diffusion is smarter".
 - **Better calibrated, but still over-confident.** Treat the confidence as a ranking ("this answer is surer than that one"), not a number that's accurate to three decimals. The losing options' probabilities wobble with low-level GPU settings ([§5.4](#54-not-fixed-probabilities-depend-on-the-kernel-path)).

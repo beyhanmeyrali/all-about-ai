@@ -40,7 +40,7 @@ DiffusionGemma and Laya write 0. Jev bills input only; output is free.
 • DiffusionGemma: 89% / 77%, zero broken replies.
 • Qwen writing answers: 83% / 65.5%, with 31 malformed replies out of 400.
 • Bonsai (5.9 GB, fits entirely on the laptop GPU): 92.5% / 86.5%, 0 malformed,
-  and the best calibrated of all four. It beats Jev on news topics.
+  and the best calibrated of the LLMs. It beats Jev on news topics.
 • Laya: 46% on reviews asked as yes/no (it said "no" to all), 92% asked as
   a choice. Its 94% on news is from its own training data.
 

@@ -74,7 +74,7 @@ And the fastest of all by far was **Laya: 11 ms for one question, 57 ms for twen
 > 📎 **Upload:** `images/accuracy-400-questions.png` · **Alt text:** Grouped bar chart of accuracy on 200 movie reviews and 200 news articles. Jev 94.0% and 85.0%; Bonsai 27B 92.5% and 86.5%; Laya 92.0% and 94.0% (reviews asked as a choice, news in its training data); DiffusionGemma 89.0% and 77.0%; Qwen 3 30B 83.0% and 65.5%. · **Caption:** Accuracy on the same 400 questions. Laya's news score is on data it was trained on; asked as yes/no, it scored 46% on reviews.
 
 - **Jev: 94 % on movie reviews, 85 % on news topics**, and well calibrated — when it says 90 %, it's usually right about 90 % of the time.
-- **Ternary Bonsai 27B: 92.5 % / 86.5 %**, zero broken replies, and the *best* calibration of all five. It beat Jev on news topics — from a 5.9 GB file running entirely on a laptop GPU.
+- **Ternary Bonsai 27B: 92.5 % / 86.5 %**, zero broken replies, and the *best* calibration of the language models. It beat Jev on news topics — from a 5.9 GB file running entirely on a laptop GPU.
 - **DiffusionGemma: 89 % / 77 %**, zero broken replies. Solid, but 5–8 points behind Jev.
 - **Qwen 3 30B, typing its answers: 83 % / 65.5 %**, with **31 malformed replies out of 400** — it was told to answer "q1: D" and wrote "D: D" or "B: Sports" instead.
 - **Laya** is the complicated one. Asked the same yes/no question as everyone else, it answered "no" to every single review — 46 %, worse than a coin flip, at 99.99 % confidence. Asked as a two-option choice instead ("negative or positive?"), the same model scored 92 %. Its 94 % on news doesn't count: its own benchmark code says AG News was in its training data.
@@ -118,6 +118,64 @@ But on consumer hardware it isn't "0.2 s flat", it's 5–8 points less accurate 
 - **Many questions about the same text, locally:** DiffusionGemma. Its one-pass reads are where it genuinely shines.
 - **Millions of decisions on well-defined, familiar tasks:** Laya — but only after testing it on *your* questions. It's astonishingly fast and silently wrong outside its comfort zone.
 - **Chat, writing, code:** none of the above. Use a normal model.
+
+## Combine them: fast first, strong only when unsure
+
+None of these models replaces a chat LLM, and they don't have to compete with each other either. The real win is **combining** them, so the expensive model only runs when it's actually needed.
+
+The simplest version is a **confidence cascade**: ask the fastest, cheapest model first. If it's confident, take its answer. If not, pass the question to a stronger model, and from there to a human.
+
+I measured it on the 200 movie reviews: **Laya first, and Jev only when Laya is less than 95 % sure.**
+
+![Chart of accuracy against average time per decision on 200 movie reviews. Laya alone: 92.0 %, 9 ms, $0. Cascade with threshold 0.8: 93.0 %, 48 ms. Threshold 0.9: 93.5 %, 86 ms. Threshold 0.95: 94.5 %, 136 ms, $0.0048 per 1,000. Jev alone: 94.0 %, 334 ms, $0.0126 per 1,000.](images/cascade-laya-then-jev.png)
+
+> 📎 **Upload:** `images/cascade-laya-then-jev.png` · **Alt text:** Chart of accuracy against average time per decision on 200 movie reviews. Laya alone: 92.0 %, 9 ms, $0. Cascade with threshold 0.8: 93.0 %, 48 ms. Threshold 0.9: 93.5 %, 86 ms. Threshold 0.95: 94.5 %, 136 ms, $0.0048 per 1,000. Jev alone: 94.0 %, 334 ms, $0.0126 per 1,000. · **Caption:** Laya answers when it's at least 95 % sure (62 % of reviews); Jev answers the rest. The result: Jev-level accuracy, 2.5× faster and 62 % cheaper.
+
+- **Laya answered 62 % of the reviews on its own**, and was right on 98.4 % of those.
+- **Jev answered the other 38 %.**
+- **Overall: 94.5 % accurate**, the same as Jev alone (94.0 %, one review apart), but **2.5× faster** (136 ms vs 334 ms on average) and **62 % cheaper**.
+- **Lower the bar to 0.8** and the average decision takes 48 ms, 7× faster than Jev, for one point of accuracy.
+
+This only works because Laya's confidence *means* something: when it said "95 % sure", it was right 98 % of the time. That's calibration, and it turns out to be the property that matters most.
+
+The same idea works anywhere a big LLM is involved:
+
+- **In front of it:** a decision layer answers *what is this, does it need a reply, which team, which prompt?* in milliseconds. Every request it closes is an LLM call you never pay for.
+- **After it:** before sending an LLM's reply, ask 10 yes/no checks in one request (answers the question? contains personal data? right tone?). Far cheaper than a second LLM acting as judge.
+- **Inside agents:** *which tool, is it done, retry?* become reads with zero output tokens and no broken replies.
+- **Before retrieval:** score each retrieved passage for relevance and send only the best few, so fewer tokens reach the big model.
+
+## What if you fine-tune the small one?
+
+Everything above tests Laya straight out of the box. Its authors say that's not the point: it's "a fast base to specialise, not a zero-shot decision engine". On one benchmark, fine-tuning on that benchmark's own training data took their score from 0.36 to 0.77.
+
+That changes how to read my results. A 421M model that answers in 10 ms and is reliable on the questions it was trained for isn't a weaker Jev. It's a different tool: the **System One layer** in front of your **System Two** models.
+
+**Where a fine-tuned classifier like this beats an LLM call:**
+
+- **Routing and triage**: tickets, emails, alerts, documents. A fixed list, huge volume, and your history already holds the labels.
+- **Inside agents**: which tool to call, is the task done, does this need the big model? These run on every turn, and a gate that costs an LLM call saves nothing.
+- **Guards**: prompt-injection checks, personal-data gates, compliance flags on call transcripts.
+- **On-device and regulated data**: a 0.84 GB file that runs on a laptop, so nothing leaves the building.
+
+**Where it won't work, and fine-tuning won't fix it:** reasoning (it cleared zero lines at Tetris), open-ended answers, more than ~20–50 options, and text longer than 512 tokens.
+
+**Calibration is what makes it safe.** A cascade is a threshold rule, and it only works if the number means what it says. I saw both sides in the same model on the same reviews. Asked as a choice, Laya was 92 % confident on average and right 92 % of the time, and the cascade above worked. Asked as yes/no, it was 100 % confident and right 46 % of the time: a cascade built on that would have acted on every wrong answer and escalated nothing. Accuracy tells you how often a model is right; calibration tells you whether it will admit when it isn't.
+
+**The recipe, in short:**
+
+1. Label your own traffic with the big model you already run. By my arithmetic, 100,000 Jev decisions cost about $1.50, and Bonsai locally costs nothing.
+2. Fine-tune on the exact questions you'll use.
+3. Validate on a split by time, and measure three things:
+   - accuracy;
+   - calibration;
+   - coverage: the share of traffic the small model can handle alone above your target accuracy.
+4. Check that no question has collapsed to a single answer.
+5. Let every escalated case become training data for the next round.
+
+**The vision.** I haven't run this fine-tune yet; everything here is zero-shot, and that's the next experiment. But the direction looks clear. The big model stops being what every request passes through. It becomes what *trains, and backs up*, a fleet of tiny specialised decision-makers, one per question, refreshed from their own escalations. LLM calls become the exception, not the default.
+
+On the cases the small model handles, decisions are ~35× faster and free. And every decision becomes a stored probability you can threshold and audit, which is something a parsed "yes" never was.
 
 ## Everything is open
 
