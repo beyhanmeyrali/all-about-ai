@@ -48,6 +48,7 @@
 3. **For decisions, stop making models type.** Reading probabilities instead of parsing text removed every format error, for every model.
 4. **The dark horse is Ternary Bonsai 27B.** A 5.9 GB model on an 8 GB laptop is about as accurate as Jev on these tasks. It's just slow when it has to type many answers.
 5. **Laya is blazing fast and narrow.** At 10–60 ms it's in a different speed class, and on familiar task types it's accurate and very well calibrated. But its yes/no answers collapsed on a plain sentiment question, and it can't reason through a Tetris board. Test it on your own questions before trusting it.
+6. **Combine them.** A cascade that lets Laya answer when it's ≥95 % sure, and asks Jev otherwise, was **as accurate as Jev alone (94.5 % vs 94.0 %), 2.5× faster, and 62 % cheaper** ([measured below](#pattern-1-the-confidence-cascade-measured)).
 
 **Every number on this page was measured by me unless marked otherwise.** Local runs used an RTX 5060 Laptop (8 GB) with a Ryzen AI 9 365 and 29 GB RAM. Jev was called over the internet through OpenRouter, so its times include the network round trip. [Every test case and exact query](#every-test-exactly) is listed below. The page has two parts:
 - **Part 1** (this top part): the TL;DR, the idea explained from zero, code you can copy, and real side-by-side answers.
@@ -179,6 +180,65 @@ Lee chose the four features by hand and found the weights with a genetic algorit
 - **Laya is ~35× faster than Jev but much narrower.** On the task types it was trained on it's accurate and well calibrated. Outside them it can fail silently: "no" to every review, and random-level Tetris.
 
 ---
+
+## Where each fits, and how to combine them with other LLMs
+
+None of these models replaces a chat LLM. Each is a **fast decision layer** that sits *in front of*, *around* or *inside* a bigger model, so the expensive model only runs when it's actually needed. Think of it as System One and System Two: fast intuition handles the easy majority, and slow, costly reasoning is saved for the rest.
+
+### Where each one fits
+
+| Model | Its superpower | Its weak spot | Best job |
+|---|---|---|---|
+| **Laya** | 10 ms, $0, 0.84 GB, well calibrated on familiar task types | Narrow: fails silently outside what it was trained for; no reasoning | First-pass filter at huge volume, with a confidence gate |
+| **Jev** (cloud) | Most accurate here, flat ~0.35 s for 1–20 questions, ~$0.014 per 1,000 | Cloud-only, closed | The strong second opinion for anything the fast layer isn't sure about |
+| **Ternary Bonsai 27B** (local) | Best local accuracy and calibration, 5.9 GB; also a full chat LLM | Slow when it must *type* many answers | Private, on-premises decisions, and the local "System Two" writer |
+| **DiffusionGemma** (local) | Many questions about one text in one pass, 0 output tokens | Heavy (16.8 GB), slow to read new text on 8 GB | Checking 10–20 attributes of the same document locally |
+| **Any chat LLM** (Qwen, a frontier API…) | Open-ended writing, reasoning, tools | Slow and costly per decision; types answers that can break format | Only the cases that need words or real reasoning. Use the [read trick](#the-read-trick-on-a-normal-model) for its decisions. |
+
+### Pattern 1: the confidence cascade (measured)
+
+Ask the fastest, cheapest model first. If its confidence is above a threshold, accept the answer; otherwise pass the question up to a stronger model, and from there to a human. This only works if the fast model's confidence *means* something, which is why calibration matters so much.
+
+Measured on the 200 movie reviews: **Laya first, Jev for anything Laya is less sure about than the threshold.** ([`cascade_analysis.py`](diffusiongemma/cascade_analysis.py); per-question results in [`cascade.json`](diffusiongemma/cascade.json).)
+
+| Setup | Answered by Laya | Laya's accuracy on those | **Overall accuracy** | **Avg time per decision** | **Cost per 1,000** |
+|---|---:|---:|---:|---:|---:|
+| Laya alone | 100 % | 92.0 % | 92.0 % | 9 ms | $0 |
+| Cascade, threshold 0.8 | 88.5 % | 94.4 % | 93.0 % | 48 ms | $0.0014 |
+| Cascade, threshold 0.9 | 77.0 % | 95.5 % | 93.5 % | 86 ms | $0.0029 |
+| **Cascade, threshold 0.95** | **62.0 %** | **98.4 %** | **94.5 %** | **136 ms** | **$0.0048** |
+| Jev alone | 0 % | — | 94.0 % | 334 ms | $0.0126 |
+
+**At a threshold of 0.95, the cascade matches Jev alone on accuracy (94.5 % vs 94.0 %, a difference of one review) while being 2.5× faster and 62 % cheaper.** When Laya says it's ≥95 % sure, it's right 98.4 % of the time, so trusting those answers costs nothing in quality, and Jev's effort goes where it's needed. Lower the threshold to trade a little accuracy for a lot of speed: at 0.8, the average decision takes 48 ms (7× faster than Jev) for a 1-point accuracy loss.
+
+*How it was measured: both models answered every review. Laya ran on the CPU for this run (the GPU was busy), which changes its speed but not its answers, so times use its measured GPU median (9.4 ms) and Jev's measured median (334 ms, network included). Costs are Jev's billed cost.*
+
+The same arithmetic works for any pair: **average time ≈ fast model's time + (share escalated × strong model's time)**, and **cost ≈ share escalated × strong model's cost**. Swap in a frontier LLM or a human reviewer as the top tier and the savings grow with the price gap.
+
+### Pattern 2: a decision layer in front of the big LLM
+
+Most requests to a chat LLM start with a decision the big model doesn't need to make: *What is this about? Does it need an answer at all? Which team, which tool, which prompt?*
+
+```
+request ──► System One read (10–350 ms, ~0 output tokens)
+               ├─ spam / duplicate / "thanks!"  ──► close, no LLM call
+               ├─ simple, known intent          ──► template or short local model
+               └─ needs real writing/reasoning  ──► big LLM, with a prompt picked for that intent
+```
+
+Every request the first layer closes is an LLM call you never pay for, and the ones that do go through get a shorter, specialised prompt. The support ticket in [Example 2](#example-2-a-support-ticket-five-questions-at-once) is exactly this: five routing answers in one read before any text is written.
+
+### Pattern 3: a one-pass check after the big LLM writes
+
+Before sending an LLM's reply, ask a System One model several yes/no questions about it in **one request**: *Does it answer the question? Does it contain personal data? Is the tone appropriate? Does it promise something we can't do?* On DiffusionGemma, 10 such checks cost 287 ms once the text is read; on Jev they cost the same ~0.35 s as one. That's a lot cheaper than a second LLM call acting as a judge and writing its verdict out.
+
+### Pattern 4: agent loops
+
+An agent makes many small decisions: *which tool next? is the task done? should I retry? ask the user?* Each one done by a chat LLM is a full generation. As typed questions, each becomes a read with zero output tokens and no format errors, so the loop runs faster and never breaks on a malformed "next action".
+
+### Pattern 5: filter the context before it reaches the LLM
+
+In retrieval (RAG), score every retrieved chunk with a `score` question (*"How relevant is this passage to the question?"*) and send only the top few to the big model. Fewer input tokens means a faster, cheaper, and often better answer.
 
 ## The idea, one step at a time
 

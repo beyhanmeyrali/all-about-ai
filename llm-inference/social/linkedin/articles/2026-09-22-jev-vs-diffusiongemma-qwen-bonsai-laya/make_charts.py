@@ -132,4 +132,39 @@ title(fig, "Tetris: every move is one decision", "Each model picks where to drop
 source(fig, "Grey bars are reference players. Jev in the cloud; the others on an RTX 5060 8 GB laptop.")
 fig.savefig(OUT / "tetris-results.png", facecolor=SURFACE)
 plt.close(fig)
+# ---------------------------------------------------------------- 4. cascade: Laya first, Jev when Laya is unsure
+cz = json.loads((D / "cascade.json").read_text())
+pts = [("Laya alone", cz["laya_alone"]["ms"], cz["laya_alone"]["accuracy"], cz["laya_alone"]["cost_per_1k"])]
+pts += [(f"Cascade ≥{c['threshold']}", c["mean_ms"], c["overall_accuracy"], c["cost_per_1k"])
+        for c in cz["cascade"] if c["threshold"] in (0.8, 0.9, 0.95)]
+pts += [("Jev alone", cz["jev_alone"]["ms"], cz["jev_alone"]["accuracy"], cz["jev_alone"]["cost_per_1k"])]
+fig, ax = plt.subplots(figsize=(12, 7.2), dpi=150)
+fig.subplots_adjust(left=0.1, right=0.95, top=0.8, bottom=0.16)
+xs, ys = [p[1] for p in pts], [p[2] * 100 for p in pts]
+ax.plot(xs, ys, color="#2a78d6", lw=2.2, zorder=2)
+for name, ms, acc_, cost in pts:
+    end = name in ("Laya alone", "Jev alone")
+    ax.scatter([ms], [acc_ * 100], s=110, color=MUTED if end else "#2a78d6", edgecolor=SURFACE, linewidth=2, zorder=3)
+    lab = f"{name}\n{acc_ * 100:.1f} % · {ms:.0f} ms · " + ("$0" if cost == 0 else f"${cost:.4f} per 1k")
+    dx, dy, ha = {"Cascade ≥0.95": (0, 18, "center"), "Cascade ≥0.8": (8, -40, "left"),
+                  "Cascade ≥0.9": (10, -40, "left")}.get(name, (0, -40, "center"))
+    ax.annotate(lab, (ms, acc_ * 100), xytext=(dx, dy), textcoords="offset points", ha=ha,
+                fontsize=11.5, color=INK, fontweight="bold" if name == "Cascade ≥0.95" else "normal")
+ax.set_xscale("log")
+ax.xaxis.set_major_locator(FixedLocator([10, 30, 100, 300]))
+ax.xaxis.set_minor_locator(NullLocator())
+ax.set_xticklabels(["10 ms", "30 ms", "100 ms", "300 ms"])
+ax.set_xlim(6, 600)
+ax.set_ylim(90.5, 96)
+ax.set_yticks([91, 92, 93, 94, 95])
+ax.set_yticklabels(["91 %", "92 %", "93 %", "94 %", "95 %"])
+ax.set_xlabel("Average time per decision (log scale)")
+ax.grid(axis="y", color=GRID, lw=1)
+frame(ax)
+title(fig, "Combine them: Laya first, Jev only when Laya is unsure",
+      "Jev-level accuracy at a fraction of the time and cost. 200 movie reviews.")
+source(fig, "\"Cascade ≥0.95\": Laya answers when it's at least 95 % sure (62 % of reviews); the rest go to Jev.\n"
+            "Times are measured medians: Laya on the laptop GPU, Jev in the cloud with the network included.")
+fig.savefig(OUT / "cascade-laya-then-jev.png", facecolor=SURFACE)
+plt.close(fig)
 print("wrote", sorted(p.name for p in OUT.glob("*.png")))

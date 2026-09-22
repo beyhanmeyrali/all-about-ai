@@ -1,0 +1,1864 @@
+{
+ "laya_alone": {
+  "accuracy": 0.92,
+  "ms": 9.354868000059469,
+  "cost_per_1k": 0.0
+ },
+ "jev_alone": {
+  "accuracy": 0.94,
+  "ms": 333.71829698444344,
+  "cost_per_1k": 0.012587399999999999
+ },
+ "cascade": [
+  {
+   "threshold": 0.6,
+   "answered_by_laya_pct": 97.5,
+   "laya_accuracy_on_kept": 0.9230769230769231,
+   "overall_accuracy": 0.915,
+   "mean_ms": 17.697825424670555,
+   "cost_per_1k": 0.000314685
+  },
+  {
+   "threshold": 0.7,
+   "answered_by_laya_pct": 92.0,
+   "laya_accuracy_on_kept": 0.9402173913043478,
+   "overall_accuracy": 0.925,
+   "mean_ms": 36.052331758814944,
+   "cost_per_1k": 0.001006992
+  },
+  {
+   "threshold": 0.8,
+   "answered_by_laya_pct": 88.5,
+   "laya_accuracy_on_kept": 0.943502824858757,
+   "overall_accuracy": 0.93,
+   "mean_ms": 47.732472153270464,
+   "cost_per_1k": 0.0014475509999999996
+  },
+  {
+   "threshold": 0.9,
+   "answered_by_laya_pct": 77.0,
+   "laya_accuracy_on_kept": 0.9545454545454546,
+   "overall_accuracy": 0.935,
+   "mean_ms": 86.11007630648146,
+   "cost_per_1k": 0.0028951019999999992
+  },
+  {
+   "threshold": 0.95,
+   "answered_by_laya_pct": 62.0,
+   "laya_accuracy_on_kept": 0.9838709677419355,
+   "overall_accuracy": 0.945,
+   "mean_ms": 136.16782085414798,
+   "cost_per_1k": 0.004783211999999999
+  },
+  {
+   "threshold": 0.99,
+   "answered_by_laya_pct": 4.0,
+   "laya_accuracy_on_kept": 1.0,
+   "overall_accuracy": 0.94,
+   "mean_ms": 329.7244331051252,
+   "cost_per_1k": 0.012083904
+  }
+ ],
+ "items": [
+  {
+   "i": 0,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.986,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.2138e-05
+  },
+  {
+   "i": 1,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9853,
+   "jev": "positive",
+   "jev_conf": 0.91,
+   "jev_cost": 1.3566e-05
+  },
+  {
+   "i": 2,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9372,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.2936e-05
+  },
+  {
+   "i": 3,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9833,
+   "jev": "positive",
+   "jev_conf": 0.97,
+   "jev_cost": 1.2558e-05
+  },
+  {
+   "i": 4,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9853,
+   "jev": "positive",
+   "jev_conf": 0.97,
+   "jev_cost": 1.2684e-05
+  },
+  {
+   "i": 5,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9876,
+   "jev": "negative",
+   "jev_conf": 0.8,
+   "jev_cost": 1.2894e-05
+  },
+  {
+   "i": 6,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9705,
+   "jev": "positive",
+   "jev_conf": 0.94,
+   "jev_cost": 1.218e-05
+  },
+  {
+   "i": 7,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9776,
+   "jev": "negative",
+   "jev_conf": 0.94,
+   "jev_cost": 1.2558e-05
+  },
+  {
+   "i": 8,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9896,
+   "jev": "positive",
+   "jev_conf": 0.96,
+   "jev_cost": 1.2684e-05
+  },
+  {
+   "i": 9,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.6875,
+   "jev": "negative",
+   "jev_conf": 0.71,
+   "jev_cost": 1.239e-05
+  },
+  {
+   "i": 10,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9855,
+   "jev": "positive",
+   "jev_conf": 0.91,
+   "jev_cost": 1.2936e-05
+  },
+  {
+   "i": 11,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9233,
+   "jev": "positive",
+   "jev_conf": 0.76,
+   "jev_cost": 1.239e-05
+  },
+  {
+   "i": 12,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9877,
+   "jev": "positive",
+   "jev_conf": 0.96,
+   "jev_cost": 1.302e-05
+  },
+  {
+   "i": 13,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9813,
+   "jev": "positive",
+   "jev_conf": 0.96,
+   "jev_cost": 1.281e-05
+  },
+  {
+   "i": 14,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9794,
+   "jev": "negative",
+   "jev_conf": 0.79,
+   "jev_cost": 1.2894e-05
+  },
+  {
+   "i": 15,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.81,
+   "jev": "positive",
+   "jev_conf": 0.66,
+   "jev_cost": 1.2558e-05
+  },
+  {
+   "i": 16,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.8124,
+   "jev": "negative",
+   "jev_conf": 0.88,
+   "jev_cost": 1.2096e-05
+  },
+  {
+   "i": 17,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9435,
+   "jev": "positive",
+   "jev_conf": 0.83,
+   "jev_cost": 1.2306e-05
+  },
+  {
+   "i": 18,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9696,
+   "jev": "positive",
+   "jev_conf": 0.97,
+   "jev_cost": 1.3062e-05
+  },
+  {
+   "i": 19,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.5587,
+   "jev": "positive",
+   "jev_conf": 0.62,
+   "jev_cost": 1.2222e-05
+  },
+  {
+   "i": 20,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9616,
+   "jev": "positive",
+   "jev_conf": 0.8,
+   "jev_cost": 1.1886e-05
+  },
+  {
+   "i": 21,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9728,
+   "jev": "positive",
+   "jev_conf": 0.93,
+   "jev_cost": 1.281e-05
+  },
+  {
+   "i": 22,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9538,
+   "jev": "positive",
+   "jev_conf": 0.88,
+   "jev_cost": 1.2264e-05
+  },
+  {
+   "i": 23,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.91,
+   "jev": "negative",
+   "jev_conf": 0.96,
+   "jev_cost": 1.2306e-05
+  },
+  {
+   "i": 24,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9938,
+   "jev": "negative",
+   "jev_conf": 0.97,
+   "jev_cost": 1.2054e-05
+  },
+  {
+   "i": 25,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9865,
+   "jev": "negative",
+   "jev_conf": 0.91,
+   "jev_cost": 1.26e-05
+  },
+  {
+   "i": 26,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.673,
+   "jev": "negative",
+   "jev_conf": 0.8,
+   "jev_cost": 1.3188e-05
+  },
+  {
+   "i": 27,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9587,
+   "jev": "negative",
+   "jev_conf": 0.97,
+   "jev_cost": 1.197e-05
+  },
+  {
+   "i": 28,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9875,
+   "jev": "positive",
+   "jev_conf": 0.77,
+   "jev_cost": 1.2768e-05
+  },
+  {
+   "i": 29,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9881,
+   "jev": "positive",
+   "jev_conf": 0.91,
+   "jev_cost": 1.2096e-05
+  },
+  {
+   "i": 30,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.958,
+   "jev": "positive",
+   "jev_conf": 0.91,
+   "jev_cost": 1.2726e-05
+  },
+  {
+   "i": 31,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9827,
+   "jev": "negative",
+   "jev_conf": 0.86,
+   "jev_cost": 1.2684e-05
+  },
+  {
+   "i": 32,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9716,
+   "jev": "positive",
+   "jev_conf": 0.86,
+   "jev_cost": 1.302e-05
+  },
+  {
+   "i": 33,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9805,
+   "jev": "positive",
+   "jev_conf": 0.79,
+   "jev_cost": 1.2222e-05
+  },
+  {
+   "i": 34,
+   "gold": "negative",
+   "laya": "positive",
+   "laya_conf": 0.8893,
+   "jev": "negative",
+   "jev_conf": 0.94,
+   "jev_cost": 1.2642e-05
+  },
+  {
+   "i": 35,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9283,
+   "jev": "negative",
+   "jev_conf": 0.95,
+   "jev_cost": 1.281e-05
+  },
+  {
+   "i": 36,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9678,
+   "jev": "positive",
+   "jev_conf": 0.61,
+   "jev_cost": 1.323e-05
+  },
+  {
+   "i": 37,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9363,
+   "jev": "positive",
+   "jev_conf": 0.92,
+   "jev_cost": 1.1802e-05
+  },
+  {
+   "i": 38,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9766,
+   "jev": "positive",
+   "jev_conf": 0.97,
+   "jev_cost": 1.2264e-05
+  },
+  {
+   "i": 39,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.987,
+   "jev": "positive",
+   "jev_conf": 0.81,
+   "jev_cost": 1.2684e-05
+  },
+  {
+   "i": 40,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9863,
+   "jev": "negative",
+   "jev_conf": 0.89,
+   "jev_cost": 1.3356e-05
+  },
+  {
+   "i": 41,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.5956,
+   "jev": "positive",
+   "jev_conf": 0.65,
+   "jev_cost": 1.1928e-05
+  },
+  {
+   "i": 42,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.8894,
+   "jev": "positive",
+   "jev_conf": 0.86,
+   "jev_cost": 1.2306e-05
+  },
+  {
+   "i": 43,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.979,
+   "jev": "positive",
+   "jev_conf": 0.65,
+   "jev_cost": 1.218e-05
+  },
+  {
+   "i": 44,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9938,
+   "jev": "negative",
+   "jev_conf": 0.96,
+   "jev_cost": 1.2768e-05
+  },
+  {
+   "i": 45,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9878,
+   "jev": "positive",
+   "jev_conf": 0.94,
+   "jev_cost": 1.239e-05
+  },
+  {
+   "i": 46,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9844,
+   "jev": "positive",
+   "jev_conf": 0.91,
+   "jev_cost": 1.2306e-05
+  },
+  {
+   "i": 47,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9825,
+   "jev": "positive",
+   "jev_conf": 0.96,
+   "jev_cost": 1.3188e-05
+  },
+  {
+   "i": 48,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9716,
+   "jev": "positive",
+   "jev_conf": 0.84,
+   "jev_cost": 1.2726e-05
+  },
+  {
+   "i": 49,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.8929,
+   "jev": "positive",
+   "jev_conf": 0.5,
+   "jev_cost": 1.3314e-05
+  },
+  {
+   "i": 50,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9798,
+   "jev": "positive",
+   "jev_conf": 0.91,
+   "jev_cost": 1.281e-05
+  },
+  {
+   "i": 51,
+   "gold": "positive",
+   "laya": "negative",
+   "laya_conf": 0.6072,
+   "jev": "positive",
+   "jev_conf": 0.8,
+   "jev_cost": 1.3062e-05
+  },
+  {
+   "i": 52,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.987,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.2726e-05
+  },
+  {
+   "i": 53,
+   "gold": "negative",
+   "laya": "positive",
+   "laya_conf": 0.963,
+   "jev": "positive",
+   "jev_conf": 0.7,
+   "jev_cost": 1.2726e-05
+  },
+  {
+   "i": 54,
+   "gold": "negative",
+   "laya": "positive",
+   "laya_conf": 0.8941,
+   "jev": "positive",
+   "jev_conf": 0.74,
+   "jev_cost": 1.2306e-05
+  },
+  {
+   "i": 55,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9708,
+   "jev": "negative",
+   "jev_conf": 0.86,
+   "jev_cost": 1.2768e-05
+  },
+  {
+   "i": 56,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9777,
+   "jev": "negative",
+   "jev_conf": 0.97,
+   "jev_cost": 1.2642e-05
+  },
+  {
+   "i": 57,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.6043,
+   "jev": "positive",
+   "jev_conf": 0.82,
+   "jev_cost": 1.2726e-05
+  },
+  {
+   "i": 58,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9227,
+   "jev": "positive",
+   "jev_conf": 0.52,
+   "jev_cost": 1.2306e-05
+  },
+  {
+   "i": 59,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9692,
+   "jev": "positive",
+   "jev_conf": 0.97,
+   "jev_cost": 1.2516e-05
+  },
+  {
+   "i": 60,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.961,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.1928e-05
+  },
+  {
+   "i": 61,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.974,
+   "jev": "positive",
+   "jev_conf": 0.91,
+   "jev_cost": 1.2306e-05
+  },
+  {
+   "i": 62,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9482,
+   "jev": "positive",
+   "jev_conf": 0.81,
+   "jev_cost": 1.2222e-05
+  },
+  {
+   "i": 63,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9852,
+   "jev": "positive",
+   "jev_conf": 0.91,
+   "jev_cost": 1.2642e-05
+  },
+  {
+   "i": 64,
+   "gold": "positive",
+   "laya": "negative",
+   "laya_conf": 0.9418,
+   "jev": "positive",
+   "jev_conf": 0.62,
+   "jev_cost": 1.2348e-05
+  },
+  {
+   "i": 65,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9519,
+   "jev": "negative",
+   "jev_conf": 0.95,
+   "jev_cost": 1.2096e-05
+  },
+  {
+   "i": 66,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.6291,
+   "jev": "positive",
+   "jev_conf": 0.69,
+   "jev_cost": 1.2768e-05
+  },
+  {
+   "i": 67,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9842,
+   "jev": "positive",
+   "jev_conf": 0.89,
+   "jev_cost": 1.2642e-05
+  },
+  {
+   "i": 68,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.8774,
+   "jev": "negative",
+   "jev_conf": 0.7,
+   "jev_cost": 1.2558e-05
+  },
+  {
+   "i": 69,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9609,
+   "jev": "positive",
+   "jev_conf": 0.54,
+   "jev_cost": 1.1928e-05
+  },
+  {
+   "i": 70,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9862,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.2684e-05
+  },
+  {
+   "i": 71,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9888,
+   "jev": "positive",
+   "jev_conf": 0.96,
+   "jev_cost": 1.2474e-05
+  },
+  {
+   "i": 72,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9916,
+   "jev": "positive",
+   "jev_conf": 0.95,
+   "jev_cost": 1.3104e-05
+  },
+  {
+   "i": 73,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9668,
+   "jev": "negative",
+   "jev_conf": 0.95,
+   "jev_cost": 1.2894e-05
+  },
+  {
+   "i": 74,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9449,
+   "jev": "negative",
+   "jev_conf": 0.97,
+   "jev_cost": 1.2432e-05
+  },
+  {
+   "i": 75,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.7568,
+   "jev": "positive",
+   "jev_conf": 0.8,
+   "jev_cost": 1.3356e-05
+  },
+  {
+   "i": 76,
+   "gold": "positive",
+   "laya": "negative",
+   "laya_conf": 0.939,
+   "jev": "positive",
+   "jev_conf": 0.72,
+   "jev_cost": 1.2516e-05
+  },
+  {
+   "i": 77,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9072,
+   "jev": "negative",
+   "jev_conf": 0.95,
+   "jev_cost": 1.2432e-05
+  },
+  {
+   "i": 78,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9843,
+   "jev": "positive",
+   "jev_conf": 0.88,
+   "jev_cost": 1.2138e-05
+  },
+  {
+   "i": 79,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9893,
+   "jev": "positive",
+   "jev_conf": 0.78,
+   "jev_cost": 1.323e-05
+  },
+  {
+   "i": 80,
+   "gold": "positive",
+   "laya": "negative",
+   "laya_conf": 0.923,
+   "jev": "negative",
+   "jev_conf": 0.78,
+   "jev_cost": 1.2642e-05
+  },
+  {
+   "i": 81,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9323,
+   "jev": "negative",
+   "jev_conf": 0.9,
+   "jev_cost": 1.2306e-05
+  },
+  {
+   "i": 82,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9582,
+   "jev": "negative",
+   "jev_conf": 0.54,
+   "jev_cost": 1.2432e-05
+  },
+  {
+   "i": 83,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9167,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.2432e-05
+  },
+  {
+   "i": 84,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.8852,
+   "jev": "negative",
+   "jev_conf": 0.95,
+   "jev_cost": 1.218e-05
+  },
+  {
+   "i": 85,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9904,
+   "jev": "positive",
+   "jev_conf": 0.96,
+   "jev_cost": 1.2558e-05
+  },
+  {
+   "i": 86,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9347,
+   "jev": "negative",
+   "jev_conf": 0.97,
+   "jev_cost": 1.3062e-05
+  },
+  {
+   "i": 87,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9879,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.2348e-05
+  },
+  {
+   "i": 88,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.99,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.3062e-05
+  },
+  {
+   "i": 89,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.8902,
+   "jev": "positive",
+   "jev_conf": 0.89,
+   "jev_cost": 1.2642e-05
+  },
+  {
+   "i": 90,
+   "gold": "negative",
+   "laya": "positive",
+   "laya_conf": 0.8319,
+   "jev": "negative",
+   "jev_conf": 0.72,
+   "jev_cost": 1.2096e-05
+  },
+  {
+   "i": 91,
+   "gold": "negative",
+   "laya": "positive",
+   "laya_conf": 0.6566,
+   "jev": "negative",
+   "jev_conf": 0.73,
+   "jev_cost": 1.3524e-05
+  },
+  {
+   "i": 92,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9837,
+   "jev": "positive",
+   "jev_conf": 0.8,
+   "jev_cost": 1.2474e-05
+  },
+  {
+   "i": 93,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9777,
+   "jev": "negative",
+   "jev_conf": 0.89,
+   "jev_cost": 1.1928e-05
+  },
+  {
+   "i": 94,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9872,
+   "jev": "positive",
+   "jev_conf": 0.97,
+   "jev_cost": 1.3608e-05
+  },
+  {
+   "i": 95,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9738,
+   "jev": "positive",
+   "jev_conf": 0.93,
+   "jev_cost": 1.2978e-05
+  },
+  {
+   "i": 96,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9872,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.3104e-05
+  },
+  {
+   "i": 97,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9044,
+   "jev": "negative",
+   "jev_conf": 0.96,
+   "jev_cost": 1.2222e-05
+  },
+  {
+   "i": 98,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.6016,
+   "jev": "negative",
+   "jev_conf": 0.97,
+   "jev_cost": 1.2222e-05
+  },
+  {
+   "i": 99,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.6336,
+   "jev": "negative",
+   "jev_conf": 0.6599999999999999,
+   "jev_cost": 1.3104e-05
+  },
+  {
+   "i": 100,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9505,
+   "jev": "positive",
+   "jev_conf": 0.85,
+   "jev_cost": 1.2306e-05
+  },
+  {
+   "i": 101,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9716,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.3398e-05
+  },
+  {
+   "i": 102,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9145,
+   "jev": "negative",
+   "jev_conf": 0.6599999999999999,
+   "jev_cost": 1.2432e-05
+  },
+  {
+   "i": 103,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9829,
+   "jev": "negative",
+   "jev_conf": 0.99,
+   "jev_cost": 1.2516e-05
+  },
+  {
+   "i": 104,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.936,
+   "jev": "positive",
+   "jev_conf": 0.84,
+   "jev_cost": 1.281e-05
+  },
+  {
+   "i": 105,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.96,
+   "jev": "positive",
+   "jev_conf": 0.97,
+   "jev_cost": 1.3104e-05
+  },
+  {
+   "i": 106,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9195,
+   "jev": "negative",
+   "jev_conf": 0.73,
+   "jev_cost": 1.3104e-05
+  },
+  {
+   "i": 107,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9549,
+   "jev": "negative",
+   "jev_conf": 0.96,
+   "jev_cost": 1.2054e-05
+  },
+  {
+   "i": 108,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.864,
+   "jev": "positive",
+   "jev_conf": 0.6,
+   "jev_cost": 1.2558e-05
+  },
+  {
+   "i": 109,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9547,
+   "jev": "negative",
+   "jev_conf": 0.9299999999999999,
+   "jev_cost": 1.1886e-05
+  },
+  {
+   "i": 110,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9888,
+   "jev": "negative",
+   "jev_conf": 0.95,
+   "jev_cost": 1.2516e-05
+  },
+  {
+   "i": 111,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.8507,
+   "jev": "negative",
+   "jev_conf": 0.76,
+   "jev_cost": 1.3146e-05
+  },
+  {
+   "i": 112,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9785,
+   "jev": "positive",
+   "jev_conf": 0.7,
+   "jev_cost": 1.2432e-05
+  },
+  {
+   "i": 113,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9864,
+   "jev": "negative",
+   "jev_conf": 0.83,
+   "jev_cost": 1.2726e-05
+  },
+  {
+   "i": 114,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9879,
+   "jev": "negative",
+   "jev_conf": 0.95,
+   "jev_cost": 1.3482e-05
+  },
+  {
+   "i": 115,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9431,
+   "jev": "negative",
+   "jev_conf": 0.94,
+   "jev_cost": 1.2138e-05
+  },
+  {
+   "i": 116,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9795,
+   "jev": "positive",
+   "jev_conf": 0.94,
+   "jev_cost": 1.2348e-05
+  },
+  {
+   "i": 117,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9812,
+   "jev": "positive",
+   "jev_conf": 0.96,
+   "jev_cost": 1.2642e-05
+  },
+  {
+   "i": 118,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.7124,
+   "jev": "negative",
+   "jev_conf": 0.95,
+   "jev_cost": 1.302e-05
+  },
+  {
+   "i": 119,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.529,
+   "jev": "positive",
+   "jev_conf": 0.52,
+   "jev_cost": 1.3062e-05
+  },
+  {
+   "i": 120,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.5278,
+   "jev": "negative",
+   "jev_conf": 0.8,
+   "jev_cost": 1.197e-05
+  },
+  {
+   "i": 121,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9829,
+   "jev": "positive",
+   "jev_conf": 0.95,
+   "jev_cost": 1.2474e-05
+  },
+  {
+   "i": 122,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9858,
+   "jev": "negative",
+   "jev_conf": 0.94,
+   "jev_cost": 1.2936e-05
+  },
+  {
+   "i": 123,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9783,
+   "jev": "positive",
+   "jev_conf": 0.91,
+   "jev_cost": 1.2726e-05
+  },
+  {
+   "i": 124,
+   "gold": "positive",
+   "laya": "negative",
+   "laya_conf": 0.9125,
+   "jev": "negative",
+   "jev_conf": 0.9299999999999999,
+   "jev_cost": 1.323e-05
+  },
+  {
+   "i": 125,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9807,
+   "jev": "positive",
+   "jev_conf": 0.98,
+   "jev_cost": 1.197e-05
+  },
+  {
+   "i": 126,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9716,
+   "jev": "negative",
+   "jev_conf": 0.9,
+   "jev_cost": 1.218e-05
+  },
+  {
+   "i": 127,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9786,
+   "jev": "positive",
+   "jev_conf": 0.78,
+   "jev_cost": 1.2936e-05
+  },
+  {
+   "i": 128,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9832,
+   "jev": "positive",
+   "jev_conf": 0.91,
+   "jev_cost": 1.3566e-05
+  },
+  {
+   "i": 129,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.99,
+   "jev": "positive",
+   "jev_conf": 0.98,
+   "jev_cost": 1.2474e-05
+  },
+  {
+   "i": 130,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9864,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.281e-05
+  },
+  {
+   "i": 131,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9903,
+   "jev": "positive",
+   "jev_conf": 0.98,
+   "jev_cost": 1.2684e-05
+  },
+  {
+   "i": 132,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.7529,
+   "jev": "negative",
+   "jev_conf": 0.91,
+   "jev_cost": 1.2138e-05
+  },
+  {
+   "i": 133,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9545,
+   "jev": "negative",
+   "jev_conf": 0.84,
+   "jev_cost": 1.2474e-05
+  },
+  {
+   "i": 134,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9874,
+   "jev": "positive",
+   "jev_conf": 0.98,
+   "jev_cost": 1.197e-05
+  },
+  {
+   "i": 135,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.979,
+   "jev": "negative",
+   "jev_conf": 0.96,
+   "jev_cost": 1.281e-05
+  },
+  {
+   "i": 136,
+   "gold": "positive",
+   "laya": "negative",
+   "laya_conf": 0.5874,
+   "jev": "negative",
+   "jev_conf": 0.88,
+   "jev_cost": 1.2138e-05
+  },
+  {
+   "i": 137,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9359,
+   "jev": "positive",
+   "jev_conf": 0.87,
+   "jev_cost": 1.2768e-05
+  },
+  {
+   "i": 138,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9624,
+   "jev": "negative",
+   "jev_conf": 0.91,
+   "jev_cost": 1.2684e-05
+  },
+  {
+   "i": 139,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9782,
+   "jev": "positive",
+   "jev_conf": 0.92,
+   "jev_cost": 1.2642e-05
+  },
+  {
+   "i": 140,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9554,
+   "jev": "positive",
+   "jev_conf": 0.81,
+   "jev_cost": 1.26e-05
+  },
+  {
+   "i": 141,
+   "gold": "negative",
+   "laya": "positive",
+   "laya_conf": 0.9694,
+   "jev": "negative",
+   "jev_conf": 0.77,
+   "jev_cost": 1.2138e-05
+  },
+  {
+   "i": 142,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.8008,
+   "jev": "negative",
+   "jev_conf": 0.9,
+   "jev_cost": 1.2642e-05
+  },
+  {
+   "i": 143,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9826,
+   "jev": "positive",
+   "jev_conf": 0.92,
+   "jev_cost": 1.2558e-05
+  },
+  {
+   "i": 144,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9894,
+   "jev": "positive",
+   "jev_conf": 0.97,
+   "jev_cost": 1.2138e-05
+  },
+  {
+   "i": 145,
+   "gold": "negative",
+   "laya": "positive",
+   "laya_conf": 0.9106,
+   "jev": "negative",
+   "jev_conf": 0.88,
+   "jev_cost": 1.26e-05
+  },
+  {
+   "i": 146,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9865,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.2012e-05
+  },
+  {
+   "i": 147,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9871,
+   "jev": "positive",
+   "jev_conf": 0.7,
+   "jev_cost": 1.2936e-05
+  },
+  {
+   "i": 148,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9785,
+   "jev": "positive",
+   "jev_conf": 0.78,
+   "jev_cost": 1.26e-05
+  },
+  {
+   "i": 149,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9537,
+   "jev": "negative",
+   "jev_conf": 0.6599999999999999,
+   "jev_cost": 1.239e-05
+  },
+  {
+   "i": 150,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.984,
+   "jev": "positive",
+   "jev_conf": 0.88,
+   "jev_cost": 1.2768e-05
+  },
+  {
+   "i": 151,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.8254,
+   "jev": "negative",
+   "jev_conf": 0.77,
+   "jev_cost": 1.2432e-05
+  },
+  {
+   "i": 152,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9687,
+   "jev": "positive",
+   "jev_conf": 0.9,
+   "jev_cost": 1.2642e-05
+  },
+  {
+   "i": 153,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9779,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.2264e-05
+  },
+  {
+   "i": 154,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.8826,
+   "jev": "positive",
+   "jev_conf": 0.93,
+   "jev_cost": 1.2348e-05
+  },
+  {
+   "i": 155,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9812,
+   "jev": "positive",
+   "jev_conf": 0.91,
+   "jev_cost": 1.2558e-05
+  },
+  {
+   "i": 156,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.8303,
+   "jev": "negative",
+   "jev_conf": 0.84,
+   "jev_cost": 1.2222e-05
+  },
+  {
+   "i": 157,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9771,
+   "jev": "positive",
+   "jev_conf": 0.9,
+   "jev_cost": 1.239e-05
+  },
+  {
+   "i": 158,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9408,
+   "jev": "negative",
+   "jev_conf": 0.97,
+   "jev_cost": 1.2432e-05
+  },
+  {
+   "i": 159,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9627,
+   "jev": "positive",
+   "jev_conf": 0.78,
+   "jev_cost": 1.3104e-05
+  },
+  {
+   "i": 160,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.8409,
+   "jev": "positive",
+   "jev_conf": 0.75,
+   "jev_cost": 1.2852e-05
+  },
+  {
+   "i": 161,
+   "gold": "negative",
+   "laya": "positive",
+   "laya_conf": 0.6494,
+   "jev": "negative",
+   "jev_conf": 0.94,
+   "jev_cost": 1.2558e-05
+  },
+  {
+   "i": 162,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.8719,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.2516e-05
+  },
+  {
+   "i": 163,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9779,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.302e-05
+  },
+  {
+   "i": 164,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.7704,
+   "jev": "negative",
+   "jev_conf": 0.6799999999999999,
+   "jev_cost": 1.2768e-05
+  },
+  {
+   "i": 165,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9241,
+   "jev": "negative",
+   "jev_conf": 0.86,
+   "jev_cost": 1.1844e-05
+  },
+  {
+   "i": 166,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.979,
+   "jev": "positive",
+   "jev_conf": 0.85,
+   "jev_cost": 1.2852e-05
+  },
+  {
+   "i": 167,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.6752,
+   "jev": "negative",
+   "jev_conf": 0.75,
+   "jev_cost": 1.2348e-05
+  },
+  {
+   "i": 168,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9883,
+   "jev": "positive",
+   "jev_conf": 0.76,
+   "jev_cost": 1.2726e-05
+  },
+  {
+   "i": 169,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9753,
+   "jev": "positive",
+   "jev_conf": 0.94,
+   "jev_cost": 1.2768e-05
+  },
+  {
+   "i": 170,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9706,
+   "jev": "negative",
+   "jev_conf": 0.97,
+   "jev_cost": 1.2012e-05
+  },
+  {
+   "i": 171,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9882,
+   "jev": "positive",
+   "jev_conf": 0.97,
+   "jev_cost": 1.2306e-05
+  },
+  {
+   "i": 172,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9488,
+   "jev": "negative",
+   "jev_conf": 0.97,
+   "jev_cost": 1.2936e-05
+  },
+  {
+   "i": 173,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9426,
+   "jev": "negative",
+   "jev_conf": 0.95,
+   "jev_cost": 1.3188e-05
+  },
+  {
+   "i": 174,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9408,
+   "jev": "positive",
+   "jev_conf": 0.97,
+   "jev_cost": 1.197e-05
+  },
+  {
+   "i": 175,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.854,
+   "jev": "negative",
+   "jev_conf": 0.95,
+   "jev_cost": 1.2894e-05
+  },
+  {
+   "i": 176,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.8064,
+   "jev": "negative",
+   "jev_conf": 0.92,
+   "jev_cost": 1.2684e-05
+  },
+  {
+   "i": 177,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9576,
+   "jev": "negative",
+   "jev_conf": 0.79,
+   "jev_cost": 1.2306e-05
+  },
+  {
+   "i": 178,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9798,
+   "jev": "positive",
+   "jev_conf": 0.93,
+   "jev_cost": 1.2516e-05
+  },
+  {
+   "i": 179,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.7246,
+   "jev": "negative",
+   "jev_conf": 0.79,
+   "jev_cost": 1.3272e-05
+  },
+  {
+   "i": 180,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.8899,
+   "jev": "negative",
+   "jev_conf": 0.94,
+   "jev_cost": 1.1886e-05
+  },
+  {
+   "i": 181,
+   "gold": "negative",
+   "laya": "positive",
+   "laya_conf": 0.6807,
+   "jev": "positive",
+   "jev_conf": 0.59,
+   "jev_cost": 1.197e-05
+  },
+  {
+   "i": 182,
+   "gold": "negative",
+   "laya": "positive",
+   "laya_conf": 0.7397,
+   "jev": "negative",
+   "jev_conf": 0.89,
+   "jev_cost": 1.2978e-05
+  },
+  {
+   "i": 183,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9577,
+   "jev": "negative",
+   "jev_conf": 0.86,
+   "jev_cost": 1.2726e-05
+  },
+  {
+   "i": 184,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9759,
+   "jev": "negative",
+   "jev_conf": 0.98,
+   "jev_cost": 1.2684e-05
+  },
+  {
+   "i": 185,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9735,
+   "jev": "negative",
+   "jev_conf": 0.9299999999999999,
+   "jev_cost": 1.1928e-05
+  },
+  {
+   "i": 186,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9883,
+   "jev": "positive",
+   "jev_conf": 0.96,
+   "jev_cost": 1.2936e-05
+  },
+  {
+   "i": 187,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9622,
+   "jev": "positive",
+   "jev_conf": 0.7,
+   "jev_cost": 1.2474e-05
+  },
+  {
+   "i": 188,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9901,
+   "jev": "positive",
+   "jev_conf": 0.93,
+   "jev_cost": 1.2348e-05
+  },
+  {
+   "i": 189,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9876,
+   "jev": "positive",
+   "jev_conf": 0.98,
+   "jev_cost": 1.2684e-05
+  },
+  {
+   "i": 190,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.987,
+   "jev": "positive",
+   "jev_conf": 0.97,
+   "jev_cost": 1.197e-05
+  },
+  {
+   "i": 191,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.8772,
+   "jev": "negative",
+   "jev_conf": 0.92,
+   "jev_cost": 1.1886e-05
+  },
+  {
+   "i": 192,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.899,
+   "jev": "negative",
+   "jev_conf": 0.96,
+   "jev_cost": 1.281e-05
+  },
+  {
+   "i": 193,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9494,
+   "jev": "positive",
+   "jev_conf": 0.97,
+   "jev_cost": 1.2222e-05
+  },
+  {
+   "i": 194,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9881,
+   "jev": "positive",
+   "jev_conf": 0.95,
+   "jev_cost": 1.3062e-05
+  },
+  {
+   "i": 195,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9889,
+   "jev": "negative",
+   "jev_conf": 0.94,
+   "jev_cost": 1.218e-05
+  },
+  {
+   "i": 196,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.9832,
+   "jev": "positive",
+   "jev_conf": 0.69,
+   "jev_cost": 1.2894e-05
+  },
+  {
+   "i": 197,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9761,
+   "jev": "negative",
+   "jev_conf": 0.96,
+   "jev_cost": 1.2138e-05
+  },
+  {
+   "i": 198,
+   "gold": "negative",
+   "laya": "negative",
+   "laya_conf": 0.9785,
+   "jev": "negative",
+   "jev_conf": 0.99,
+   "jev_cost": 1.3608e-05
+  },
+  {
+   "i": 199,
+   "gold": "positive",
+   "laya": "positive",
+   "laya_conf": 0.7875,
+   "jev": "positive",
+   "jev_conf": 0.7,
+   "jev_cost": 1.3146e-05
+  }
+ ]
+}

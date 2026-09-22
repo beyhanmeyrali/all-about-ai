@@ -284,7 +284,7 @@ def jev_decide(client, model, state, questions):
     t0 = time.perf_counter()
     for attempt in range(5):
         r = client.post(JEV_URL, json={"model": model, "state": state, "questions": questions})
-        if r.status_code not in (429, 500, 502, 503, 529):
+        if r.status_code not in (429, 500, 502, 503, 520, 522, 524, 529):
             break
         time.sleep(2 * (attempt + 1))
     ms = (time.perf_counter() - t0) * 1000
@@ -329,15 +329,16 @@ def bench_jev(model, tasks, limit=None):
 LAYA_PATH = "/home/ubuntu/workspace/models/laya"
 
 
-def laya_agent(head_max_len=None):
+def laya_agent(head_max_len=None, device="cuda"):
     """Laya's own `laya` package on the GPU. It silently falls back to the CPU on any CUDA
     OOM, so fail loudly instead if it didn't stay on the GPU."""
     import os
     os.environ.setdefault("USE_TF", "0")
     import laya
-    agent = laya.load(os.environ.get("LAYA_PATH", LAYA_PATH), device="cuda")
+    agent = laya.load(os.environ.get("LAYA_PATH", LAYA_PATH), device=device)
     if head_max_len:
         agent.cfg["head_max_len"] = head_max_len
+    agent.wanted_device = device
     return agent
 
 
@@ -348,7 +349,7 @@ def laya_decide(agent, state, questions):
     r = agent.predict(state, questions)
     torch.cuda.synchronize()
     ms = (time.perf_counter() - t0) * 1000
-    if agent.device.type != "cuda":
+    if agent.device.type != getattr(agent, "wanted_device", "cuda"):
         raise RuntimeError("Laya fell back to the CPU (GPU out of memory?)")
     return r["answers"], r.get("usage", {}), ms
 
