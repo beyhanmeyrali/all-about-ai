@@ -54,5 +54,3 @@ venv/
 .huggingface/
 .ollama/
 
-# Local copy-paste drafts for social posts (never committed)
-SOCIAL_POSTS.md

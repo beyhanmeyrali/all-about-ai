@@ -1,4 +1,4 @@
-"""Charts for the LinkedIn article, drawn from the measured results in ../diffusiongemma/*.json."""
+"""Images for this LinkedIn article, drawn from the measured results in llm-inference/diffusiongemma/*.json."""
 import json
 from pathlib import Path
 
@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FixedLocator, NullLocator
 
 HERE = Path(__file__).resolve().parent
-D = HERE.parent / "diffusiongemma"
-OUT = HERE / "charts"
+D = HERE.parents[3] / "diffusiongemma"  # llm-inference/diffusiongemma
+OUT = HERE / "images"
 
 SURFACE, INK, INK2, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#8a8984", "#e6e5e0"
 C = {"Jev": "#2a78d6", "DiffusionGemma": "#eb6834", "Qwen 3 30B": "#1baf7a", "Bonsai 27B": "#eda100", "Laya": "#e87ba4"}
@@ -67,11 +67,11 @@ title(fig, "Time to answer N yes/no questions",
       "Jev stays flat. Models that type their answers slow down with every question. (log scale)")
 source(fig, "Measured on an RTX 5060 8 GB laptop. Jev: cloud via OpenRouter, network included, new text. "
             "Local models: text already read. Median of 3.")
-fig.savefig(OUT / "1_speed.png", facecolor=SURFACE)
+fig.savefig(OUT / "speed-by-question-count.png", facecolor=SURFACE)
 # the same chart at LinkedIn's recommended article-cover size (1920 x 1080, 16:9)
 fig.set_size_inches(12.8, 7.2)
 fig.subplots_adjust(left=0.09, right=0.8, top=0.8, bottom=0.14)
-fig.savefig(OUT / "0_cover_1920x1080.png", dpi=150, facecolor=SURFACE)
+fig.savefig(OUT / "cover-1920x1080.png", dpi=150, facecolor=SURFACE)
 plt.close(fig)
 
 # ---------------------------------------------------------------- 2. accuracy
@@ -104,7 +104,7 @@ title(fig, "Accuracy on the same 400 questions", "200 movie reviews (SST-2) and 
 source(fig, "* Laya: reviews asked as a 2-option choice (asked yes/no it scored 46 %, answering \"no\" to all). "
             "Its news score is on data it was trained on.\nQwen: typing its answer; 31 of 400 replies were malformed. "
             "DiffusionGemma: one read.")
-fig.savefig(OUT / "2_accuracy.png", facecolor=SURFACE)
+fig.savefig(OUT / "accuracy-400-questions.png", facecolor=SURFACE)
 plt.close(fig)
 
 # ---------------------------------------------------------------- 3. Tetris
@@ -130,6 +130,6 @@ ax.grid(axis="x", color=GRID, lw=1)
 frame(ax)
 title(fig, "Tetris: every move is one decision", "Each model picks where to drop every piece, from the list of legal placements.")
 source(fig, "Grey bars are reference players. Jev in the cloud; the others on an RTX 5060 8 GB laptop.")
-fig.savefig(OUT / "3_tetris.png", facecolor=SURFACE)
+fig.savefig(OUT / "tetris-results.png", facecolor=SURFACE)
 plt.close(fig)
 print("wrote", sorted(p.name for p in OUT.glob("*.png")))

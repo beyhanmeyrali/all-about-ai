@@ -1,12 +1,12 @@
-# LinkedIn article: I Tested Jev Against 4 Open Models on My 8 GB Laptop. Speed Isn't the Whole Story.
+# I Tested Jev Against 4 Open Models on My 8 GB Laptop. Speed Isn't the Whole Story.
 
-*Ready to copy into LinkedIn. How to publish it is explained in [README.md](README.md).*
+*A LinkedIn article, ready to copy. Publishing steps: [social/README.md](../../../README.md#publishing-a-linkedin-article). The full benchmark it summarises: [DIFFUSIONGEMMA.md](../../../../DIFFUSIONGEMMA.md).*
 
 ## Cover image
 
-![Line chart showing Jev answering 1 to 20 questions in a flat 0.34–0.40 s, while models that type their answers slow down with every question.](charts/0_cover_1920x1080.png)
+![Line chart showing Jev answering 1 to 20 questions in a flat 0.34–0.40 s, while models that type their answers slow down with every question.](images/cover-1920x1080.png)
 
-> 📎 **Upload as the cover:** `charts/0_cover_1920x1080.png` (1920 × 1080, LinkedIn's recommended size) · **Alt text:** Line chart showing Jev answering 1 to 20 questions in a flat 0.34–0.40 s, while models that type their answers slow down with every question.
+> 📎 **Upload as the cover:** `images/cover-1920x1080.png` (1920 × 1080, LinkedIn's recommended size) · **Alt text:** Line chart showing Jev answering 1 to 20 questions in a flat 0.34–0.40 s, while models that type their answers slow down with every question.
 
 ## Title
 
@@ -48,9 +48,9 @@ That's the whole pitch. The question is whether it holds up.
 
 ## Speed: Jev's claim is real
 
-![Line chart of time to answer 1, 2, 5, 10 and 20 yes/no questions about one text, log scale. Jev stays flat at 0.34–0.40 s. DiffusionGemma rises from 0.09 to 0.36 s, Qwen 3 30B from 0.10 to 1.67 s, Bonsai 27B from 0.27 to 2.42 s, and Laya from 11 to 57 ms.](charts/1_speed.png)
+![Line chart of time to answer 1, 2, 5, 10 and 20 yes/no questions about one text, log scale. Jev stays flat at 0.34–0.40 s. DiffusionGemma rises from 0.09 to 0.36 s, Qwen 3 30B from 0.10 to 1.67 s, Bonsai 27B from 0.27 to 2.42 s, and Laya from 11 to 57 ms.](images/speed-by-question-count.png)
 
-> 📎 **Upload:** `charts/1_speed.png` · **Alt text:** Line chart of time to answer 1, 2, 5, 10 and 20 yes/no questions about one text, log scale. Jev stays flat at 0.34–0.40 s. DiffusionGemma rises from 0.09 to 0.36 s, Qwen 3 30B from 0.10 to 1.67 s, Bonsai 27B from 0.27 to 2.42 s, and Laya from 11 to 57 ms. · **Caption:** Jev stays flat from 1 to 20 questions. Models that type their answers slow down with every question. Measured on an RTX 5060 8 GB laptop; Jev in the cloud, network included.
+> 📎 **Upload:** `images/speed-by-question-count.png` · **Alt text:** Line chart of time to answer 1, 2, 5, 10 and 20 yes/no questions about one text, log scale. Jev stays flat at 0.34–0.40 s. DiffusionGemma rises from 0.09 to 0.36 s, Qwen 3 30B from 0.10 to 1.67 s, Bonsai 27B from 0.27 to 2.42 s, and Laya from 11 to 57 ms. · **Caption:** Jev stays flat from 1 to 20 questions. Models that type their answers slow down with every question. Measured on an RTX 5060 8 GB laptop; Jev in the cloud, network included.
 
 **Jev answered in 0.34–0.40 seconds whether I asked 1 question or 20** — and that includes the round trip over the internet from Türkiye. That's the headline promise, and it holds.
 
@@ -69,9 +69,9 @@ And the fastest of all by far was **Laya: 11 ms for one question, 57 ms for twen
 
 ## Quality: the surprise wasn't the diffusion model
 
-![Grouped bar chart of accuracy on 200 movie reviews and 200 news articles. Jev 94.0% and 85.0%; Bonsai 27B 92.5% and 86.5%; Laya 92.0% and 94.0% (reviews asked as a choice, news in its training data); DiffusionGemma 89.0% and 77.0%; Qwen 3 30B 83.0% and 65.5%.](charts/2_accuracy.png)
+![Grouped bar chart of accuracy on 200 movie reviews and 200 news articles. Jev 94.0% and 85.0%; Bonsai 27B 92.5% and 86.5%; Laya 92.0% and 94.0% (reviews asked as a choice, news in its training data); DiffusionGemma 89.0% and 77.0%; Qwen 3 30B 83.0% and 65.5%.](images/accuracy-400-questions.png)
 
-> 📎 **Upload:** `charts/2_accuracy.png` · **Alt text:** Grouped bar chart of accuracy on 200 movie reviews and 200 news articles. Jev 94.0% and 85.0%; Bonsai 27B 92.5% and 86.5%; Laya 92.0% and 94.0% (reviews asked as a choice, news in its training data); DiffusionGemma 89.0% and 77.0%; Qwen 3 30B 83.0% and 65.5%. · **Caption:** Accuracy on the same 400 questions. Laya's news score is on data it was trained on; asked as yes/no, it scored 46% on reviews.
+> 📎 **Upload:** `images/accuracy-400-questions.png` · **Alt text:** Grouped bar chart of accuracy on 200 movie reviews and 200 news articles. Jev 94.0% and 85.0%; Bonsai 27B 92.5% and 86.5%; Laya 92.0% and 94.0% (reviews asked as a choice, news in its training data); DiffusionGemma 89.0% and 77.0%; Qwen 3 30B 83.0% and 65.5%. · **Caption:** Accuracy on the same 400 questions. Laya's news score is on data it was trained on; asked as yes/no, it scored 46% on reviews.
 
 - **Jev: 94 % on movie reviews, 85 % on news topics**, and well calibrated — when it says 90 %, it's usually right about 90 % of the time.
 - **Ternary Bonsai 27B: 92.5 % / 86.5 %**, zero broken replies, and the *best* calibration of all five. It beat Jev on news topics — from a 5.9 GB file running entirely on a laptop GPU.
@@ -83,9 +83,9 @@ One lesson stood out above all the others: **every model stopped producing broke
 
 ## Tetris: can they actually play?
 
-![Bar chart of Tetris lines cleared over 3 games. Hand-tuned expert 86, Jev 78 (survived 3 of 3, 312 ms per move), Bonsai 27B 64 (2 of 3, 3.0 s), DiffusionGemma 52 (2 of 3, 3.2 s), Qwen 3 30B 37 (0 of 3, 1.6 s), Laya 0 (0 of 3, 28 ms), Random 0.](charts/3_tetris.png)
+![Bar chart of Tetris lines cleared over 3 games. Hand-tuned expert 86, Jev 78 (survived 3 of 3, 312 ms per move), Bonsai 27B 64 (2 of 3, 3.0 s), DiffusionGemma 52 (2 of 3, 3.2 s), Qwen 3 30B 37 (0 of 3, 1.6 s), Laya 0 (0 of 3, 28 ms), Random 0.](images/tetris-results.png)
 
-> 📎 **Upload:** `charts/3_tetris.png` · **Alt text:** Bar chart of Tetris lines cleared over 3 games. Hand-tuned expert 86, Jev 78 (survived 3 of 3, 312 ms per move), Bonsai 27B 64 (2 of 3, 3.0 s), DiffusionGemma 52 (2 of 3, 3.2 s), Qwen 3 30B 37 (0 of 3, 1.6 s), Laya 0 (0 of 3, 28 ms), Random 0. · **Caption:** Tetris, where every move is one decision. Same pieces for every player; 3 games of 80 pieces each.
+> 📎 **Upload:** `images/tetris-results.png` · **Alt text:** Bar chart of Tetris lines cleared over 3 games. Hand-tuned expert 86, Jev 78 (survived 3 of 3, 312 ms per move), Bonsai 27B 64 (2 of 3, 3.0 s), DiffusionGemma 52 (2 of 3, 3.2 s), Qwen 3 30B 37 (0 of 3, 1.6 s), Laya 0 (0 of 3, 28 ms), Random 0. · **Caption:** Tetris, where every move is one decision. Same pieces for every player; 3 games of 80 pieces each.
 
 A decision benchmark with consequences: a bad move makes the next one harder.
 
