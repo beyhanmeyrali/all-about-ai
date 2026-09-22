@@ -243,5 +243,42 @@
       "well_formed": false,
       "reply": "q1 yes q2 no q3 yes q4 no q5 no q6 no q7 yes q8 yes q9 yes q10 no q11 no q12 no q13 no q14 no q15 no q16 no q17 no q18 no q19 yes q20 no"
     }
+  ],
+  "laya": [
+    {
+      "questions": 1,
+      "cold_ms": 11.358058000041638,
+      "warm_ms": 11.10538299997188,
+      "input_tokens": 66,
+      "output_tokens": 0
+    },
+    {
+      "questions": 2,
+      "cold_ms": 17.404189000103543,
+      "warm_ms": 17.056143999980122,
+      "input_tokens": 132,
+      "output_tokens": 0
+    },
+    {
+      "questions": 5,
+      "cold_ms": 23.237719000007928,
+      "warm_ms": 23.185280999996394,
+      "input_tokens": 329,
+      "output_tokens": 0
+    },
+    {
+      "questions": 10,
+      "cold_ms": 32.56334299999253,
+      "warm_ms": 32.72217100004582,
+      "input_tokens": 659,
+      "output_tokens": 0
+    },
+    {
+      "questions": 20,
+      "cold_ms": 57.16799499998615,
+      "warm_ms": 57.379893000074844,
+      "input_tokens": 1317,
+      "output_tokens": 0
+    }
   ]
 }

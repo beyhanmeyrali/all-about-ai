@@ -1,6 +1,6 @@
-# Jev vs DiffusionGemma vs Qwen (+ Bonsai) — Fast AI Decisions, Measured
+# Jev vs DiffusionGemma vs Qwen (+ Bonsai, Laya) — Fast AI Decisions, Measured
 
-> **In one sentence:** TypeSafe's Jev answers typed questions in a flat ~0.34 s, and a viral post claims Google's open DiffusionGemma is a free Jev. I measured both, plus two normal local models (Qwen 3 30B and a 5.9 GB ternary Bonsai 27B), on the same 400 questions, a 1–20 question speed test, and Tetris, on an 8 GB laptop GPU.
+> **In one sentence:** TypeSafe's Jev answers typed questions in a flat ~0.34 s, and a viral post claims Google's open DiffusionGemma is a free Jev. I measured both, plus two normal local models (Qwen 3 30B and a 5.9 GB ternary Bonsai 27B) and Laya, a tiny open-source Jev alternative, on the same 400 questions, a 1–20 question speed test, and Tetris, on an 8 GB laptop GPU.
 
 ## At a glance
 
@@ -9,16 +9,19 @@
 - **DiffusionGemma 26B-A4B**, Google's open text-diffusion model, run as an open Jev clone on an 8 GB laptop GPU.
 - **Qwen 3 30B-A3B**, a normal chat model, as the baseline.
 - **Ternary Bonsai 27B**, PrismML's 27B model compressed to 1.75 bits per weight: a 5.9 GB file that fits entirely on the laptop GPU.
+- **Laya**, an open-source "Jev alternative" from ConvAI Innovations. It isn't a chat model at all: it's a 421M-parameter ModernBERT classifier (0.84 GB) with a Jev-style API.
 
 **⚡ Speed**: time to answer N yes/no questions about one text:
 - **Jev** (cloud, network included): 0.40 s for 1 question and 0.34 s for 20. **Flat.**
 - **DiffusionGemma**: 0.09 s for 1 and 0.36 s for 20 once the text is loaded; 0.56 → 2.1 s for a new text.
 - **Qwen, typing its answers**: 0.10 s → 1.7 s, growing with every question. At 20 questions it broke its own output format.
 - **Bonsai, typing its answers**: 0.27 s → 2.4 s. Same problem, slower typist.
+- **Laya**: **0.011 s → 0.057 s.** The fastest by far: about 35× faster than Jev at 1 question, 6× at 20.
 
 **🔢 Tokens**
 - **Qwen and Bonsai** have to *write* their answers: 5 output tokens per question, 72–92 for 20 questions.
 - **DiffusionGemma** writes nothing: **0 output tokens**. It reads each answer straight out of one pass over a pre-printed form.
+- **Laya** writes nothing either: 0 output tokens. It re-reads the text once per question, so its *input* tokens grow with the question count (66 for 1 question, 1,317 for 20).
 - **Jev** bills only input tokens ($0.042 per million); output is free.
 
 **💰 Cost per 1,000 decisions**
@@ -30,18 +33,21 @@
 - **Bonsai**: 92.5 % / 86.5 %, 0 malformed replies, and the best calibrated of all four. It beats Jev on news topics.
 - **DiffusionGemma**: 89 % / 77 %, 0 malformed replies.
 - **Qwen, writing its answers**: 83 % / 65.5 %, with 31 malformed replies out of 400.
+- **Laya**: **46 %** / 94 % as asked, and 92 % on the reviews when the yes/no question is asked as a two-option choice instead. Its yes/no head answered "no" to every review. Its 94 % on news is from data it was **trained on**, so that score isn't comparable.
 
 **🎮 Tetris** (the model picks every move; 3 games, 80 pieces each):
 - **Jev**: survived 3 of 3, 78 lines, 0.31 s per move.
 - **Bonsai**: survived 2 of 3, 64 lines, 3.0 s per move.
 - **DiffusionGemma**: survived 2 of 3, 52 lines, 3.2 s per move.
 - **Qwen**: topped out in all 3, 37 lines, 1.6 s per move.
+- **Laya**: topped out in all 3 with 0 lines, no better than random, at 0.03 s per move.
 
 **Takeaways**
 1. **Jev's speed claim is real**: a flat 0.34–0.40 s whether you ask 1 question or 20.
 2. **"DiffusionGemma is a free Jev" is half true.** It really does answer many questions in one pass with zero output tokens. On an 8 GB GPU, though, it isn't flat, and it's 5–8 points less accurate than Jev.
 3. **For decisions, stop making models type.** Reading probabilities instead of parsing text removed every format error, for every model.
 4. **The dark horse is Ternary Bonsai 27B.** A 5.9 GB model on an 8 GB laptop is about as accurate as Jev on these tasks. It's just slow when it has to type many answers.
+5. **Laya is blazing fast and narrow.** At 10–60 ms it's in a different speed class, and on familiar task types it's accurate and very well calibrated. But its yes/no answers collapsed on a plain sentiment question, and it can't reason through a Tetris board. Test it on your own questions before trusting it.
 
 **Every number on this page was measured by me unless marked otherwise.** Local runs used an RTX 5060 Laptop (8 GB) with a Ryzen AI 9 365 and 29 GB RAM. Jev was called over the internet through OpenRouter, so its times include the network round trip. [Every test case and exact query](#every-test-exactly) is listed below. The page has two parts:
 - **Part 1** (this top part): the TL;DR, the idea explained from zero, code you can copy, and real side-by-side answers.
@@ -58,50 +64,54 @@
 | **Jev 1.13** (TypeSafe) | A commercial "System One" decision model | Returns a probability per option. No text. | TypeSafe's cloud, called through OpenRouter (`typesafe/jev-1.13`) |
 | **DiffusionGemma 26B-A4B** (Google, open) | A text-*diffusion* model, run as an open Jev clone (OpenJev + my llama.cpp backend) | Fills every answer box of a pre-printed form in **one pass** and reads the probabilities. 0 output tokens. | My 8 GB laptop GPU, with most of the model in system RAM |
 | **Qwen 3 30B-A3B** (Alibaba, open) | A normal chat model: the baseline | **Types** its answers token by token (`q1: yes`), and my code parses the text | The same laptop |
+| **Laya** (ConvAI Innovations, open) | A 421M-parameter ModernBERT *classifier* with a Jev-style API; not an LLM | Scores each option at its own marker in one encoder pass, then applies a softmax. 0 output tokens. | The same laptop GPU, via its `laya` Python package (0.84 GB file, 1.8 GB VRAM) |
 | **Ternary Bonsai 27B** (PrismML, open; Qwen3.8-27B base) | A dense 27B chat model compressed to ternary weights, 1.75 bits each: a **5.9 GB** file | Types its answers like Qwen (a probability-read variant is also measured) | The same laptop, **entirely on the GPU** (PrismML's llama.cpp fork) |
 
 ### ⚡ Speed: time to answer N yes/no questions about one news article
 
 "Text already loaded" means the model has already read this text, so only the answering is timed. "New text" includes reading it first. Median of 3 runs each. Qwen's columns show the faster of its two server settings for each row (llama.cpp op-offload on or off; both runs are in `speed_scaling.json`).
 
-| Questions in one request | **Jev**, new text (cloud, incl. network) | **DiffusionGemma**, text already loaded | DiffusionGemma, new text | **Qwen types the answers**, text already loaded | Qwen, new text | **Bonsai types the answers**, text already loaded | Bonsai, new text |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1 | 396 ms | **93 ms** | 563 ms | 97 ms | 614 ms | 269 ms | 797 ms |
-| 2 | 350 ms | **93 ms** | 627 ms | 183 ms | 763 ms | 426 ms | 965 ms |
-| 5 | 349 ms | **155 ms** | 864 ms | 452 ms | 1,214 ms | 896 ms | 1,678 ms |
-| 10 | 354 ms | **287 ms** | 1,336 ms | 931 ms | 1,906 ms | 1,737 ms | 2,687 ms |
-| 20 | **336 ms** | 363 ms | 2,089 ms | 1,674 ms ❌ *format broke* | 2,697 ms | 2,418 ms ❌ *format broke* | 4,012 ms |
+| Questions in one request | **Jev**, new text (cloud, incl. network) | **DiffusionGemma**, text already loaded | DiffusionGemma, new text | **Qwen types the answers**, text already loaded | Qwen, new text | **Bonsai types the answers**, text already loaded | Bonsai, new text | **Laya** (new text) |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 396 ms | **93 ms** | 563 ms | 97 ms | 614 ms | 269 ms | 797 ms | **11 ms** |
+| 2 | 350 ms | **93 ms** | 627 ms | 183 ms | 763 ms | 426 ms | 965 ms | **17 ms** |
+| 5 | 349 ms | **155 ms** | 864 ms | 452 ms | 1,214 ms | 896 ms | 1,678 ms | **23 ms** |
+| 10 | 354 ms | **287 ms** | 1,336 ms | 931 ms | 1,906 ms | 1,737 ms | 2,687 ms | **33 ms** |
+| 20 | **336 ms** | 363 ms | 2,089 ms | 1,674 ms ❌ *format broke* | 2,697 ms | 2,418 ms ❌ *format broke* | 4,012 ms | **57 ms** |
 
 - **Jev is flat.** 1 question or 20, 0.34–0.40 s including the trip over the internet. That's the whole pitch, and it holds.
 - **DiffusionGemma is nearly flat once it has read the text.** 20 answers cost 4× one answer, not 20×, because every answer box is filled in the same pass. Reading a *new* text on a laptop is the slow part (0.5–2 s). No trick removes that, but Jev's datacentre hardware hides it.
 - **Qwen gets slower with every question**, because it has to type each answer. At 20 questions it's 4.6× slower than DiffusionGemma, and its reply no longer matched the requested format.
+- **Laya is in a different speed class**: 11 ms for one question and 57 ms for twenty, with no cache needed, because it's a small encoder rather than a 26–30B model. It re-reads the text for every question, so its cost grows linearly, but from a tiny base.
 - **Bonsai has the same problem, only slower.** It's a dense model: all 27B weights run for every token, at 32 tokens/s versus Qwen's 54. At 20 questions it's 6.7× slower than DiffusionGemma, and its format broke too.
 
 ### 🔢 Tokens and 💰 cost per decision
 
-| | **Jev** | **DiffusionGemma** | **Qwen: types the answer** | **Bonsai: types the answer** |
-|---|---:|---:|---:|---:|
-| Input tokens, one question (movie review / news article) | 300 / 361 | ~103 / ~152 | ~110 | ~113 |
-| **Output tokens, one question** | 20 / 47 (reported, billed at $0) | **0** | 5 | 5 |
-| Output tokens, 20 questions | 354 (billed at $0) | **0** | 92 | 72 (format broke) |
-| Price | $0.042 per 1M input tokens; output free | $0 (my hardware) | $0 (my hardware) | $0 (my hardware) |
-| **Cost per 1,000 decisions** | **$0.013–0.015** | **$0** | **$0** | **$0** |
-| Whole 400-question benchmark | **$0.0056** | $0 | $0 | $0 |
-| Model file / VRAM | cloud | 16.8 GB file, most of it in system RAM | 17.3 GB file, most of it in system RAM | **5.9 GB file, all on the GPU (6.5 GB VRAM with a 4K context)** |
+| | **Jev** | **DiffusionGemma** | **Qwen: types the answer** | **Bonsai: types the answer** | **Laya** |
+|---|---:|---:|---:|---:|---:|
+| Input tokens, one question (movie review / news article) | 300 / 361 | ~103 / ~152 | ~110 | ~113 | 60 / 82 |
+| **Output tokens, one question** | 20 / 47 (reported, billed at $0) | **0** | 5 | 5 | **0** |
+| Output tokens, 20 questions | 354 (billed at $0) | **0** | 92 | 72 (format broke) | **0** (input 1,317: the text is re-read per question) |
+| Price | $0.042 per 1M input tokens; output free | $0 (my hardware) | $0 (my hardware) | $0 (my hardware) | $0 (my hardware) |
+| **Cost per 1,000 decisions** | **$0.013–0.015** | **$0** | **$0** | **$0** | **$0** |
+| Whole 400-question benchmark | **$0.0056** | $0 | $0 | $0 | $0 |
+| Model file / VRAM | cloud | 16.8 GB file, most of it in system RAM | 17.3 GB file, most of it in system RAM | **5.9 GB file, all on the GPU (6.5 GB VRAM with a 4K context)** | **0.84 GB file, 1.8 GB VRAM** |
 
 *Token counts use each model's own tokenizer and prompt wrapper, so compare them as orders of magnitude, not exactly. Jev's input count is ~3× the others for the same text because TypeSafe adds its own instructions. Its "output tokens" are what the API reports; it doesn't return any text.*
 
 ### 🎯 Quality: same 400 questions (200 movie reviews: *positive?* · 200 news articles: *which of 4 topics?*)
 
-| | **Jev** | **DiffusionGemma** (1 pass) | DiffusionGemma (OpenJev default, ≤4 passes) | Qwen: reads probabilities | **Qwen: types the answer** | **Bonsai: types the answer** | Bonsai: reads probabilities |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| Movie reviews correct | **94.0 %** | 89.0 % | 90.5 % | 83.0 % | 83.0 % | 92.5 % | 92.5 % |
-| News topics correct | 85.0 % | 77.0 % | 78.0 % | 73.5 % | 65.5 % | **86.5 %** | 86.0 % |
-| Broken replies | 0 | 0 | 0 | 0 | **31 of 400** | 0 | 0 |
-| Calibration error, ECE (0 = perfect) | 0.070 / 0.109 | 0.077 / 0.167 | 0.087 / 0.163 | 0.170 / 0.230 | — (no probabilities) | — (no probabilities) | **0.063 / 0.078** |
-| Median time per decision | **334 / 336 ms** | 534 / 700 ms | 816 / 991 ms | 506 / 601 ms | 549 / 652 ms | 470 / 508 ms | 516 / 517 ms |
+| | **Jev** | **DiffusionGemma** (1 pass) | DiffusionGemma (OpenJev default, ≤4 passes) | Qwen: reads probabilities | **Qwen: types the answer** | **Bonsai: types the answer** | Bonsai: reads probabilities | **Laya** |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Movie reviews correct | **94.0 %** | 89.0 % | 90.5 % | 83.0 % | 83.0 % | 92.5 % | 92.5 % | 46.0 % as yes/no · **92.0 %** as a choice |
+| News topics correct | 85.0 % | 77.0 % | 78.0 % | 73.5 % | 65.5 % | **86.5 %** | 86.0 % | 94.0 % ⚠️ *trained on AG News* |
+| Broken replies | 0 | 0 | 0 | 0 | **31 of 400** | 0 | 0 | 0 |
+| Calibration error, ECE (0 = perfect) | 0.070 / 0.109 | 0.077 / 0.167 | 0.087 / 0.163 | 0.170 / 0.230 | — (no probabilities) | — (no probabilities) | **0.063 / 0.078** | 0.540 as yes/no · **0.022** as a choice / 0.028 |
+| Median time per decision | 334 / 336 ms | 534 / 700 ms | 816 / 991 ms | 506 / 601 ms | 549 / 652 ms | 470 / 508 ms | 516 / 517 ms | **9.5 / 11.3 ms** |
 
 *Calibration asks whether a stated "95 % sure" is right 95 % of the time. Lower ECE is better; [Step 4](#step-4-what-calibrated-means) explains it.*
+
+**About Laya's column:** asked the same yes/no question as everyone else, Laya answered "no" (P(yes) = 0.0) to every review, which is why it scores 46 %: that's the share of negative reviews. Asked as a two-option choice (*"What is the sentiment of this movie review?"* negative / positive), the same model gets 92 %, with the best calibration in the table. Its own benchmark code states that **AG News was in its training data**, so its 94 % there measures what it remembers, not how it handles new text.
 
 #### What are SST-2 and AG News?
 
@@ -129,12 +139,14 @@ Every move is one decision. The model sees the board as text, the current and ne
 | **DiffusionGemma** (laptop) | 2 | 237 | 52 | 57 % | 3,186 ms | 884 / **0** | $0 |
 | **Bonsai**, typing its choice (laptop, all on the GPU) | 2 | 236 | 64 | 71 % | 3,043 ms | 890 / 5 | $0 |
 | **Qwen**, typing its choice (laptop) | 0 | 209 | 37 | 56 % | 1,574 ms | 782 / 5 | $0 |
+| **Laya** (laptop GPU) | 0 | 88 | 0 | 30 % | **28 ms** | 422 / 0 | $0 |
 | Random (reference) | 0 | 76 | 0 | 17 % | 0 ms | — | $0 |
 
 - **Jev plays almost like the hand-tuned expert**: it survived every game and matched the expert's move 88 % of the time, at 0.3 s per move.
 - **DiffusionGemma kept 2 of 3 games alive**, but at 3.2 s per move. Tetris prompts are long (~900 tokens, with ~21 options), and reading them is exactly the slow part on a laptop.
 - **Bonsai is the best local player**: it survived 2 of 3 games, cleared 64 lines, and matched the expert 71 % of the time. It's also the slowest, at 3.0 s per move, because it reads a ~890-token board with every weight of a dense 27B model. It produced 5 malformed replies in 236 moves.
 - **Qwen typed a valid answer every time** (0 broken replies), but it chose worse moves and topped out in all 3 games.
+- **Laya played barely better than random**: 0 lines in all 3 games, and it matched the expert only 30 % of the time (random: 17 %), though each move took just 28 ms. Weighing options like "+2 holes, max height 6" against each other is reasoning, and a 421M classifier doesn't do it. (Its option budget was raised from 192 to 512 tokens so that every placement fit; see Test 4.)
 - Test details are in [Test 4](#test-4--tetris), and the code is [`tetris_bench.py`](diffusiongemma/tetris_bench.py).
 
 ### When to use which
@@ -143,6 +155,7 @@ Every move is one decision. The model sees the board as text, the current and ne
 |---|---|
 | Decisions at scale, fastest and most accurate, and a cloud API is fine | **Jev**: ~0.34 s flat, 94 % / 85 %, ~$0.014 per 1,000 decisions |
 | Decisions that must stay on your own hardware (privacy, offline, no API bill) | **DiffusionGemma** as a local Jev: 0 output tokens, 0 broken replies, many questions per pass |
+| Very high volume, millisecond budgets, and task types it was trained on (routing, triage, topic, moderation) | **Laya**: 10–60 ms, 0.84 GB, excellent calibration *on familiar tasks*. Validate it on your own questions first: its yes/no answers collapsed on sentiment, and it can't reason through Tetris. |
 | The most accurate *local* decisions, from one small file | **Ternary Bonsai 27B**: 5.9 GB, fits an 8 GB GPU, 92.5 % / 86.5 %, the best calibration here if you read its probabilities. Slow if it must type many answers. |
 | One quick local decision and you already run a chat model | **Reading probabilities** from it ([code below](#the-read-trick-on-a-normal-model)): same speed, no format errors |
 | Chat, writing, code, summaries | A normal model. Neither Jev nor a System One read writes text. |
@@ -152,6 +165,7 @@ Every move is one decision. The model sees the board as text, the current and ne
 - **The "free open-source Jev" claim is half true.** DiffusionGemma really does answer many questions in one pass with zero output tokens. On an 8 GB laptop it isn't flat for new text, and it's 5–8 points less accurate than Jev.
 - **Every model stopped producing broken replies** once we read probabilities instead of parsing typed text. If you take one lesson from this page, take that one.
 - **The best local decision-maker isn't the diffusion model; it's Ternary Bonsai.** It's a normal (autoregressive) dense 27B compressed to 5.9 GB, and it roughly matched Jev's accuracy (92.5 % / 86.5 % vs 94 % / 85 %) with the best calibration of all. DiffusionGemma keeps the edge in *speed* whenever many answers are needed at once.
+- **Laya is ~35× faster than Jev but much narrower.** On the task types it was trained on it's accurate and well calibrated. Outside them it can fail silently: "no" to every review, and random-level Tetris.
 
 ---
 
@@ -417,16 +431,16 @@ Both models got the same inputs and the same instructions, and the replies below
 
 These are the first six AG News articles where **Qwen: write** didn't reply `q1: <letter>`:
 
-| Article (start) | Dataset says | Qwen wrote | DiffusionGemma answered | Jev answered |
-|---|---|---|---|---|
-| *RealNetworks Gets in Content Business (AP) — RealNetworks Inc. survived the dot-com collapse…* | Sci/Tech | `D: D` | Business (0.9999) ✗ | Business 0.82 / Sci/Tech 0.18 ✗ |
-| *Prototype copter-cam: Here, there, everywhere — It can only remain aloft for three minutes…* | Sci/Tech | `D: Sci/Tech` | **Sci/Tech (0.9989)** ✓ | **Sci/Tech (1.00)** ✓ |
-| *Oil prices look set to dominate — The price of oil looks set to grab headlines…* | Business | `D: D` | **Business (0.9997)** ✓ | **Business (1.00)** ✓ |
-| *CSKA sponsor rejects criticism — Russian oil giant Sibneft today rejected any suggestion of a conflict of interest between Chelsea and CSKA…* | Sports | `A` | **Sports (0.954)**, Business 0.044 ✓ | **Sports (0.98)** ✓ |
-| *Dollar Rises Vs Euro on Asset Flows Data — NEW YORK (Reuters) - The dollar extended gains…* | Business | `D: Sci/Tech` | **Business (0.9999)** ✓ | **Business (1.00)** ✓ |
-| *Real targets iPod with download price cut — RealNetworks has kicked off… the biggest online music sale…* | Sci/Tech | `D: D` | Business (0.990) ✗ | Business 0.55 / Sci/Tech 0.45 ✗ (confidence 0.39) |
+| Article (start) | Dataset says | Qwen wrote | DiffusionGemma answered | Jev answered | Laya answered (*trained on AG News*) |
+|---|---|---|---|---|---|
+| *RealNetworks Gets in Content Business (AP) — RealNetworks Inc. survived the dot-com collapse…* | Sci/Tech | `D: D` | Business (0.9999) ✗ | Business 0.82 / Sci/Tech 0.18 ✗ | **Sci/Tech (0.96)** ✓ |
+| *Prototype copter-cam: Here, there, everywhere — It can only remain aloft for three minutes…* | Sci/Tech | `D: Sci/Tech` | **Sci/Tech (0.9989)** ✓ | **Sci/Tech (1.00)** ✓ | **Sci/Tech (0.92)** ✓ |
+| *Oil prices look set to dominate — The price of oil looks set to grab headlines…* | Business | `D: D` | **Business (0.9997)** ✓ | **Business (1.00)** ✓ | **Business (0.98)** ✓ |
+| *CSKA sponsor rejects criticism — Russian oil giant Sibneft today rejected any suggestion of a conflict of interest between Chelsea and CSKA…* | Sports | `A` | **Sports (0.954)**, Business 0.044 ✓ | **Sports (0.98)** ✓ | **Sports (0.99)** ✓ |
+| *Dollar Rises Vs Euro on Asset Flows Data — NEW YORK (Reuters) - The dollar extended gains…* | Business | `D: Sci/Tech` | **Business (0.9999)** ✓ | **Business (1.00)** ✓ | **Business (0.96)** ✓ |
+| *Real targets iPod with download price cut — RealNetworks has kicked off… the biggest online music sale…* | Sci/Tech | `D: D` | Business (0.990) ✗ | Business 0.55 / Sci/Tech 0.45 ✗ (confidence 0.39) | **Sci/Tech (0.87)** ✓ |
 
-Jev took 308–429 ms per article, network included, and billed 332–373 input tokens (about $0.000015) each.
+Jev took 308–429 ms per article, network included, and billed 332–373 input tokens (about $0.000015) each. Laya got all 6 right, including the two RealNetworks stories that DiffusionGemma and Jev called "Business", in 10–28 ms each. But it was trained on AG News, so this table can't tell memory from understanding.
 
 Three lessons in one table:
 1. **Qwen's broken replies weren't just formatting.** `D: D` for an oil-price story means it picked Sci/Tech, which is wrong. The format error was hiding a wrong answer.
@@ -473,6 +487,18 @@ q5: 4: critical
 | Which team first? | billing | billing 0.96, engineering 0.03 → confidence 0.94 |
 | Urgency | high → critical (score 3.27 of 4) | high 0.73, critical 0.27 → confidence 0.77 |
 
+**Laya** replied in **29 ms** (387 input tokens, 0 output):
+
+| Question | Answer | Probability / confidence |
+|---|---|---|
+| Billing issue? | yes | P(yes) = 0.96 |
+| Software bug? | **no** ✗ | P(yes) = 0.23 |
+| Customer angry? | unsure | P(yes) = 0.52 |
+| Which team first? | billing | billing 0.98 → confidence 0.93 |
+| Urgency | **medium** (score 1.45 of 4) | medium 0.51, not urgent 0.28 → confidence 0.24 |
+
+Laya got the routing right and was fast, but it missed the bug, couldn't tell the customer was angry ("third time I'm writing!!"), and rated a same-day double charge as medium urgency. It did flag its own doubt on those last questions, with low confidence.
+
 DiffusionGemma and Jev agree on all five answers. Jev is less extreme, rating urgency "high" rather than "critical", which is arguably the better call for a double charge.
 
 Asking DiffusionGemma the same five questions as **five separate requests** took 4,680 ms. Filling all five boxes in one pass is what saves the time. Note that Qwen was faster on this single request: typing 30 tokens is quick. Where diffusion wins is correctness of shape, the probabilities, and the growing gap as the number of questions goes up.
@@ -497,6 +523,11 @@ These are all the inputs and settings behind the tables above. The raw outputs a
 - Weights: `prism-ml/Ternary-Bonsai-2-27B-gguf`, `PTQ1_0`, 5.9 GB.
 - Server: [PrismML's llama.cpp fork](https://github.com/PrismML-Eng/llama.cpp) (commit `9a9394a`), because stock llama.cpp can't read ternary files. Flags: `llama-server -ngl 99 -fa on -c 4096 -np 1 --jinja`, with the whole model on the GPU.
 - Scripts: the same ones, as `--ar-name bonsai-27b-ternary` / `--name bonsai_write` / `--name bonsai`.
+
+**Laya** runs in-process through its own Python package:
+- Weights: `convaiinnovations/laya`, the English root checkpoint: ModernBERT-large plus a decision head, 421M parameters, 0.84 GB.
+- Setup: `laya` 0.3.5 on PyTorch 2.11 (CUDA 12.8), `laya.load(path, device="cuda")`. The scripts pass the same `{state, questions}` JSON with the `--laya` flag.
+- The machine was otherwise idle. Laya silently falls back to the CPU on any GPU out-of-memory error (about 150 ms per question instead of 10 ms), so the scripts check it stayed on the GPU.
 
 ### Test 1 — 400 labelled decisions (accuracy, calibration, latency, tokens, cost)
 
@@ -529,7 +560,8 @@ Reply with one line per question, in this order, formatted as "id: label".
 
   For the news articles, the options are listed as `A: World`, `B: Sports`, `C: Business`, `D: Sci/Tech`.
 - **Scoring:** the prediction is the option with the highest probability (for yes/no, "positive" means P(yes) > 0.5). *Qwen: write* counts as correct only if the reply is exactly `q1: <label>`; the lenient score also accepts replies like `D: D` or `B: Sports`. *Qwen: read* pre-fills `q1:` and takes the next-token probabilities of the labels (`n_probs: 50`). Calibration is ECE over 10 bins, using the predicted option's probability.
-- **Commands:** `systemone_bench.py --reads …` (DiffusionGemma), `--ar-url …` (Qwen), `--jev` (Jev; reads `OPENROUTER_API_KEY`).
+- **Commands:** `systemone_bench.py --reads …` (DiffusionGemma), `--ar-url …` (Qwen), `--jev` (Jev; reads `OPENROUTER_API_KEY`), `--laya` (Laya).
+- **Laya extras:** Laya was also run on `sst2_choice`: the same 200 reviews asked as `{"type": "choice", "instructions": "What is the sentiment of this movie review?", "criteria": {"negative": "", "positive": ""}}`, because its yes/no head answered 0.0 to every review. Laya's benchmark code ([github.com/NandhaKishorM/laya](https://github.com/NandhaKishorM/laya), `research/scripts/build_benchmark_nb.py`) states that *"ag_news and boolq were in Laya's training mix"*, while SST-5, which uses the same movie-review sentences as SST-2, was held out.
 
 ### Test 2 — speed as the number of questions grows
 
@@ -590,6 +622,7 @@ Board (10 wide, 20 tall, # = filled):
 
 - **Players:**
   - Jev and DiffusionGemma get that JSON, with DiffusionGemma doing one read per move. It ran at `--n-cpu-moe 22` here, because the ~900-token prompts need an extra ~160 MB of VRAM for the prompt store, and at 20 it runs out of memory.
+  - Laya gets the same JSON as Jev, with its option budget (`head_max_len`) raised from 192 to 512 tokens. With the default, 20–34 placements don't fit and it refuses the question. With 512, every move fit (0 refusals).
   - Qwen and Bonsai get OpenJev's generated instructions and must type `q1: <letter>`. A broken reply plays the first option. Qwen produced none; Bonsai produced 5 in 236 moves.
 - **Metrics:** pieces placed, lines cleared, games survived, and how often the move matched an expert heuristic (Yiyuan Lee's hand-tuned weights). Per-move time, tokens and cost are all in [`tetris_results.json`](diffusiongemma/tetris_results.json), which records every move of every game.
 
@@ -766,6 +799,7 @@ Baselines: **Qwen 3 30B-A3B** Q4_K_M on stock llama.cpp `b1-1719747` (`-ncmoe 34
 | **DiffusionGemma — 1 read** | **89.0 %** | **77.0 %** | **0** | **0.077** / 0.167 | 0.967 / 0.937 | **534 / 700 ms** |
 | DiffusionGemma — OpenJev default (≤ 4 reads) | 90.5 % | 78.0 % | 0 | 0.087 / 0.163 | 0.968 / 0.937 | 816 / 991 ms |
 | **Jev 1.13** (TypeSafe, via OpenRouter; latency includes the network) | **94.0 %** | **85.0 %** | 0 | **0.070 / 0.109** | 0.870 / 0.951 | **334 / 336 ms** |
+| **Laya** (ModernBERT-large classifier, 421M, local GPU; ⚠️ trained on AG News) | 46.0 % as yes/no · 92.0 % as a choice | 94.0 % | 0 | 0.540 · 0.022 / 0.028 | 1.000 · 0.921 / 0.927 | **9.5 / 11.3 ms** |
 
 *ECE = expected calibration error: the average gap between the confidence it states and how often it's right (10 bins; 0 is perfect). Brier scores are in `results.json`.*
 

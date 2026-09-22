@@ -456,5 +456,52 @@
       "brier": 0.2388712326938923,
       "model": "bonsai-27b-ternary"
     }
+  },
+  "laya": {
+    "sst2": {
+      "n": 200,
+      "accuracy": 0.46,
+      "p50_ms": 9.514527999954225,
+      "p95_ms": 11.368511999990005,
+      "mean_ms": 10.086196439998503,
+      "mean_confidence": 0.9999985,
+      "ece": 0.5399984999999998,
+      "brier": 1.0799980003,
+      "model": "convaiinnovations/laya (ModernBERT-large, 421M)",
+      "mean_input_tokens": 59.62,
+      "mean_output_tokens": 0,
+      "total_cost_usd": 0.0,
+      "in_training_data": false
+    },
+    "sst2_choice": {
+      "n": 200,
+      "accuracy": 0.92,
+      "p50_ms": 9.354868000059469,
+      "p95_ms": 9.667314000012084,
+      "mean_ms": 9.393199134999577,
+      "mean_confidence": 0.920605,
+      "ece": 0.02205299999999997,
+      "brier": 0.1374629184,
+      "model": "convaiinnovations/laya (ModernBERT-large, 421M)",
+      "mean_input_tokens": 44.62,
+      "mean_output_tokens": 0,
+      "total_cost_usd": 0.0,
+      "in_training_data": false
+    },
+    "agnews": {
+      "n": 200,
+      "accuracy": 0.94,
+      "p50_ms": 11.349365999990368,
+      "p95_ms": 11.923491999937141,
+      "mean_ms": 11.330348824997714,
+      "mean_confidence": 0.927016,
+      "ece": 0.027954000000000024,
+      "brier": 0.102376824,
+      "model": "convaiinnovations/laya (ModernBERT-large, 421M)",
+      "mean_input_tokens": 82.185,
+      "mean_output_tokens": 0,
+      "total_cost_usd": 0.0,
+      "in_training_data": true
+    }
   }
 }

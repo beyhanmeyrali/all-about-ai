@@ -74,6 +74,7 @@ flowchart TD
 | **Qwen 3 30B-A3B MoE** (Q4) | 18 GB | **53.8** | A 30B model at 8B speeds — the headline result. |
 | Qwen3.6-35B-A3B MoE (Q4) | 22 GB | **37.8** | Newer 35B MoE with hybrid attn — chat-speed, but ~30 % slower than 30B-A3B. |
 | Gemma 4 26B-A4B MoE (Q4) | 17 GB | **28.7** | Smaller MoE, but 262K vocab + 4B active cap offload — only 2 expert layers fit GPU. |
+| **Laya** (421M ModernBERT decision classifier) | 0.84 GB | **10 ms / decision** | Open "Jev alternative": 10–60 ms per request, 92 % on sentiment asked as a choice (46 % as yes/no), random-level at Tetris. Very fast, narrow. |
 | **Ternary Bonsai 2 27B** (1.75-bit ternary) | **5.9 GB** | **31.7** | A dense 27B entirely on an 8 GB GPU. The best local decision-maker tested: 92.5 % / 86.5 % vs Qwen 30B's 83 % / 65.5 %. |
 | Phi-4-reasoning 14B (Q4) | 8.5 GB | 23.8 | Smartest dense at usable speed. |
 | Qwen3.6-27B dense (Q3) | 13 GB | 7.8 | The dense penalty: 7× slower than the 30B MoE. |

@@ -120,13 +120,32 @@ def run_jev(model):
     OUT.write_text(json.dumps(res, indent=2))
 
 
+def run_laya():
+    from systemone_bench import laya_agent, laya_decide
+    agent = laya_agent()
+    rows = []
+    laya_decide(agent, STATE, questions(1))
+    for n in NS:
+        cold = [laya_decide(agent, STATE + f" [{n}.{r}]", questions(n)) for r in range(REPS)]
+        warm = [laya_decide(agent, STATE + f" [{n}.0]", questions(n)) for r in range(REPS)]
+        rows.append({"questions": n, "cold_ms": med([m for _, _, m in cold]), "warm_ms": med([m for _, _, m in warm]),
+                     "input_tokens": cold[0][1].get("input_tokens"), "output_tokens": 0})
+        print("laya", json.dumps(rows[-1]), flush=True)
+    res = load()
+    res["laya"] = rows
+    OUT.write_text(json.dumps(res, indent=2))
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--qwen")
     ap.add_argument("--name", default="qwen_write", help="results key for a --qwen (llama-server) run")
     ap.add_argument("--dg")
     ap.add_argument("--jev", nargs="?", const="typesafe/jev-1.13")
+    ap.add_argument("--laya", action="store_true")
     a = ap.parse_args()
+    if a.laya:
+        run_laya()
     if a.jev:
         run_jev(a.jev)
     if a.qwen:

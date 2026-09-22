@@ -185,11 +185,12 @@ DiffusionGemma is Google's open text-*diffusion* MoE (Gemma 4 backbone, 128 expe
 | **DiffusionGemma — 1 read** (`-ncmoe 20 --no-op-offload`) | **89.0 %** | **77.0 %** | **0** | **0.077** / 0.167 | **534 / 700 ms** |
 | DiffusionGemma — OpenJev default (≤ 4 reads) | 90.5 % | 78.0 % | 0 | 0.087 / 0.163 | 816 / 991 ms |
 | **Ternary Bonsai 27B** — types / next-token probabilities (5.9 GB, all on the GPU) | **92.5 %** | **86.5 % / 86.0 %** | 0 | **0.063 / 0.078** (read) | 470 / 508 ms |
+| **Laya** (421M ModernBERT classifier, 0.84 GB; ⚠️ AG News was in its training data) | 46.0 % as yes/no · **92.0 %** as a choice | 94.0 % | 0 | 0.540 · **0.022** / 0.028 | **9.5 / 11.3 ms** |
 | *Jev 1.13 (TypeSafe cloud via OpenRouter; not local, latency includes the network; $0.013–0.015 per 1,000 decisions)* | *94.0 %* | *85.0 %* | *0* | *0.070 / 0.109* | *334 / 336 ms* |
 
 Questions per request (same article, one read each): **1 → 93 ms, 20 → 363 ms** when the text is already read; 563 ms → 2.09 s for a new text. Qwen typing its answers: 97 ms → 1.67 s. Jev in the cloud: flat 0.34–0.40 s. Full speed/token/cost comparison: [DIFFUSIONGEMMA.md TL;DR](DIFFUSIONGEMMA.md#tldr--speed-and-tokens-first).
 
-**Tetris** (every move is one typed choice among ~21 legal placements; 3 seeded games × 80 pieces): Jev survived 3/3 with 78 lines at 312 ms per move ($0.012 in total). DiffusionGemma survived 2/3 with 52 lines at 3.2 s per move and 0 output tokens. Qwen typing its choice survived 0/3 with 37 lines at 1.6 s per move. For reference, a hand-tuned heuristic gets 3/3 and 86 lines, and random gets 0/3 and 0 lines. Details: [DIFFUSIONGEMMA.md](DIFFUSIONGEMMA.md#-tetris-can-they-actually-play).
+**Tetris** (every move is one typed choice among ~21 legal placements; 3 seeded games × 80 pieces): Jev survived 3/3 with 78 lines at 312 ms per move ($0.012 in total). DiffusionGemma survived 2/3 with 52 lines at 3.2 s per move and 0 output tokens. Qwen typing its choice survived 0/3 with 37 lines at 1.6 s per move. Laya: 0/3 with 0 lines at 28 ms per move, barely above random. For reference, a hand-tuned heuristic gets 3/3 and 86 lines, and random gets 0/3 and 0 lines. Details: [DIFFUSIONGEMMA.md](DIFFUSIONGEMMA.md#-tetris-can-they-actually-play).
 
 ### Offload sweep and generation
 

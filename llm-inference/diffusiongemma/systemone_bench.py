@@ -26,6 +26,13 @@ HERE = Path(__file__).resolve().parent
 RESULTS = HERE / "results.json"
 
 TASKS = {
+    # SST-2 asked as a 2-option choice instead of yes/no (used for Laya, whose yes/no head answers "no" to everything)
+    "sst2_choice": {
+        "file": "data/sst2_200.json",
+        "question": {"type": "choice", "instructions": "What is the sentiment of this movie review?",
+                     "criteria": {"negative": "", "positive": ""}},
+        "labels": ["negative", "positive"],
+    },
     "sst2": {
         "file": "data/sst2_200.json",
         "question": {"type": "noul", "instructions": "Is the sentiment of this movie review positive?"},
@@ -317,6 +324,63 @@ def bench_jev(model, tasks, limit=None):
     return out
 
 
+# ----------------------------------------------------------------- Laya (convaiinnovations, local, in-process)
+
+LAYA_PATH = "/home/ubuntu/workspace/models/laya"
+
+
+def laya_agent(head_max_len=None):
+    """Laya's own `laya` package on the GPU. It silently falls back to the CPU on any CUDA
+    OOM, so fail loudly instead if it didn't stay on the GPU."""
+    import os
+    os.environ.setdefault("USE_TF", "0")
+    import laya
+    agent = laya.load(os.environ.get("LAYA_PATH", LAYA_PATH), device="cuda")
+    if head_max_len:
+        agent.cfg["head_max_len"] = head_max_len
+    return agent
+
+
+def laya_decide(agent, state, questions):
+    """-> (answers, usage, wall ms), the same shape as jev_decide."""
+    import torch
+    t0 = time.perf_counter()
+    r = agent.predict(state, questions)
+    torch.cuda.synchronize()
+    ms = (time.perf_counter() - t0) * 1000
+    if agent.device.type != "cuda":
+        raise RuntimeError("Laya fell back to the CPU (GPU out of memory?)")
+    return r["answers"], r.get("usage", {}), ms
+
+
+def bench_laya(tasks, limit=None):
+    agent = laya_agent()
+    for _ in range(3):
+        laya_decide(agent, "warm up", {"q": TASKS["sst2"]["question"]})
+    out = {}
+    for name in tasks:
+        t = TASKS[name]
+        rows = json.load(open(HERE / t["file"]))[:limit]
+        lat, correct, conf, probs, gold, tok_in = [], [], [], [], [], []
+        for r in rows:
+            ans, usage, ms = laya_decide(agent, r["text"], {"q": t["question"]})
+            lat.append(ms)
+            a = ans["q"]
+            p = [1 - a["noul"], a["noul"]] if a["type"] == "noul" else [a["probabilities"][k] for k in t["labels"]]
+            pred = max(range(len(p)), key=p.__getitem__)
+            correct.append(int(pred == r["label"]))
+            conf.append(p[pred])
+            probs.append(p)
+            gold.append(r["label"])
+            tok_in.append(usage.get("input_tokens", 0))
+        out[name] = summarize(lat, correct, conf, probs, gold, {
+            "model": "convaiinnovations/laya (ModernBERT-large, 421M)", "mean_input_tokens": statistics.mean(tok_in),
+            "mean_output_tokens": 0, "total_cost_usd": 0.0,
+            "in_training_data": name == "agnews"})
+        print("laya", name, json.dumps(out[name]), flush=True)
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--reads", action="store_true", help="run System One reads (args after -- go to the server)")
@@ -324,6 +388,7 @@ def main():
     ap.add_argument("--ar-name", default="ar-baseline")
     ap.add_argument("--ar-max-tokens", type=int, default=16)
     ap.add_argument("--jev", nargs="?", const="typesafe/jev-1.13", help="benchmark Jev on OpenRouter (model id)")
+    ap.add_argument("--laya", action="store_true", help="benchmark Laya locally (convaiinnovations/laya)")
     ap.add_argument("--tasks", default="sst2,agnews")
     ap.add_argument("--no-sweep", action="store_true")
     ap.add_argument("--limit", type=int, help="first N examples per task (quick --n-cpu-moe sweeps)")
@@ -339,6 +404,8 @@ def main():
         res[args.ar_name + "-read"] = bench_ar_read(args.ar_url, args.ar_name, tasks)
     if args.jev:
         res["jev-openrouter"] = bench_jev(args.jev, tasks, args.limit)
+    if args.laya:
+        res["laya"] = bench_laya(tasks, args.limit)
     json.dump(res, open(RESULTS, "w"), indent=2)
     print("wrote", RESULTS)
 

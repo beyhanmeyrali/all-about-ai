@@ -9,6 +9,7 @@ one. Pieces come from a seeded 7-bag, so every player faces the same sequence.
     python tetris_bench.py --player jev                            # OPENROUTER_API_KEY
     python tetris_bench.py --player dg --url http://127.0.0.1:8080  # openjev_llamacpp.py
     python tetris_bench.py --player qwen --url http://127.0.0.1:8081  # llama-server
+    python tetris_bench.py --player laya                           # convaiinnovations/laya, in-process
 Results merge into tetris_results.json (per game and per move).
 """
 import argparse
@@ -219,6 +220,29 @@ class Qwen(Player):
                      "raw": text if invalid else None}
 
 
+class LayaPlayer(Player):
+    """Laya (convaiinnovations) in-process on the GPU. Every option is scored at its own marker inside a
+    fixed option budget (head_max_len, 192 tokens by default), too small for ~20-34 Tetris placements,
+    so it is raised to 512 as the model card suggests. A move that still doesn't fit plays option 0."""
+    name = "laya"
+
+    def __init__(self):
+        from systemone_bench import laya_agent, laya_decide
+        self.agent, self.decide = laya_agent(head_max_len=512), laya_decide
+
+    def choose(self, state, opts):
+        if len(opts) == 1:
+            return 0, {"ms": 0.0, "input_tokens": 0, "output_tokens": 0, "cost": 0.0, "invalid": False}
+        try:
+            ans, usage, ms = self.decide(self.agent, state, question(opts))
+        except ValueError as e:  # options exceed head_max_len
+            return 0, {"ms": 0.0, "input_tokens": 0, "output_tokens": 0, "cost": 0.0, "invalid": True, "raw": str(e)[:120]}
+        pick = ans["move"]["choice"]
+        idx = next(i for i, o in enumerate(opts) if o["name"] == pick)
+        return idx, {"ms": ms, "input_tokens": usage.get("input_tokens"), "output_tokens": 0, "cost": 0.0,
+                     "invalid": False, "confidence": ans["move"].get("confidence")}
+
+
 # ---------------------------------------------------------------- game loop
 
 def play(player, seed):
@@ -264,14 +288,14 @@ def summarize(games):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--player", required=True, choices=["heuristic", "random", "jev", "dg", "qwen"])
+    ap.add_argument("--player", required=True, choices=["heuristic", "random", "jev", "dg", "qwen", "laya"])
     ap.add_argument("--url")
     ap.add_argument("--jev-model", default="typesafe/jev-1.13")
     ap.add_argument("--name", help="results key (default: the player name)")
     a = ap.parse_args()
     import sys
     sys.path.insert(0, str(HERE))
-    player = {"heuristic": Heuristic, "random": Random}.get(a.player)
+    player = {"heuristic": Heuristic, "random": Random, "laya": LayaPlayer}.get(a.player)
     player = player() if player else (Qwen(a.url) if a.player == "qwen" else
                                       Decisions(a.player, a.url, a.jev_model))
     games = []

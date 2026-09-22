@@ -129,12 +129,31 @@ def run_jev(model):
     print(json.dumps({k: v for k, v in res.items() if k.startswith("jev")}, indent=1)[:4000])
 
 
+def run_laya():
+    from systemone_bench import laya_agent, laya_decide
+    agent = laya_agent()
+    res = load()
+    rows = agnews_cases()
+    laya_decide(agent, "warm up", {"q": TOPIC})
+    res["laya_agnews"] = []
+    for i in res.get("qwen_format_failures_idx") or list(range(6)):
+        ans, usage, ms = laya_decide(agent, rows[i]["text"], {"q": TOPIC})
+        res["laya_agnews"].append({"i": i, "gold": TOPICS[rows[i]["label"]], "answer": ans["q"], "ms": ms, "usage": usage})
+    ans, usage, ms = laya_decide(agent, TICKET, TICKET_QS)
+    res["laya_ticket"] = {"answer": ans, "ms": ms, "usage": usage}
+    OUT.write_text(json.dumps(res, indent=2))
+    print(json.dumps({k: v for k, v in res.items() if k.startswith("laya")}, indent=1)[:4000])
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--dg")
     ap.add_argument("--qwen")
     ap.add_argument("--jev", nargs="?", const="typesafe/jev-1.13")
+    ap.add_argument("--laya", action="store_true")
     a = ap.parse_args()
+    if a.laya:
+        run_laya()
     if a.jev:
         run_jev(a.jev)
     if a.qwen:
